@@ -22,6 +22,8 @@ class FireBaseAuthService implements IAuthService {
         StreamController<Either<AuthFailure, String>>();
 
     await _firebaseAuth.verifyPhoneNumber(
+        timeout: timeout,
+        phoneNumber: phoneNumber,
         verificationCompleted: (PhoneAuthCredential credential) async {},
         verificationFailed: (FirebaseAuthException e) {
           late final Either<AuthFailure, String> result;

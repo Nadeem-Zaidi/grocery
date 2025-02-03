@@ -34,7 +34,7 @@ class SigninState {
         phoneNumber: phoneNumber ?? this.phoneNumber,
         smsCode: smsCode ?? this.smsCode,
         failureOptions: failureOptions ?? this.failureOptions,
-        verificationIdOption: this.verificationIdOption,
+        verificationIdOption: verificationOption ?? this.verificationIdOption,
         isInProgress: isInProgress ?? this.isInProgress);
   }
 

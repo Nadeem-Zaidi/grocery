@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
+import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
 import 'package:grocery_app/authentication/presentation/phone_number_signin.dart';
 import 'package:grocery_app/router/route_generator.dart';
 import 'package:grocery_app/theme/theme_data.dart';
@@ -19,11 +22,18 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: myAppTheme,
-      initialRoute: '/',
-      onGenerateRoute: RouteGenerator.generateRoute,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthCubit>(create: (context) => AuthCubit()),
+        BlocProvider<SigninCubit>(create: (context) => SigninCubit()),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: myAppTheme,
+        initialRoute: '/',
+        onGenerateRoute: RouteGenerator.generateRoute,
+      ),
     );
   }
 }
