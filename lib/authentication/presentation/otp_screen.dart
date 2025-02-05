@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
 
+import '../../utils/screen_utils.dart';
+
 class OTPScreen extends StatefulWidget {
   const OTPScreen({super.key});
 
@@ -55,6 +57,8 @@ class _OTPScreenState extends State<OTPScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = ScreenUtils.getScreenWidth(context);
+    final screenHeight = ScreenUtils.getScreenHeight(context);
     return Scaffold(
       body: Center(
         child: Padding(
@@ -80,7 +84,8 @@ class _OTPScreenState extends State<OTPScreen> {
                     6,
                     (index) {
                       return SizedBox(
-                        width: 50,
+                        width: screenWidth * 0.13,
+                        height: screenHeight * 0.065,
                         child: TextFormField(
                           controller: _controller[index],
                           focusNode: _focusNode[index],
