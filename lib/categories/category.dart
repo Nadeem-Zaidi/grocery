@@ -1,11 +1,10 @@
 class Category {
-  String id;
+  String? id;
   String name;
   String parent;
   String? path;
 
-  Category(
-      {this.path, required this.name, required this.parent, required this.id});
+  Category({this.id, this.path, required this.name, required this.parent});
 
   Category copyWith({String? id, String? name, String? parent, String? path}) {
     return Category(

@@ -70,9 +70,6 @@ class _AppState extends State<App> {
         ],
         child: BlocBuilder<SigninCubit, SigninState>(
           builder: (context, state) {
-            print("*****from app2*********");
-            print(state.displaySmsCodeForm);
-            print("*****app2**********");
             if (state.displaySmsCodeForm) {
               return const OTPScreen();
             } else {

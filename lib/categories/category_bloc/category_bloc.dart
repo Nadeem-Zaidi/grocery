@@ -16,10 +16,12 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<CategoryEvent>((event, emit) async {
       switch (event) {
         case FetchAllCategories():
-          _fetchAllCategories(emit);
+          await _fetchAllCategories(emit);
           throw UnimplementedError();
         case FetchCategory(categoryId: String categoryId):
-          _fetchCategory(emit, categoryId);
+          await _fetchCategory(emit, categoryId);
+        case CreateCategory(categoryData: Map<String, dynamic> categoryData):
+          await _createCategory(emit, categoryData);
       }
     });
   }
@@ -45,6 +47,18 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
           categories: cat as List<category.Category>, isLoading: false));
     } else {
       emit(state.copyWith(error: "could not load category"));
+    }
+  }
+
+  Future<void> _createCategory(
+      Emitter<CategoryState> emit, Map<String, dynamic> categoryData) async {
+    emit(state.copyWith(isLoading: true));
+
+    var result = await dbService.create(categoryData);
+    if (result) {
+      emit(state.copyWith(categories: result as List<category.Category>));
+    } else {
+      emit(state.copyWith(error: "Category could not be created"));
     }
   }
 }

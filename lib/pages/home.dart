@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
 import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
+import 'package:grocery_app/categories/widgets/category_drawer.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -41,6 +42,7 @@ class _HomeState extends State<Home> {
             style: Theme.of(context).textTheme.displayMedium,
           ),
         ),
+        drawer: CategoryDrawer(),
       ),
     );
   }
