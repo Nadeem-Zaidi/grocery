@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fpdart/fpdart.dart';
-import 'package:grocery_app/authentication/domain/auth_failure.dart';
 import 'package:grocery_app/authentication/domain/user_model.dart';
 import 'package:grocery_app/authentication/infrastructure/firebase_auth.dart';
 import 'package:meta/meta.dart';
@@ -21,7 +19,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   @override
   Future<void> close() async {
-    await _authUserSubscription?.cancel();
+    await _authUserSubscription.cancel();
     super.close();
   }
 

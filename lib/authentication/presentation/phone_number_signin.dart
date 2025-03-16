@@ -12,7 +12,7 @@ class PhoneNumberSignin extends StatefulWidget {
 }
 
 class _PhoneNumberSigninState extends State<PhoneNumberSignin> {
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void dispose() {
@@ -73,9 +73,9 @@ class _PhoneNumberSigninState extends State<PhoneNumberSignin> {
                               return null;
                             },
                             onChanged: (value) {
-                              print("+91${value}".trim());
+                              print("+91$value".trim());
                               context.read<SigninCubit>().phoneNumberChanged(
-                                  phoneNumber: "+91${value}".trim());
+                                  phoneNumber: "+91$value".trim());
                             },
                           ),
                         ),

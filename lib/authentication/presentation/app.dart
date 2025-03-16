@@ -3,10 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
 import 'package:grocery_app/authentication/presentation/otp_screen.dart';
 import 'package:grocery_app/authentication/presentation/phone_number_signin.dart';
-import '../../widget/overlay.dart';
+import '../../widgets/overlay.dart';
 
 import '../cubit/auth_cubit.dart';
-import '../domain/auth_failure.dart';
 
 class App extends StatefulWidget {
   const App({super.key});

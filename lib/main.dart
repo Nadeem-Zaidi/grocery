@@ -3,7 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
 import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
-import 'package:grocery_app/authentication/presentation/phone_number_signin.dart';
 import 'package:grocery_app/router/route_generator.dart';
 import 'package:grocery_app/theme/theme_data.dart';
 import 'firebase_options.dart';

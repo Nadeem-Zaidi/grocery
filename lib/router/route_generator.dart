@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/authentication/presentation/otp_screen.dart';
-import 'package:grocery_app/authentication/presentation/phone_number_signin.dart';
-import 'package:grocery_app/categories/create_categories/create_category.dart';
-import 'package:grocery_app/pages/create_category_page.dart';
+import 'package:grocery_app/pages/category_pages/create_category_page.dart';
 
 import '../authentication/presentation/app.dart';
+import '../pages/category_pages/categories.dart';
 import '../pages/home.dart';
 import '../authentication/presentation/landing_page.dart';
 
@@ -21,6 +20,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const OTPScreen());
       case '/createcategory':
         return MaterialPageRoute(builder: (_) => const CreateCategorypage());
+      case '/categories':
+        return MaterialPageRoute(builder: (_) => const CategoriesPage());
 
       default:
         return _errorRoute();
