@@ -7,4 +7,5 @@ abstract class IdatabaseService {
       [DocumentSnapshot? lastDocument]);
   Future<dynamic> getById(String id);
   Future<dynamic> create(Map<String, dynamic> data);
+  Future<dynamic> update(Map<String, dynamic> data);
 }

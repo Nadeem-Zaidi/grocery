@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:grocery_app/categories/category_update/category_update_bloc.dart';
 import 'package:grocery_app/categories/create_category_bloc/category_create_bloc.dart'; // Import your cubit
 
-class WImagePicker extends StatelessWidget {
-  bool create;
-  WImagePicker({required this.create, super.key});
+class WImagePickerUpdate extends StatelessWidget {
+  WImagePickerUpdate({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +13,7 @@ class WImagePicker extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           // Circular Avatar with Image Preview
-          BlocBuilder<CreateCategoryBloc, CreateCategoryState>(
+          BlocBuilder<CategoryUpdateBloc, CategoryUpdateState>(
             builder: (context, state) {
               return Container(
                 width: 150,
@@ -38,9 +38,9 @@ class WImagePicker extends StatelessWidget {
                           state.imageFile!,
                           fit: BoxFit.cover,
                         )
-                      : state.uploadedUrl != null
+                      : state.uploadedImage != null
                           ? Image.network(
-                              state.uploadedUrl!,
+                              state.uploadedImage!,
                               fit: BoxFit.cover,
                             )
                           : Icon(
@@ -58,11 +58,7 @@ class WImagePicker extends StatelessWidget {
             bottom: 0,
             right: 0,
             child: GestureDetector(
-              onTap: () {
-                if (create == true) {
-                  context.read<CreateCategoryBloc>().add(PickImage());
-                }
-              },
+              onTap: () {},
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(

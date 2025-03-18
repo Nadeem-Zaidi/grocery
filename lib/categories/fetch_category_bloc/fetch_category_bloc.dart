@@ -18,6 +18,7 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
     });
   }
   Future<void> _fetchCategories(Emitter<FetchCategoryState> emit) async {
+    emit(state.copyWith(isFetching: true));
     try {
       var (newCategories, newLastDocument) =
           await dbService.getAll(8, state.lastDocument);

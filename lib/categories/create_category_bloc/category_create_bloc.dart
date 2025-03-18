@@ -35,6 +35,9 @@ class CreateCategoryBloc
           await _resetpath(emit);
         case UpdateCategoryPath(userInput: String userInput):
           _updateCategoryPath(emit, userInput);
+        case UpdateCategory():
+          // TODO: Handle this case.
+          throw UnimplementedError();
       }
     });
   }
@@ -152,5 +155,16 @@ class CreateCategoryBloc
 
   Future<void> _resetpath(Emitter<CreateCategoryState> emit) async {
     emit(state.copyWith(path: ""));
+  }
+
+  Future<void> _updateCategory(
+      Emitter<CreateCategoryState> emit, String id) async {
+    emit(state.copyWith(isLoading: true));
+    try {
+      Map<String, dynamic> categoryDataToUpdate = {
+        "id": id,
+      };
+      await dbService.update(categoryDataToUpdate);
+    } catch (e) {}
   }
 }

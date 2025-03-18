@@ -100,7 +100,7 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
                           ?.copyWith(color: Colors.grey.shade600),
                     ),
                     SizedBox(height: 10),
-                    WImagePicker(),
+                    WImagePicker(create: false),
                     SizedBox(height: 20),
                     Container(
                       padding: EdgeInsets.only(left: 15, right: 15),

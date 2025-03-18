@@ -1,6 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:grocery_app/categories/category_update/category_update_bloc.dart';
 import 'package:grocery_app/categories/fetch_category_bloc/fetch_category_bloc.dart';
+import 'package:grocery_app/pages/category_pages/category_update_page.dart';
+
+import '../../database_service.dart/firestore_category_service.dart';
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
@@ -11,6 +16,10 @@ class CategoriesPage extends StatefulWidget {
 
 class _CategoriesPageState extends State<CategoriesPage> {
   final _scrollController = ScrollController();
+  FirestoreCategoryService categoryService = FirestoreCategoryService(
+    firestore: FirebaseFirestore.instance,
+    collectionName: "categories",
+  );
 
   @override
   void initState() {
@@ -57,6 +66,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
               itemBuilder: (context, index) {
                 if (index < state.categories.length) {
                   final category = state.categories[index];
+                  print("gjhjh");
+                  print(category.url);
+                  print("jjnjkhj");
                   return Card(
                     margin: const EdgeInsets.symmetric(
                         vertical: 8.0, horizontal: 16.0),
@@ -64,30 +76,49 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(16.0),
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: Image.network(
-                          category.url,
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Icon(Icons.image, size: 50);
-                          },
-                        ),
-                      ),
-                      title: Text(
-                        category.name,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    child: GestureDetector(
                       onTap: () {
-                        // Add navigation or action here
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                BlocProvider<CategoryUpdateBloc>(
+                              create: (context) =>
+                                  CategoryUpdateBloc(dbService: categoryService)
+                                    ..add(InitializeExisting(
+                                      id: category.id,
+                                      name: category.name,
+                                      parent: category.parent,
+                                      path: category.path,
+                                      url: category.url,
+                                    )),
+                              child: CategoryUpdatePage(),
+                            ),
+                          ),
+                        );
                       },
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(16.0),
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.network(
+                            category.url,
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(Icons.image, size: 50);
+                            },
+                          ),
+                        ),
+                        title: Text(
+                          category.name,
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      ),
                     ),
                   );
                 } else {

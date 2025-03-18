@@ -40,8 +40,7 @@ class FirestoreCategoryService implements IdatabaseService {
           return Category.fromMap(docData);
         }).toList();
 
-        DocumentSnapshot? lastDocument =
-            querySnapshot.docs.last; // Track last doc
+        DocumentSnapshot? lastDocument = querySnapshot.docs.last;
         return (documents, lastDocument);
       }
     } catch (e) {
@@ -72,7 +71,6 @@ class FirestoreCategoryService implements IdatabaseService {
       throw ArgumentError(
           'Error : Unexpected fields found:${extraKeys.join(",")}');
     }
-    //checking for the misssing
 
     String? missingKey =
         requiredField.firstWhere((key) => data[key] == null, orElse: () => '');
@@ -93,5 +91,35 @@ class FirestoreCategoryService implements IdatabaseService {
         await firestore.collection(collectionName).add(category.toJson());
 
     return docRef;
+  }
+
+  @override
+  Future update(Map<String, dynamic> data) async {
+    List<String> allowedFields = ["id", 'name', 'parent', 'path', 'url'];
+    List<String> dataFields = data.keys.toList();
+    List<String> invalidFields = dataFields
+        .where((attribute) => !allowedFields.contains(attribute))
+        .toList();
+
+    if (invalidFields.isNotEmpty) {
+      throw ArgumentError("Error: Please provide valid attribute to update");
+    }
+
+    if (data.containsKey("id") &&
+        (data["id"] == null || data["id"].toString().trim().isEmpty)) {
+      throw ArgumentError('Error: Invalid Id');
+    }
+    String id = data["id"];
+
+    Map<String, dynamic> refinedData = data
+      ..removeWhere((key, value) => value == null || value == "");
+
+    await firestore.collection(collectionName).doc(id).update(refinedData);
+    DocumentSnapshot documentSnap =
+        await firestore.collection(collectionName).doc(id).get();
+    if (documentSnap.exists) {
+      return Category.fromMap(documentSnap.data() as Map<String, dynamic>);
+    }
+    return null;
   }
 }

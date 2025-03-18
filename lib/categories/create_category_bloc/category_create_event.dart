@@ -39,3 +39,8 @@ class ResetPatg extends CreateCategoryEvent {}
 class CreateCategory extends CreateCategoryEvent {
   CreateCategory();
 }
+
+class UpdateCategory extends CreateCategoryEvent {
+  String id;
+  UpdateCategory(this.id);
+}

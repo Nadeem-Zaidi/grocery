@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/authentication/presentation/otp_screen.dart';
+import 'package:grocery_app/pages/category_pages/category_update_page.dart';
 import 'package:grocery_app/pages/category_pages/create_category_page.dart';
 
 import '../authentication/presentation/app.dart';
@@ -22,6 +23,9 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const CreateCategorypage());
       case '/categories':
         return MaterialPageRoute(builder: (_) => const CategoriesPage());
+
+      // case '/category_update':
+      //   return MaterialPageRoute(builder: (_) => const CategoryUpdatePage());
 
       default:
         return _errorRoute();
