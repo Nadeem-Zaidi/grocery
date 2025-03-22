@@ -73,15 +73,14 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
       ),
       body: BlocListener<CreateCategoryBloc, CreateCategoryState>(
         listener: (context, state) {
-          // if (state.isLoading) {
-          //   OverlayHelper.showOverlay(context, "Saving");
-          // } else {
-          //   OverlayHelper.removeOverlay();
-          // }
+          if (state.isLoading) {
+            OverlayHelper.showOverlay(context, "Saving");
+          } else {
+            OverlayHelper.removeOverlay();
+          }
 
           if (state.categories.isNotEmpty) {
-            print("Categories are not empty, popping the navigator");
-            Navigator.pop(context);
+            Navigator.pushReplacementNamed(context, '/categories');
           }
         },
         child: SingleChildScrollView(
@@ -100,7 +99,7 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
                           ?.copyWith(color: Colors.grey.shade600),
                     ),
                     SizedBox(height: 10),
-                    WImagePicker(create: false),
+                    WImagePicker(),
                     SizedBox(height: 20),
                     Container(
                       padding: EdgeInsets.only(left: 15, right: 15),

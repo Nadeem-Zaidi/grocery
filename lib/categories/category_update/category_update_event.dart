@@ -17,3 +17,17 @@ class InitializeExisting extends CategoryUpdateEvent {
     required this.url,
   });
 }
+
+class CheckForDifference extends CategoryUpdateEvent {
+  String? value;
+  CheckForDifference({this.value});
+}
+
+class UpdateExistingName extends CategoryUpdateEvent {
+  String? value;
+  UpdateExistingName({this.value});
+}
+
+class UpdateCategory extends CategoryUpdateEvent {
+  UpdateCategory();
+}

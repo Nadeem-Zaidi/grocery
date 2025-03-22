@@ -14,9 +14,10 @@ class CategoryUpdatePage extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<CategoryUpdatePage> {
+  TextEditingController _categoryname = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    TextEditingController _categoryname = TextEditingController();
+    String? path = context.read<CategoryUpdateBloc>().state.existingPath;
 
     final screenWidth = ScreenUtils.getScreenWidth(context);
     final screenHeight = ScreenUtils.getScreenHeight(context);
@@ -25,6 +26,7 @@ class _MyWidgetState extends State<CategoryUpdatePage> {
     final paddingAll = screenWidth * 0.030;
     final paddingPathContainer = screenWidth * 0.020;
     final borderRadiusPathContainer = screenWidth * 0;
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Create Category",
@@ -40,49 +42,76 @@ class _MyWidgetState extends State<CategoryUpdatePage> {
           child: Form(
               child: Column(
             children: [
-              Text(
-                "Update Image",
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineMedium
-                    ?.copyWith(color: Colors.grey.shade600),
+              BlocBuilder<CategoryUpdateBloc, CategoryUpdateState>(
+                builder: (context, state) {
+                  if (state.existingPath != null) {
+                    return Text(
+                      "Update Image",
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium
+                          ?.copyWith(color: Colors.grey.shade600),
+                    );
+                  }
+                  return Container();
+                },
               ),
               WImagePickerUpdate(),
               SizedBox(height: 10),
               SizedBox(height: 20),
-              Container(
-                padding: EdgeInsets.only(left: 15, right: 15),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Select Parent Category"),
-                    IconButton(
-                      onPressed: () {},
-                      icon: Icon(Icons.arrow_drop_down),
-                    )
-                  ],
-                ),
+              BlocBuilder<CategoryUpdateBloc, CategoryUpdateState>(
+                builder: (context, state) {
+                  if (state.pathName != null) {
+                    return Container(
+                      padding: EdgeInsets.only(left: 15, right: 15),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(child: Text(state.pathName ?? "")),
+                        ],
+                      ),
+                    );
+                  }
+                  return Container();
+                },
               ),
               SizedBox(
                 height: screenHeight * 0.030,
               ),
-              TextFormField(
-                controller: _categoryname,
-                decoration: InputDecoration(
-                  labelText: "Category Name",
-                ),
-                onChanged: (value) {},
+              BlocBuilder<CategoryUpdateBloc, CategoryUpdateState>(
+                builder: (context, state) {
+                  return TextFormField(
+                    controller: _categoryname,
+                    decoration:
+                        InputDecoration(hintText: "Enter Category Name"),
+                    onChanged: (value) {
+                      context
+                          .read<CategoryUpdateBloc>()
+                          .add(UpdateExistingName(value: value));
+                    },
+                  );
+                },
               )
             ],
           )),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: Icon(Icons.save),
+      floatingActionButton:
+          BlocBuilder<CategoryUpdateBloc, CategoryUpdateState>(
+        builder: (context, state) {
+          if (state.shouldChange == true && state.dynamicPath!.isNotEmpty) {
+            return FloatingActionButton(
+              onPressed: () {
+                context.read<CategoryUpdateBloc>().add(UpdateCategory());
+              },
+              child: Icon(Icons.save),
+            );
+          }
+          return Container();
+        },
       ),
     );
   }

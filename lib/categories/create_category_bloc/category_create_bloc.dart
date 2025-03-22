@@ -101,17 +101,10 @@ class CreateCategoryBloc
   Future<void> _createCategory(Emitter<CreateCategoryState> emit) async {
     emit(state.copyWith(isLoading: true));
     try {
-      Map<String, dynamic> categoryToCreate = {
-        "name": state.name,
-        "path": state.path,
-        "parent": (state.parentId == "/" ||
-                state.parentId == "" ||
-                state.parentId == null)
-            ? ""
-            : state.parentId,
-      };
-
-      String fileName = categoryToCreate["name"];
+      if (state.name == null) {
+        throw Exception("Category name cannot be null");
+      }
+      String fileName = state.name!;
 
       // Ensure an image is selected
       if (state.imageFile == null) {
@@ -124,16 +117,14 @@ class CreateCategoryBloc
       UploadTask uploadTask = storageRef.putFile(state.imageFile!);
       TaskSnapshot snapshot = await uploadTask;
 
-      // Get the image URL and ensure it's valid
       String url = await snapshot.ref.getDownloadURL();
+
       if (url.isEmpty) {
         throw Exception("Image upload failed, no URL returned.");
       }
 
-      categoryToCreate["url"] = url;
-
       // Save the category and check the result
-      var result = await dbService.create(categoryToCreate);
+      var result = await dbService.create(state.name!, state.parentId, url);
 
       // if (result == null || result.isEmpty) {
       //   throw Exception("Failed to create category.");

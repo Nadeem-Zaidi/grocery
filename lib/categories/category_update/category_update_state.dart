@@ -8,26 +8,35 @@ class CategoryUpdateState {
   String? error;
   String? existingName;
   String? existingPath;
+  String? pathName;
   String? existingParent;
   String? nameToUpdate;
   String? pathToUpdate;
   String? parentToUpdate;
   File? imageFile;
   String? uploadedImage;
+  bool? shouldChange;
+  String? fixedPath;
+  String? dynamicPath;
 
-  CategoryUpdateState(
-      {this.id,
-      this.category,
-      this.isFetching = false,
-      this.error,
-      this.existingName,
-      this.existingPath,
-      this.existingParent,
-      this.nameToUpdate,
-      this.parentToUpdate,
-      this.pathToUpdate,
-      this.imageFile,
-      this.uploadedImage});
+  CategoryUpdateState({
+    this.id,
+    this.category,
+    this.isFetching = false,
+    this.error,
+    this.existingName,
+    this.existingPath,
+    this.existingParent,
+    this.nameToUpdate,
+    this.parentToUpdate,
+    this.pathToUpdate,
+    this.imageFile,
+    this.uploadedImage,
+    this.shouldChange = false,
+    this.fixedPath,
+    this.dynamicPath,
+    this.pathName,
+  });
 
   factory CategoryUpdateState.initial() {
     return CategoryUpdateState(
@@ -42,7 +51,11 @@ class CategoryUpdateState {
         parentToUpdate: null,
         pathToUpdate: null,
         imageFile: null,
-        uploadedImage: null);
+        uploadedImage: null,
+        shouldChange: false,
+        fixedPath: null,
+        dynamicPath: null,
+        pathName: null);
   }
 
   CategoryUpdateState copyWith({
@@ -53,11 +66,12 @@ class CategoryUpdateState {
     String? existingName,
     String? existingPath,
     String? existingParent,
-    String? nameToUpdate,
-    String? pathToUpdate,
-    String? parentToUpdate,
     File? imageFile,
     String? uploadedImage,
+    bool? shouldChange,
+    String? fixedPath,
+    String? dynamicPath,
+    String? pathName,
   }) {
     return CategoryUpdateState(
         id: id ?? this.id,
@@ -71,6 +85,10 @@ class CategoryUpdateState {
         pathToUpdate: pathToUpdate ?? this.parentToUpdate,
         parentToUpdate: parentToUpdate ?? this.parentToUpdate,
         imageFile: imageFile ?? this.imageFile,
-        uploadedImage: uploadedImage ?? this.uploadedImage);
+        uploadedImage: uploadedImage ?? this.uploadedImage,
+        shouldChange: shouldChange ?? this.shouldChange,
+        fixedPath: fixedPath ?? this.fixedPath,
+        dynamicPath: dynamicPath ?? this.dynamicPath,
+        pathName: pathName ?? this.pathName);
   }
 }

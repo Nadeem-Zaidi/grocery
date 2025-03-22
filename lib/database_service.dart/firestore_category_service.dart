@@ -55,46 +55,72 @@ class FirestoreCategoryService implements IdatabaseService {
     DocumentReference docRef = firestore.collection(collectionName).doc(id);
     DocumentSnapshot docSnapShot = await docRef.get();
     if (docSnapShot.exists) {
-      return Category.fromMap(docSnapShot.data() as Map<String, dynamic>);
+      Map<String, dynamic> doc = docSnapShot.data() as Map<String, dynamic>;
+      doc["id"] = docSnapShot.id;
+
+      return Category.fromMap(doc);
     } else {
       return null;
     }
   }
 
   @override
-  Future create(Map<String, dynamic> data) async {
-    List<String> requiredField = ['name', 'parent', 'path', 'url'];
-    Set<String> allowedFields = requiredField.toSet();
-    //checking for extra fields
-    Set<String> extraKeys = data.keys.toSet().difference(allowedFields);
-    if (extraKeys.isNotEmpty) {
-      throw ArgumentError(
-          'Error : Unexpected fields found:${extraKeys.join(",")}');
+  Future create(String name, String? parent, String url) async {
+    // List<String> requiredField = ['name', 'path', 'parent' 'url'];
+    // Set<String> allowedFields = requiredField.toSet();
+    // //checking for extra fields
+    // Set<String> extraKeys = data.keys.toSet().difference(allowedFields);
+    // if (extraKeys.isNotEmpty) {
+    //   throw ArgumentError(
+    //       'Error : Unexpected fields found:${extraKeys.join(",")}');
+    // }
+
+    // String? missingKey =
+    //     requiredField.firstWhere((key) => data[key] == null, orElse: () => '');
+
+    // if (missingKey.isNotEmpty) {
+    //   throw ArgumentError('Error :$missingKey can not be null');
+    // }
+
+    if (name.isEmpty) {
+      throw ArgumentError('Error :"name" can not be null');
     }
 
-    String? missingKey =
-        requiredField.firstWhere((key) => data[key] == null, orElse: () => '');
+    DocumentReference newCategoryRef =
+        firestore.collection(collectionName).doc();
 
-    if (missingKey.isNotEmpty) {
-      throw ArgumentError('Error :$missingKey can not be null');
+    String newPath = name;
+
+    if (parent != null || parent.toString().isNotEmpty) {
+      DocumentSnapshot<Map<String, dynamic>> parentDoc =
+          await firestore.collection(collectionName).doc(parent).get();
+      if (parentDoc.exists) {
+        String parentPath = parentDoc['path'];
+        newPath = "$parentPath/$name";
+      }
     }
 
-    Category category = Category(
-      id: data['id'],
-      name: data["name"],
-      parent: data["parent"],
-      path: data["path"],
-      url: data["url"],
-    );
+    Map<String, dynamic> categoryData = {
+      "id": newCategoryRef.id,
+      "name": name,
+      "parent": parent,
+      "path": newPath,
+      "url": url
+    };
 
-    DocumentReference docRef =
-        await firestore.collection(collectionName).add(category.toJson());
+    try {
+      await newCategoryRef.set(categoryData);
+    } catch (e) {
+      print("Error creating category: $e");
+      rethrow;
+    }
 
-    return docRef;
+    return categoryData;
   }
 
   @override
   Future update(Map<String, dynamic> data) async {
+    print(data);
     List<String> allowedFields = ["id", 'name', 'parent', 'path', 'url'];
     List<String> dataFields = data.keys.toList();
     List<String> invalidFields = dataFields
@@ -110,9 +136,14 @@ class FirestoreCategoryService implements IdatabaseService {
       throw ArgumentError('Error: Invalid Id');
     }
     String id = data["id"];
+    print("id from update");
+    print(id);
+    print("id from update");
 
     Map<String, dynamic> refinedData = data
       ..removeWhere((key, value) => value == null || value == "");
+
+    refinedData.remove('id');
 
     await firestore.collection(collectionName).doc(id).update(refinedData);
     DocumentSnapshot documentSnap =
@@ -121,5 +152,33 @@ class FirestoreCategoryService implements IdatabaseService {
       return Category.fromMap(documentSnap.data() as Map<String, dynamic>);
     }
     return null;
+  }
+
+  @override
+  Future<List<Category>> whereClause(
+      Query Function(CollectionReference) queryBuilder) async {
+    List<Category> documents = [];
+
+    try {
+      Query query = queryBuilder(firestore.collection(collectionName));
+      QuerySnapshot querySnapshot = await query.get();
+      print(querySnapshot.docs);
+
+      documents = querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>? ?? {};
+        return Category.fromMap({...data, "id": doc.id});
+      }).toList();
+    } on FirebaseException catch (e) {
+      print("Firestore error: ${e.message}");
+      rethrow;
+    } on TimeoutException catch (e) {
+      print("Query timed out: ${e.message}");
+      rethrow;
+    } catch (e) {
+      print("Unexpected error: $e");
+      rethrow;
+    }
+
+    return documents;
   }
 }

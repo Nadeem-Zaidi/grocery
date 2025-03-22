@@ -3,8 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/categories/create_category_bloc/category_create_bloc.dart'; // Import your cubit
 
 class WImagePicker extends StatelessWidget {
-  bool create;
-  WImagePicker({required this.create, super.key});
+  WImagePicker({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -59,9 +58,7 @@ class WImagePicker extends StatelessWidget {
             right: 0,
             child: GestureDetector(
               onTap: () {
-                if (create == true) {
-                  context.read<CreateCategoryBloc>().add(PickImage());
-                }
+                context.read<CreateCategoryBloc>().add(PickImage());
               },
               child: Container(
                 padding: const EdgeInsets.all(8),
