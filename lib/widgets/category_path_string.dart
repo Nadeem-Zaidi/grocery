@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/categories/create_category_bloc/category_create_bloc.dart';
+import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart';
 
 class CategoryStringpath extends StatefulWidget {
   const CategoryStringpath({super.key});

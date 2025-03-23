@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/categories/create_category_bloc/category_create_bloc.dart';
-import 'package:grocery_app/categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
-import 'package:grocery_app/database_service.dart/firestore_category_service.dart';
+import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart';
+import 'package:grocery_app/blocs/categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
+import 'package:grocery_app/database_service.dart/category/firestore_category_service.dart';
 
-import '../categories/models/category.dart';
+import '../models/category.dart';
 
 Future<void> categoryParentSelectionDialog(
     BuildContext context, double width, double height, Function parentData) {

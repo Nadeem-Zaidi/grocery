@@ -5,8 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
-import '../../database_service.dart/idatabase_service.dart';
-import '../models/category.dart';
+import '../../../database_service.dart/idatabase_service.dart';
+import '../../../models/category.dart';
 
 part 'category_update_event.dart';
 part 'category_update_state.dart';
@@ -33,7 +33,7 @@ class CategoryUpdateBloc
         case UpdateExistingName(value: String? value):
           updateExistingName(emit, value);
         case UpdateCategory():
-          updateCategory();
+          await updateCategory(emit);
       }
     });
   }
@@ -108,7 +108,8 @@ class CategoryUpdateBloc
     } finally {}
   }
 
-  Future<void> updateCategory() async {
+  Future<void> updateCategory(Emitter<CategoryUpdateState> emit) async {
+    emit(state.copyWith(isFetching: true));
     String? categoryId = state.id;
     String? newName = state.dynamicPath;
 
@@ -145,9 +146,6 @@ class CategoryUpdateBloc
         "path": newPath,
       });
 
-      print(oldPath);
-      print(newPath);
-
       // Update all child categories recursively
       List<Category> childrenCategories = await dbService.whereClause(
         (collection) => collection
@@ -168,9 +166,9 @@ class CategoryUpdateBloc
           });
         }
       }
+      emit(state.copyWith(isFetching: false, done: true));
     } catch (e) {
-      print(e);
-      emit(state.copyWith(error: e.toString()));
+      emit(state.copyWith(error: e.toString(), isFetching: false));
     }
   }
 }

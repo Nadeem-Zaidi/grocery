@@ -2,7 +2,8 @@ import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meta/meta.dart';
 
-import '../../database_service.dart/idatabase_service.dart';
+import '../../../database_service.dart/idatabase_service.dart';
+import '../../../models/category.dart';
 
 part 'fetch_category_event.dart';
 part 'fetch_category_state.dart';
@@ -26,8 +27,9 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
       if (newCategories.isEmpty) {
         emit(state.copyWith(hasReachedMax: true, isFetching: false));
       } else {
+        List<Category> newList = [...state.categories, ...newCategories];
         emit(state.copyWith(
-          categories: List.of(state.categories)..addAll(newCategories),
+          categories: newList,
           lastDocument: newLastDocument,
           isFetching: false,
         ));

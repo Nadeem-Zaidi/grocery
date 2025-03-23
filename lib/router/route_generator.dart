@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery_app/authentication/presentation/otp_screen.dart';
 import 'package:grocery_app/pages/category_pages/category_update_page.dart';
 import 'package:grocery_app/pages/category_pages/create_category_page.dart';
+import 'package:grocery_app/pages/product_pages/create_product.dart';
 
 import '../authentication/presentation/app.dart';
 import '../pages/category_pages/categories.dart';
@@ -15,6 +16,7 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const LandingPage());
       case '/home':
         return MaterialPageRoute(builder: (_) => const Home());
+      // return MaterialPageRoute(builder: (_) => CreateProduct());
       case '/signinsignup':
         return MaterialPageRoute(builder: (_) => const App());
       case '/otpscreen':

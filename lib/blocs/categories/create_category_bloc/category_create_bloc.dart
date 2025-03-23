@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:grocery_app/database_service.dart/idatabase_service.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../models/category.dart' as category;
+import '../../../models/category.dart' as category;
 
 part 'category_create_event.dart';
 part 'category_create_state.dart';

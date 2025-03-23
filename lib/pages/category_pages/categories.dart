@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/categories/category_update/category_update_bloc.dart';
-import 'package:grocery_app/categories/fetch_category_bloc/fetch_category_bloc.dart';
+import 'package:grocery_app/blocs/categories/category_update/category_update_bloc.dart';
+import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import 'package:grocery_app/pages/category_pages/category_update_page.dart';
 
-import '../../categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
-import '../../categories/create_category_bloc/category_create_bloc.dart';
-import '../../database_service.dart/firestore_category_service.dart';
+import '../../blocs/categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
+import '../../blocs/categories/create_category_bloc/category_create_bloc.dart';
+import '../../database_service.dart/category/firestore_category_service.dart';
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});

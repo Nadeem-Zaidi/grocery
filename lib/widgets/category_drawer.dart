@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/categories/create_category_bloc/category_create_bloc.dart';
-import 'package:grocery_app/categories/fetch_category_bloc/fetch_category_bloc.dart';
+import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart';
+import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 
 import 'package:grocery_app/pages/category_pages/categories.dart';
 import 'package:grocery_app/pages/category_pages/create_category_page.dart';
 
-import '../categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
-import '../database_service.dart/firestore_category_service.dart';
+import '../blocs/categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
+import '../database_service.dart/category/firestore_category_service.dart';
 
 class CategoryDrawer extends StatefulWidget {
   const CategoryDrawer({super.key});

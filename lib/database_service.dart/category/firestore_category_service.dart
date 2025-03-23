@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_app/database_service.dart/idatabase_service.dart';
 
-import '../categories/models/category.dart';
+import '../../models/category.dart';
 
 class FirestoreCategoryService implements IdatabaseService {
   FirebaseFirestore firestore;
