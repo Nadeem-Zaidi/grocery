@@ -16,10 +16,11 @@ class _HomeState extends State<Home> {
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthCubit, AuthState>(
-            listenWhen: (p, c) => p.isLoggedIn != c.isLoggedIn && !c.isLoggedIn,
-            listener: (context, state) {
-              Navigator.of(context).pushReplacementNamed('/signinsignup');
-            })
+          listenWhen: (p, c) => p.isLoggedIn != c.isLoggedIn && !c.isLoggedIn,
+          listener: (context, state) {
+            Navigator.of(context).pushReplacementNamed('/signinsignup');
+          },
+        )
       ],
       child: Scaffold(
         appBar: AppBar(

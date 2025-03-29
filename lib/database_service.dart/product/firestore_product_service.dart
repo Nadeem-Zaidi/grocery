@@ -1,13 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:grocery_app/database_service.dart/idatabase_service.dart';
 
 import '../../models/product/product.dart';
 
-class FirestoreProductService {
+class FirestoreProductService implements IdatabaseService<Product> {
   FirebaseFirestore fireStore;
   String collectionName;
   FirestoreProductService(
       {required this.fireStore, required this.collectionName});
-  Future<String> create(Product product) async {
+  @override
+  Future<Product?> create(Product product) async {
     Map<String, dynamic> productMap = product.toMap();
     productMap.removeWhere(
         (key, value) => (key == "id" || value == "" || value == null));
@@ -17,13 +19,13 @@ class FirestoreProductService {
     }
 
     try {
-      CollectionReference productCollection =
-          fireStore.collection(collectionName);
-      DocumentReference productDocument =
-          await productCollection.add(productMap);
-      return productDocument.id;
+      DocumentReference productRef = fireStore.collection(collectionName).doc();
+      Map<String, dynamic> productData = {"id": productRef.id, ...productMap};
+      await productRef.set(productData);
+      return Product.fromMap(productData);
     } catch (e) {
-      throw Exception("Product creation failed");
+      print("Error occured while creating a product");
+      rethrow;
     }
   }
 
@@ -83,5 +85,25 @@ class FirestoreProductService {
       throw Exception(
           "Failed to fetch product: $e"); // Throw a meaningful exception
     }
+  }
+
+  @override
+  Future<(List<Product>, DocumentSnapshot<Object?>?)> getAll(int limit,
+      [DocumentSnapshot<Object?>? lastDocument]) {
+    // TODO: implement getAll
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Product?> update(Map<String, dynamic> data) {
+    // TODO: implement update
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<Product>> whereClause(
+      Query<Object?> Function(CollectionReference<Object?> p1) queryBuilder) {
+    // TODO: implement whereClause
+    throw UnimplementedError();
   }
 }

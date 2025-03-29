@@ -124,7 +124,9 @@ class CreateCategoryBloc
       }
 
       // Save the category and check the result
-      var result = await dbService.create(state.name!, state.parentId, url);
+      category.Category categoryToCreate =
+          category.Category(name: state.name, parent: state.parentId, url: url);
+      var result = await dbService.create(categoryToCreate);
 
       // if (result == null || result.isEmpty) {
       //   throw Exception("Failed to create category.");

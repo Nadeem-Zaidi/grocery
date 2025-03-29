@@ -27,4 +27,8 @@ class CategoryParentDialogCubit extends Cubit<CategoryParentDialogState> {
       emit(state.copyWith(error: "Could not load categories"));
     }
   }
+
+  void selectCategory(String category) {
+    emit(state.copyWith(selectedCategory: category));
+  }
 }

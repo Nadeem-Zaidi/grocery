@@ -88,58 +88,59 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
             margin: EdgeInsets.only(top: marginTop),
             padding: EdgeInsets.all(paddingAll),
             child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    Text(
-                      "Select Image",
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium
-                          ?.copyWith(color: Colors.grey.shade600),
+              key: _formKey,
+              child: Column(
+                children: [
+                  Text(
+                    "Select Image",
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineMedium
+                        ?.copyWith(color: Colors.grey.shade600),
+                  ),
+                  SizedBox(height: 10),
+                  WImagePicker(),
+                  SizedBox(height: 20),
+                  Container(
+                    padding: EdgeInsets.only(left: 15, right: 15),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
                     ),
-                    SizedBox(height: 10),
-                    WImagePicker(),
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.only(left: 15, right: 15),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Select Parent Category"),
-                          IconButton(
-                            onPressed: () {
-                              context
-                                  .read<CategoryParentDialogCubit>()
-                                  .fetchCategories();
-                              categoryParentSelectionDialog(context,
-                                  screenWidth, screenHeight, setParent);
-                            },
-                            icon: Icon(Icons.arrow_drop_down),
-                          )
-                        ],
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Select Parent Category"),
+                        IconButton(
+                          onPressed: () {
+                            context
+                                .read<CategoryParentDialogCubit>()
+                                .fetchCategories();
+                            categoryParentSelectionDialog(
+                                context, screenWidth, screenHeight, setParent);
+                          },
+                          icon: Icon(Icons.arrow_drop_down),
+                        )
+                      ],
                     ),
-                    SizedBox(
-                      height: screenHeight * 0.030,
+                  ),
+                  SizedBox(
+                    height: screenHeight * 0.030,
+                  ),
+                  CategoryStringpath(),
+                  TextFormField(
+                    controller: _categoryNameController,
+                    decoration: InputDecoration(
+                      labelText: "Category Name",
                     ),
-                    CategoryStringpath(),
-                    TextFormField(
-                      controller: _categoryNameController,
-                      decoration: InputDecoration(
-                        labelText: "Category Name",
-                      ),
-                      onChanged: (value) {
-                        context.read<CreateCategoryBloc>().add(
-                              UpdateCategoryPath(userInput: value),
-                            );
-                      },
-                    )
-                  ],
-                )),
+                    onChanged: (value) {
+                      context.read<CreateCategoryBloc>().add(
+                            UpdateCategoryPath(userInput: value),
+                          );
+                    },
+                  )
+                ],
+              ),
+            ),
           ),
         ),
       ),

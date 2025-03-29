@@ -5,7 +5,7 @@ import 'package:grocery_app/database_service.dart/idatabase_service.dart';
 
 import '../../models/category.dart';
 
-class FirestoreCategoryService implements IdatabaseService {
+class FirestoreCategoryService implements IdatabaseService<Category> {
   FirebaseFirestore firestore;
   String collectionName;
   FirestoreCategoryService(
@@ -51,7 +51,7 @@ class FirestoreCategoryService implements IdatabaseService {
   }
 
   @override
-  Future getById(String id) async {
+  Future<Category?> getById(String id) async {
     DocumentReference docRef = firestore.collection(collectionName).doc(id);
     DocumentSnapshot docSnapShot = await docRef.get();
     if (docSnapShot.exists) {
@@ -65,62 +65,70 @@ class FirestoreCategoryService implements IdatabaseService {
   }
 
   @override
-  Future create(String name, String? parent, String url) async {
-    // List<String> requiredField = ['name', 'path', 'parent' 'url'];
-    // Set<String> allowedFields = requiredField.toSet();
-    // //checking for extra fields
-    // Set<String> extraKeys = data.keys.toSet().difference(allowedFields);
-    // if (extraKeys.isNotEmpty) {
-    //   throw ArgumentError(
-    //       'Error : Unexpected fields found:${extraKeys.join(",")}');
-    // }
-
-    // String? missingKey =
-    //     requiredField.firstWhere((key) => data[key] == null, orElse: () => '');
-
-    // if (missingKey.isNotEmpty) {
-    //   throw ArgumentError('Error :$missingKey can not be null');
-    // }
-
-    if (name.isEmpty) {
-      throw ArgumentError('Error :"name" can not be null');
+  Future<Category?> create(Category category) async {
+    // Validate input category
+    if (category == null) {
+      throw ArgumentError('Category cannot be null');
     }
 
-    DocumentReference newCategoryRef =
-        firestore.collection(collectionName).doc();
+    // Convert to map and remove unwanted fields
+    Map<String, dynamic> categoryMap = category.toJson();
+    categoryMap.removeWhere(
+        (key, value) => (key == "id" || value == "" || value == null));
 
-    String newPath = name;
-
-    if (parent != null || parent.toString().isNotEmpty) {
-      DocumentSnapshot<Map<String, dynamic>> parentDoc =
-          await firestore.collection(collectionName).doc(parent).get();
-      if (parentDoc.exists) {
-        String parentPath = parentDoc['path'];
-        newPath = "$parentPath/$name";
+    // Validate required fields
+    final requiredFields = ['name', 'path', 'parent', 'url'];
+    for (final field in requiredFields) {
+      if (categoryMap[field] == null) {
+        throw ArgumentError('Error: $field cannot be null');
       }
     }
 
-    Map<String, dynamic> categoryData = {
+    // Additional name validation
+    final name = categoryMap['name'] as String?;
+    if (name == null || name.isEmpty) {
+      throw ArgumentError('Error: "name" cannot be null or empty');
+    }
+
+    // Prepare path and parent
+    String newPath = name;
+    final parent = categoryMap['parent'] as String? ?? '';
+
+    // Get reference for new category
+    final newCategoryRef = firestore.collection(collectionName).doc();
+
+    // Handle parent path if parent exists
+    if (parent.isNotEmpty) {
+      final parentDoc =
+          await firestore.collection(collectionName).doc(parent).get();
+      if (parentDoc.exists) {
+        final parentPath = parentDoc['path'] as String? ?? '';
+        newPath = "$parentPath/$name";
+      } else {
+        throw ArgumentError('Error: Specified parent category does not exist');
+      }
+    }
+
+    // Prepare complete data
+    final categoryData = {
       "id": newCategoryRef.id,
       "name": name,
       "parent": parent,
       "path": newPath,
-      "url": url
+      "url": categoryMap['url'],
     };
 
     try {
       await newCategoryRef.set(categoryData);
+      return Category.fromMap(categoryData);
     } catch (e) {
       print("Error creating category: $e");
       rethrow;
     }
-
-    return categoryData;
   }
 
   @override
-  Future update(Map<String, dynamic> data) async {
-    print(data);
+  Future<Category?> update(Map<String, dynamic> data) async {
     List<String> allowedFields = ["id", 'name', 'parent', 'path', 'url'];
     List<String> dataFields = data.keys.toList();
     List<String> invalidFields = dataFields
@@ -136,9 +144,6 @@ class FirestoreCategoryService implements IdatabaseService {
       throw ArgumentError('Error: Invalid Id');
     }
     String id = data["id"];
-    print("id from update");
-    print(id);
-    print("id from update");
 
     Map<String, dynamic> refinedData = data
       ..removeWhere((key, value) => value == null || value == "");

@@ -151,7 +151,7 @@ class CategoryUpdateBloc
         (collection) => collection
             .where('path', isGreaterThanOrEqualTo: oldPath)
             .where('path', isLessThan: "$oldPath~"),
-      );
+      ) as List<Category>;
 
       for (Category child in childrenCategories) {
         String? childId = child.id;

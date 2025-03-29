@@ -1,29 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart';
 import 'package:grocery_app/blocs/categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
 import 'package:grocery_app/database_service.dart/category/firestore_category_service.dart';
 
+import '../blocs/products/product_bloc/product_bloc.dart';
 import '../models/category.dart';
 
-Future<void> categoryParentSelectionDialog(
-    BuildContext context, double width, double height, Function parentData) {
-  print("running categoryParentSelectionDialog");
-  final categoryPathStringCubit = context.read<CreateCategoryBloc>();
-  final categoryParentDialogCubit = context.read<CategoryParentDialogCubit>();
-
+Future<void> categorySelectionForProduct(
+    BuildContext context, double width, double height) {
   FirestoreCategoryService categoryService = FirestoreCategoryService(
       firestore: FirebaseFirestore.instance, collectionName: "categories");
+  final categoryParentDialogCubit = context.read<CategoryParentDialogCubit>();
+  final productBloc = context.read<ProductBloc>();
+
   return showDialog(
     context: context,
     builder: (BuildContext context) {
       return MultiBlocProvider(
         providers: [
           BlocProvider.value(value: categoryParentDialogCubit),
-          BlocProvider.value(
-            value: categoryPathStringCubit, // Use the existing cubit
-          ),
+          BlocProvider.value(value: productBloc)
         ],
         child: Dialog(
           shape: RoundedRectangleBorder(
@@ -42,12 +39,9 @@ Future<void> categoryParentSelectionDialog(
                       itemBuilder: (context, index) {
                         return GestureDetector(
                           onTap: () {
-                            parentData();
-                            context.read<CreateCategoryBloc>().add(
-                                  Setpath(
-                                      fixed: categories[index].path ?? "",
-                                      parentId: categories[index].id ?? ""),
-                                );
+                            context
+                                .read<ProductBloc>()
+                                .add(SetCategory(categories[index].path ?? ""));
                             Navigator.of(context).pop();
                           },
                           child: ListTile(
