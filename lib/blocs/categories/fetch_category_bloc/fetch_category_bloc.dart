@@ -9,33 +9,39 @@ part 'fetch_category_event.dart';
 part 'fetch_category_state.dart';
 
 class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
-  IdatabaseService dbService;
+  final IdatabaseService dbService;
+
   FetchCategoryBloc(this.dbService) : super(FetchCategoryState.initial()) {
-    on<FetchCategoryEvent>((event, emit) async {
-      switch (event) {
-        case FetchCategories():
-          await _fetchCategories(emit);
-      }
-    });
+    on<FetchCategories>(_onFetchCategories);
   }
-  Future<void> _fetchCategories(Emitter<FetchCategoryState> emit) async {
+
+  Future<void> _onFetchCategories(
+    FetchCategories event,
+    Emitter<FetchCategoryState> emit,
+  ) async {
+    // Don't fetch if we're already loading or have reached max
+    if (state.isFetching || state.hasReachedMax) return;
+
     emit(state.copyWith(isFetching: true));
+
     try {
-      var (newCategories, newLastDocument) =
-          await dbService.getAll(8, state.lastDocument);
+      final (newCategories, newLastDocument) = await dbService.getAll(
+        10, // Your page size
+        state.lastDocument, // Pass the last document for pagination
+      );
 
       if (newCategories.isEmpty) {
-        emit(state.copyWith(hasReachedMax: true, isFetching: false));
+        emit(state.copyWith(hasReachedMax: true));
       } else {
-        List<Category> newList = [...state.categories, ...newCategories];
         emit(state.copyWith(
-          categories: newList,
+          categories: [...state.categories, ...newCategories],
           lastDocument: newLastDocument,
-          isFetching: false,
         ));
       }
     } catch (e) {
-      emit(state.copyWith(error: e.toString(), isFetching: false));
+      emit(state.copyWith(error: e.toString()));
+    } finally {
+      emit(state.copyWith(isFetching: false));
     }
   }
 }

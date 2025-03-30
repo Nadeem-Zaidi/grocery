@@ -2,7 +2,7 @@ part of 'fetch_category_bloc.dart';
 
 @immutable
 class FetchCategoryState {
-  final List<dynamic> categories;
+  final List<Category> categories; // Changed from List<dynamic>
   final bool isFetching;
   final bool hasReachedMax;
   final DocumentSnapshot? lastDocument;
@@ -16,18 +16,14 @@ class FetchCategoryState {
     this.error,
   });
 
-  factory FetchCategoryState.initial() {
-    return FetchCategoryState(
-      categories: [],
-      isFetching: false,
-      hasReachedMax: false,
-      lastDocument: null,
-      error: null,
-    );
-  }
+  factory FetchCategoryState.initial() => FetchCategoryState(
+        categories: [],
+        isFetching: false,
+        hasReachedMax: false,
+      );
 
   FetchCategoryState copyWith({
-    List<dynamic>? categories,
+    List<Category>? categories,
     bool? isFetching,
     bool? hasReachedMax,
     DocumentSnapshot? lastDocument,

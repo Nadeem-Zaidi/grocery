@@ -21,7 +21,7 @@ class FirestoreProductService implements IdatabaseService<Product> {
     try {
       DocumentReference productRef = fireStore.collection(collectionName).doc();
       Map<String, dynamic> productData = {"id": productRef.id, ...productMap};
-      await productRef.set(productData);
+      await productRef.set(productMap);
       return Product.fromMap(productData);
     } catch (e) {
       print("Error occured while creating a product");

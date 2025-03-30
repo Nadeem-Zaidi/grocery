@@ -124,8 +124,9 @@ class CreateCategoryBloc
       }
 
       // Save the category and check the result
-      category.Category categoryToCreate =
-          category.Category(name: state.name, parent: state.parentId, url: url);
+      category.Category categoryToCreate = category.Category(
+          name: state.name, parent: state.parentId, path: state.path, url: url);
+
       var result = await dbService.create(categoryToCreate);
 
       // if (result == null || result.isEmpty) {

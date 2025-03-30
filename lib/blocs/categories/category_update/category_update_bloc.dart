@@ -113,61 +113,71 @@ class CategoryUpdateBloc
     String? categoryId = state.id;
     String? newName = state.dynamicPath;
 
-    if (categoryId == null || categoryId.isEmpty) {
-      throw ArgumentError("Category Id is required");
-    }
-
-    if (newName == null || newName.isEmpty) {
-      throw ArgumentError("Valid name is required");
-    }
-
     try {
+      if (categoryId == null || categoryId.isEmpty) {
+        throw ArgumentError("Category Id is required");
+      }
+
+      if (newName == null || newName.isEmpty) {
+        throw ArgumentError("Valid name is required");
+      }
       Category? category = await dbService.getById(categoryId);
       if (category == null) {
-        return;
+        throw Exception("Error at category");
       }
 
       String? oldPath = category.path;
       String? parentId = category.parent;
       String newPath = newName;
 
-      if (parentId != null) {
+      print("parent id status");
+      print(parentId == "");
+
+      print("parent id status");
+
+      if (parentId != null && parentId != "") {
         Category? parentDoc = await dbService.getById(parentId);
         if (parentDoc != null) {
           String? parentPath = parentDoc.path;
           newPath = "$parentPath/$newName";
         }
       }
+      print("after");
+      print(oldPath);
+      print(parentId);
+      print(newPath);
+      print("after");
 
-      // Update the current category
       Category updatedDoc = await dbService.update({
         "id": categoryId,
         "name": newName,
         "path": newPath,
       });
 
-      // Update all child categories recursively
       List<Category> childrenCategories = await dbService.whereClause(
         (collection) => collection
             .where('path', isGreaterThanOrEqualTo: oldPath)
             .where('path', isLessThan: "$oldPath~"),
       ) as List<Category>;
 
-      for (Category child in childrenCategories) {
-        String? childId = child.id;
-        String? childPath = child.path;
+      if (childrenCategories.isNotEmpty) {
+        for (Category child in childrenCategories) {
+          String? childId = child.id;
+          String? childPath = child.path;
 
-        if (childPath != null && oldPath != null) {
-          String updatedChildPath = childPath.replaceFirst(oldPath, newPath);
+          if (childPath != null && oldPath != null) {
+            String updatedChildPath = childPath.replaceFirst(oldPath, newPath);
 
-          await dbService.update({
-            "id": childId,
-            "path": updatedChildPath,
-          });
+            await dbService.update({
+              "id": childId,
+              "path": updatedChildPath,
+            });
+          }
         }
+        emit(state.copyWith(isFetching: false, done: true));
       }
-      emit(state.copyWith(isFetching: false, done: true));
     } catch (e) {
+      print("Error in updating category error==>${e.toString()}");
       emit(state.copyWith(error: e.toString(), isFetching: false));
     }
   }

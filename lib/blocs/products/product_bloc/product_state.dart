@@ -7,7 +7,7 @@ class ProductState {
   final String? productCategory;
   final String? sellingUnit;
   final String? quantityInBox;
-  final String? quantity;
+  String? quantity;
   final String? mrp;
   final String? sellingPrice;
   String? discount;
@@ -30,7 +30,7 @@ class ProductState {
       this.quantity,
       this.mrp,
       this.sellingPrice,
-      this.discount = "0",
+      this.discount,
       this.products = const [],
       this.imageUrls = const [],
       this.imageFiles = const [],
@@ -74,7 +74,7 @@ class ProductState {
       quantity: quantity ?? this.quantity,
       mrp: mrp ?? this.mrp,
       sellingPrice: sellingPrice ?? this.sellingPrice,
-      discount: discount ?? discount,
+      discount: discount ?? this.discount,
       products: products ?? List.unmodifiable(this.products),
       imageUrls: imageUrls ?? List.unmodifiable(this.imageUrls),
       imageFiles: imageFiles ?? List.unmodifiable(this.imageFiles),
@@ -110,7 +110,8 @@ class ProductState {
         other.error == error &&
         other.showQuantityInBox == showQuantityInBox &&
         other.user == user &&
-        other.discount == discount;
+        other.discount == discount &&
+        other.quantity == quantity;
   }
 
   @override
@@ -132,7 +133,8 @@ class ProductState {
         error,
         showQuantityInBox,
         user,
-        discount);
+        discount,
+        quantity);
   }
 
   @override

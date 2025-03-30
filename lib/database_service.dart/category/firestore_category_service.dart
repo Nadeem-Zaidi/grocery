@@ -13,15 +13,13 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
   @override
   Future<(List<Category>, DocumentSnapshot?)> getAll(int limit,
       [DocumentSnapshot? lastDocument]) async {
-    List<Category> documents = [];
-    CollectionReference collectionReference =
-        firestore.collection(collectionName);
-
     try {
-      Query query = collectionReference
-          .orderBy('name', descending: true) // Order by timestamp
+      Query query = firestore
+          .collection(collectionName)
+          .orderBy('name', descending: true)
           .limit(limit);
 
+      // Use the parameter (not a new variable)
       if (lastDocument != null) {
         query = query.startAfterDocument(lastDocument);
       }
@@ -29,25 +27,22 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
       QuerySnapshot querySnapshot =
           await query.get().timeout(Duration(seconds: 5));
 
-      if (querySnapshot.docs.isNotEmpty) {
-        documents = querySnapshot.docs.map((doc) {
-          Map<String, dynamic> docData = {
-            ...(doc.data() != null
-                ? doc.data() as Map<String, dynamic>
-                : {}), // Handle null case
-            "id": doc.id,
-          };
-          return Category.fromMap(docData);
-        }).toList();
-
-        DocumentSnapshot? lastDocument = querySnapshot.docs.last;
-        return (documents, lastDocument);
+      if (querySnapshot.docs.isEmpty) {
+        return (<Category>[], null);
       }
+
+      // Convert documents to Categories
+      final documents = querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>? ?? {};
+        return Category.fromMap({...data, 'id': doc.id});
+      }).toList();
+
+      // Return with the actual last document
+      return (documents, querySnapshot.docs.last);
     } catch (e) {
+      print('Error in getAll: $e');
       rethrow;
     }
-
-    return (documents, null);
   }
 
   @override
@@ -77,7 +72,7 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
         (key, value) => (key == "id" || value == "" || value == null));
 
     // Validate required fields
-    final requiredFields = ['name', 'path', 'parent', 'url'];
+    final requiredFields = ['name', 'path', 'url'];
     for (final field in requiredFields) {
       if (categoryMap[field] == null) {
         throw ArgumentError('Error: $field cannot be null');
@@ -129,6 +124,9 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
 
   @override
   Future<Category?> update(Map<String, dynamic> data) async {
+    print("from category update");
+    print(data);
+    print("from category update");
     List<String> allowedFields = ["id", 'name', 'parent', 'path', 'url'];
     List<String> dataFields = data.keys.toList();
     List<String> invalidFields = dataFields

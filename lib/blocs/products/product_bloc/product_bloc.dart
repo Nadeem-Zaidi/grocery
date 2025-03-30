@@ -4,22 +4,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:grocery_app/database_service.dart/inventory/firebase_inventory_service.dart';
 import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
 
+import '../../../models/inventory/inventory.dart';
 import '../../../models/product/product.dart';
 
 part 'product_event.dart';
 part 'product_state.dart';
 
 class ProductBloc extends Bloc<ProductEvent, ProductState> {
-  final FirestoreProductService fireStore;
+  final FirestoreProductService productDb;
+  final FirestoreInventoryService inventoryDb;
   final ImagePicker _picker = ImagePicker();
   final currentLoggedInUser = FirebaseAuth.instance.currentUser;
 
-  ProductBloc(this.fireStore) : super(ProductState.initial()) {
+  ProductBloc(this.productDb, this.inventoryDb)
+      : super(ProductState.initial()) {
     on<ProductEvent>((event, emit) async {
       switch (event) {
         case AddProductEvent():
@@ -49,8 +53,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         case ProductCategory(productCategory: String productCategory):
           productCategoryController(emit, productCategory);
 
-        case QuantityInBox(value: String value):
-          quantityBox(emit, value);
+        case QuantityInBox(value: String qib):
+          quantityBox(emit, qib);
 
         case Mrp(value: String value):
           productMrp(emit, value);
@@ -62,10 +66,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         case SetDiscount(discount: String value):
           setDiscount(emit, value);
 
-        case SetQuantity(quantity: String quantity):
-          setQuantity(emit, quantity);
+        case SetQuantity(quantity: String q):
+          setQuantity(emit, q);
         case ProductCreate():
-          createProduct(emit);
+          await createProduct(emit);
       }
     });
   }
@@ -156,7 +160,36 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
   /// **Create Product with Uploaded Images**
   Future<void> createProduct(Emitter<ProductState> emit) async {
+    if (state.imageFiles.isEmpty) return;
+
+    List<String> urls = [];
+
     try {
+      emit(state.copyWith(isLoading: true));
+
+      for (XFile file in state.imageFiles) {
+        File imageFile = File(file.path);
+        String fileName = DateTime.now().microsecondsSinceEpoch.toString();
+        Reference storageRef =
+            FirebaseStorage.instance.ref().child("images/$fileName.jpg");
+
+        UploadTask uploadTask = storageRef.putFile(imageFile);
+        TaskSnapshot snapshot = await uploadTask;
+        String url = await snapshot.ref.getDownloadURL();
+
+        if (url.isEmpty) {
+          throw Exception("Image upload failed, no URL returned.");
+        }
+
+        urls.add(url);
+      }
+
+      if (urls.isEmpty) {
+        throw Exception("Could not upload any images");
+      }
+
+      emit(state.copyWith(isLoading: false, imageUploadedUrls: urls));
+
       List<String> productRequiredFields = [
         "name",
         "brand",
@@ -178,22 +211,45 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
       if (missingProductField.isNotEmpty) {
         emit(state.copyWith(
             error: "Fields are required ${missingProductField.join(",")}"));
+        return;
       }
 
-      Product? product = await fireStore.create(Product.fromMap(productMap));
+      Map<String, dynamic> productDataToUpload = {
+        ...productMap,
+        "images": state.imageUploadedUrls
+      };
 
-      if (product?.id == null || product?.id == "") {
+      Product? product =
+          await productDb.create(Product.fromMap(productDataToUpload));
+
+      if (product?.id != null || product?.id != "") {
         Map<String, dynamic> inventoryMap = {
-          "productid": product?.id,
-          "sellingunit": state.sellingUnit,
-          "quantityinunit": state.quantityInBox,
-          "quantityavailable": state.quantity,
+          "productId": product?.id,
+          "unit": state.sellingUnit,
+          "quantityInBox": state.quantityInBox,
+          "quantityAvailable": state.quantity,
           "mrp": state.mrp,
-          "sellingprice": state.sellingPrice,
-          "discountavailable": state.discount
+          "sellingPrice": state.sellingPrice,
+          "discount": state.discount
         };
+
+        List<String> inventoryMissingFields = inventoryMap.entries
+            .where((entry) => (entry.value == null || entry.value == ""))
+            .map((item) => item.key)
+            .toList();
+        if (inventoryMissingFields.isEmpty) {
+          emit(state.copyWith(
+              error:
+                  "Inventory fiels ${inventoryMissingFields.join(",")} missing"));
+          return;
+        }
+
+        Inventory? inventory =
+            await inventoryDb.create(Inventory.fromMap(inventoryMap));
       }
-    } catch (e) {}
+    } catch (e) {
+      print("Error occured in product creation ==> ${e.toString()}");
+    }
   }
 
   void addDescription(Emitter<ProductState> emit, String description) {
