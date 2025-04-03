@@ -1,7 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart';
 import 'package:grocery_app/blocs/categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
+import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
+import 'package:grocery_app/database_service.dart/category/firestore_category_service.dart';
+import 'package:grocery_app/pages/select_category/select_category.dart';
 import 'package:grocery_app/widgets/image_picker.dart';
 import 'package:grocery_app/widgets/overlay.dart';
 import '../../widgets/category_path_string.dart';
@@ -20,6 +24,10 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
   final TextEditingController _categoryParentController =
       TextEditingController();
   final TextEditingController _categoryPathController = TextEditingController();
+  final fireStore = FirebaseFirestore.instance;
+
+  FirestoreCategoryService categoryService = FirestoreCategoryService(
+      firestore: FirebaseFirestore.instance, collectionName: "categories");
   String parentPath = "";
   String pathString = "";
   final _formKey = GlobalKey<FormState>();
@@ -56,6 +64,7 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
 
   @override
   Widget build(BuildContext context) {
+    final categoryPathStringCubit = context.read<CreateCategoryBloc>();
     final screenWidth = ScreenUtils.getScreenWidth(context);
     final screenHeight = ScreenUtils.getScreenHeight(context);
     final sizedBoxSpacing = screenHeight * 0.020;
@@ -112,11 +121,22 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
                         Text("Select Parent Category"),
                         IconButton(
                           onPressed: () {
-                            context
-                                .read<CategoryParentDialogCubit>()
-                                .fetchCategories();
-                            categoryParentSelectionDialog(
-                                context, screenWidth, screenHeight, setParent);
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider(
+                                      create: (context) =>
+                                          FetchCategoryBloc(categoryService)
+                                            ..add(FetchCategories()),
+                                    ),
+                                    BlocProvider.value(
+                                        value: categoryPathStringCubit),
+                                  ],
+                                  child: SelectCategory(),
+                                ),
+                              ),
+                            );
                           },
                           icon: Icon(Icons.arrow_drop_down),
                         )

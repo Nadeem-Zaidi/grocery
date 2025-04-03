@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/categories/category_update/category_update_bloc.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import 'package:grocery_app/pages/category_pages/category_update_page.dart';
+import 'package:grocery_app/pages/category_pages/create_category_page.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../blocs/categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
@@ -123,7 +124,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to create category page
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                create: (context) => CreateCategoryBloc(
+                  dbService: FirestoreCategoryService(
+                      firestore: FirebaseFirestore.instance,
+                      collectionName: "categories"),
+                ),
+                child: CreateCategorypage(),
+              ),
+            ),
+          );
         },
         child: const Icon(Icons.add),
       ),

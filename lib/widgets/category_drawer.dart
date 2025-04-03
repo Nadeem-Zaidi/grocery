@@ -33,21 +33,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
           ),
           InkWell(
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => MultiBlocProvider(
-                    providers: [
-                      BlocProvider<CategoryParentDialogCubit>(
-                          create: (context) => CategoryParentDialogCubit(
-                              dbService: categoryService)),
-                      BlocProvider(
-                          create: (context) =>
-                              CreateCategoryBloc(dbService: categoryService))
-                    ],
-                    child: const CreateCategorypage(),
-                  ),
-                ),
-              );
+              Navigator.of(context).pushNamed("/createcategory");
             },
             child: const ListTile(
               leading: Icon(Icons.category),
@@ -58,9 +44,23 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (context) => FetchCategoryBloc(categoryService)
-                      ..add(FetchCategories()),
+                  builder: (context) => MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                        create: (context) => FetchCategoryBloc(
+                          FirestoreCategoryService(
+                              firestore: FirebaseFirestore.instance,
+                              collectionName: "categories"),
+                        )..add(FetchCategories()),
+                      ),
+                      BlocProvider(
+                        create: (context) => CreateCategoryBloc(
+                          dbService: FirestoreCategoryService(
+                              firestore: FirebaseFirestore.instance,
+                              collectionName: "categories"),
+                        ),
+                      )
+                    ],
                     child: CategoriesPage(),
                   ),
                 ),

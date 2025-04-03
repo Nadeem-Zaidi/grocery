@@ -8,7 +8,7 @@ import 'package:grocery_app/database_service.dart/category/firestore_category_se
 import '../models/category.dart';
 
 Future<void> categoryParentSelectionDialog(
-    BuildContext context, double width, double height, Function parentData) {
+    BuildContext context, double width, double height) {
   print("running categoryParentSelectionDialog");
   final categoryPathStringCubit = context.read<CreateCategoryBloc>();
   final categoryParentDialogCubit = context.read<CategoryParentDialogCubit>();
@@ -42,7 +42,6 @@ Future<void> categoryParentSelectionDialog(
                       itemBuilder: (context, index) {
                         return GestureDetector(
                           onTap: () {
-                            parentData();
                             context.read<CreateCategoryBloc>().add(
                                   Setpath(
                                       fixed: categories[index].path ?? "",

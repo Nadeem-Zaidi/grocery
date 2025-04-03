@@ -10,6 +10,7 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
   String collectionName;
   FirestoreCategoryService(
       {required this.firestore, required this.collectionName});
+
   @override
   Future<(List<Category>, DocumentSnapshot?)> getAll(int limit,
       [DocumentSnapshot? lastDocument]) async {
@@ -165,7 +166,6 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
     try {
       Query query = queryBuilder(firestore.collection(collectionName));
       QuerySnapshot querySnapshot = await query.get();
-      print(querySnapshot.docs);
 
       documents = querySnapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>? ?? {};

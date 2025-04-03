@@ -12,10 +12,10 @@ class CategoryStringpath extends StatefulWidget {
 class _CategoryStringpathState extends State<CategoryStringpath> {
   @override
   Widget build(BuildContext context) {
-    print("Runnning CategoryStringPathString");
     return BlocBuilder<CreateCategoryBloc, CreateCategoryState>(
         builder: (context, state) {
       if (state.path != "") {
+        print("running here dude");
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

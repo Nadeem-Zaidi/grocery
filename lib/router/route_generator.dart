@@ -10,6 +10,7 @@ import 'package:grocery_app/pages/category_pages/category_update_page.dart';
 import 'package:grocery_app/pages/category_pages/create_category_page.dart';
 import 'package:grocery_app/pages/product_pages/create_product.dart';
 import 'package:grocery_app/pages/product_pages/multi_image_file_upload.dart';
+import 'package:grocery_app/pages/product_pages/product_list.dart';
 
 import '../authentication/presentation/app.dart';
 import '../database_service.dart/category/firestore_category_service.dart';
@@ -55,6 +56,9 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => const CreateCategorypage());
       case '/categories':
         return MaterialPageRoute(builder: (_) => const CategoriesPage());
+
+      case '/productlist':
+        return MaterialPageRoute(builder: (_) => const ProductList());
 
       // case '/category_update':
       //   return MaterialPageRoute(builder: (_) => const CategoryUpdatePage());

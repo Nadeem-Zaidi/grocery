@@ -2,7 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
+import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
+import 'package:grocery_app/database_service.dart/category/firestore_category_service.dart';
 import 'package:grocery_app/database_service.dart/dashboard/firebase_dashboard_service.dart';
+import 'package:grocery_app/pages/product_pages/product_list.dart';
 import 'package:grocery_app/widgets/category_drawer.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -13,9 +16,11 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+// 1. Change your state class to be a TickerProviderStateMixin
+class _HomeState extends State<Home> with TickerProviderStateMixin {
   List<Map<String, dynamic>> content = [];
   bool _isLoading = true;
+  late TabController _tabController; // Add TabController
 
   Future<void> fetchData() async {
     try {
@@ -39,65 +44,18 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     fetchData();
+
+    _tabController =
+        TabController(length: 6, vsync: this); // Initialize controller
   }
 
-  Widget _buildShimmerGrid() {
-    return SliverGrid(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        childAspectRatio: 2 / 3,
-      ),
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          return Shimmer.fromColors(
-            baseColor: Colors.grey[300]!,
-            highlightColor: Colors.grey[100]!,
-            child: Card(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: AspectRatio(
-                      aspectRatio: 1.2,
-                      child: Container(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      height: 16,
-                      width: double.infinity,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-        childCount: 8, // Show 8 shimmer items
-      ),
-    );
+  @override
+  void dispose() {
+    _tabController.dispose(); // Dispose controller
+    super.dispose();
   }
 
-  Widget _buildShimmerCategoryHeader() {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
-          child: Container(
-            height: 24,
-            width: 150,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-  }
+  // ... keep your existing methods ...
 
   @override
   Widget build(BuildContext context) {
@@ -111,162 +69,230 @@ class _HomeState extends State<Home> {
         ),
       ],
       child: Scaffold(
-        body: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              floating: true,
-              title: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Delivery in',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    '7 minutes',
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        "Home-",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            "Niknampur Road",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.normal),
+        body: DefaultTabController(
+          length: 6, // Number of tabs
+          initialIndex: 0,
+          child: NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                SliverAppBar(
+                  expandedHeight: 250,
+                  toolbarHeight: 100,
+                  floating: true,
+                  pinned: true,
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(150.0),
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 60,
+                          padding: EdgeInsets.all(5),
+                          child: TextField(
+                            decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white,
+                                prefix: Icon(
+                                  Icons.search,
+                                  color: Colors.purple,
+                                )),
                           ),
-                          Icon(
-                            Icons.arrow_drop_down,
-                            color: Colors.black,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              pinned: true,
-              toolbarHeight: 100,
-              snap: true,
-              backgroundColor: Theme.of(context).primaryColor,
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(60.0),
-                child: Container(
-                  padding: const EdgeInsets.all(5),
-                  margin: const EdgeInsets.only(bottom: 5),
-                  height: 55,
-                  child: TextField(
-                    textAlign: TextAlign.justify,
-                    decoration: InputDecoration(
-                      hintText: "Search",
-                      labelStyle: const TextStyle(fontSize: 18),
-                      prefixIcon: const Icon(Icons.search),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          width: 3,
-                          color: Colors.white,
                         ),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(
-                          width: 3,
-                          color: Colors.white,
+                        TabBar(
+                          labelColor: Colors.white,
+                          controller: _tabController,
+                          isScrollable: true,
+
+                          // Enables horizontal scrolling
+                          tabs: [
+                            Tab(icon: Icon(Icons.home), text: 'Home'),
+                            Tab(icon: Icon(Icons.favorite), text: 'Favorites'),
+                            Tab(icon: Icon(Icons.person), text: 'Profile'),
+                            Tab(icon: Icon(Icons.shopping_cart), text: 'Cart'),
+                            Tab(icon: Icon(Icons.settings), text: 'Settings'),
+                            Tab(icon: Icon(Icons.info), text: 'About'),
+                          ],
                         ),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
+                      ],
                     ),
                   ),
                 ),
-              ),
-            ),
-            if (_isLoading) ...[
-              _buildShimmerCategoryHeader(),
-              _buildShimmerGrid(),
-              _buildShimmerCategoryHeader(),
-              _buildShimmerGrid(),
-            ],
-            if (!_isLoading && content.isNotEmpty)
-              ...content
-                  .map((category) => [
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              category.keys.first,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SliverGrid(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            childAspectRatio: 2 / 3,
-                          ),
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              var categoryName = category.keys.first;
-                              var items = category[categoryName];
-
-                              return Card(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: AspectRatio(
-                                        aspectRatio: 1.2,
-                                        child: items[index]['url'] != null &&
-                                                items[index]['url'].isNotEmpty
-                                            ? Image.network(
-                                                items[index]['url'],
-                                                fit: BoxFit.cover,
-                                                width: double.infinity,
-                                                errorBuilder: (context, error,
-                                                        stackTrace) =>
-                                                    const Icon(
-                                                        Icons.broken_image),
-                                              )
-                                            : Container(color: Colors.grey),
+              ];
+            },
+            body: TabBarView(
+              controller: _tabController,
+              children: [
+                CustomScrollView(
+                  slivers: [
+                    if (!_isLoading && content.isNotEmpty)
+                      ...content
+                          .map((category) => [
+                                SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      category.keys.first,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        items[index]['name'] ?? 'Unnamed',
-                                        style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
-                              );
-                            },
-                            childCount: category[category.keys.first].length,
-                          ),
-                        ),
-                      ])
-                  .expand((x) => x),
-          ],
+                                SliverGrid(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 4,
+                                    childAspectRatio: 2 / 3,
+                                  ),
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                      var categoryName = category.keys.first;
+                                      var items = category[categoryName];
+
+                                      return InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  MultiBlocProvider(
+                                                providers: [
+                                                  BlocProvider<
+                                                      FetchCategoryBloc>(
+                                                    create: (context) =>
+                                                        FetchCategoryBloc(
+                                                      FirestoreCategoryService(
+                                                        firestore:
+                                                            FirebaseFirestore
+                                                                .instance,
+                                                        collectionName:
+                                                            "categories",
+                                                      ),
+                                                    )..add(FetchCategoryChildren(
+                                                            items[index]
+                                                                ['id'])),
+                                                  ),
+                                                ],
+                                                child: ProductList(),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Card(
+                                          margin: EdgeInsets.all(5),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: AspectRatio(
+                                                  aspectRatio: 1.2,
+                                                  child: items[index]['url'] !=
+                                                              null &&
+                                                          items[index]['url']
+                                                              .isNotEmpty
+                                                      ? Image.network(
+                                                          items[index]['url'],
+                                                          fit: BoxFit.cover,
+                                                          width:
+                                                              double.infinity,
+                                                          errorBuilder: (context,
+                                                                  error,
+                                                                  stackTrace) =>
+                                                              const Icon(Icons
+                                                                  .broken_image),
+                                                        )
+                                                      : Container(
+                                                          color: Colors.grey),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Text(
+                                                  items[index]['name'] ??
+                                                      'Unnamed',
+                                                  style: const TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w500),
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    childCount:
+                                        category[category.keys.first].length,
+                                  ),
+                                ),
+                              ])
+                          .expand((x) => x),
+                  ],
+                ),
+                CustomScrollView(
+                  slivers: [
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return ListTile(
+                          title: Text("Home Content $index"),
+                        );
+                      }, childCount: 20),
+                    )
+                  ],
+                ),
+                // Content for Profile tab
+                CustomScrollView(
+                  slivers: [
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return ListTile(
+                          title: Text("Profile Content $index"),
+                        );
+                      }, childCount: 20),
+                    )
+                  ],
+                ),
+                CustomScrollView(
+                  slivers: [
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return ListTile(
+                          title: Text("Profile Content $index"),
+                        );
+                      }, childCount: 20),
+                    )
+                  ],
+                ),
+                CustomScrollView(
+                  slivers: [
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return ListTile(
+                          title: Text("Profile Content $index"),
+                        );
+                      }, childCount: 20),
+                    )
+                  ],
+                ),
+                CustomScrollView(
+                  slivers: [
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return ListTile(
+                          title: Text("Profile Content $index"),
+                        );
+                      }, childCount: 20),
+                    )
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
         drawer: const CategoryDrawer(),
       ),
