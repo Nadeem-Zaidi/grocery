@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
+import 'package:grocery_app/blocs/products/fetch_product/fetch_product_bloc.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../models/category.dart';
+import '../../models/product/product.dart';
 
 class ProductList extends StatefulWidget {
   const ProductList({super.key});
@@ -14,37 +17,15 @@ class ProductList extends StatefulWidget {
 class _ProductListState extends State<ProductList> {
   int _selectedCategoryIndex = 0;
 
-  final List<Product> _products = [
-    Product(
-      name: "Aashirvaad 10 kg",
-      price: 450,
-      imageUrl: "https://via.placeholder.com/300?text=Aashirvaad+10kg",
-    ),
-    Product(
-      name: "Aashirvaad 5 kg",
-      price: 250,
-      imageUrl: "https://via.placeholder.com/300?text=Aashirvaad+5kg",
-    ),
-    Product(
-      name: "Multigrain Atta 5 kg",
-      price: 300,
-      imageUrl: "https://via.placeholder.com/300?text=Multigrain+5kg",
-    ),
-    Product(
-      name: "Multigrain Atta 1 kg",
-      price: 70,
-      imageUrl: "https://via.placeholder.com/300?text=Multigrain+1kg",
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    print(context.read<FetchProductBloc>().state);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Atta, Rice & Dal"),
         actions: [
           IconButton(
-            onPressed: () => _showSearch(context),
+            onPressed: () {},
             icon: const Icon(Icons.search),
             tooltip: 'Search',
           ),
@@ -57,9 +38,6 @@ class _ProductListState extends State<ProductList> {
       ),
       body: Row(
         children: [
-          // Category Navigation Rail (more modern than a simple list)
-          // In your _ProductListState class, replace the BlocBuilder section with this:
-
           BlocBuilder<FetchCategoryBloc, FetchCategoryState>(
             builder: (context, state) {
               if (state.childrenCategories.isNotEmpty) {
@@ -168,7 +146,7 @@ class _ProductListState extends State<ProductList> {
                   ),
                 );
               }
-              return const SizedBox(width: 80); // Maintain consistent width
+              return Container(); // Maintain consistent width
             },
           ),
           // Vertical divider
@@ -177,7 +155,7 @@ class _ProductListState extends State<ProductList> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: _buildProductGrid(),
+              child: _buildProductGrid(context),
             ),
           ),
         ],
@@ -190,221 +168,205 @@ class _ProductListState extends State<ProductList> {
     );
   }
 
-  Widget _buildProductGrid() {
-    if (_products.isEmpty) {
-      return const Center(child: Text("No products available"));
-    }
-
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: _products.length,
-      itemBuilder: (context, index) {
-        final product = _products[index];
-        return Container(child: _buildProductCard(product));
-      },
-    );
-  }
-
-  Widget _buildProductCard(Product product) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => _showProductDetails(product),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Product Image with Aspect Ratio
-              // AspectRatio(
-              //   aspectRatio: 1,
-              //   child: ClipRRect(
-              //     borderRadius: BorderRadius.circular(8),
-              //     child: Image.network(
-              //       product.imageUrl,
-              //       fit: BoxFit.cover,
-              //       errorBuilder: (context, error, stackTrace) =>
-              //           const Icon(Icons.image_not_supported),
-              //     ),
-              //   ),
-              // ),
-              const SizedBox(height: 15),
-              // Product Name
-              Text(
-                product.name,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              // Product Price
-              Text(
-                "₹${product.price}",
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const Spacer(),
-              // Add to Cart Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+  Widget _buildProductGrid(BuildContext context) {
+    return BlocBuilder<FetchProductBloc, FetchProductState>(
+        builder: (context, state) {
+      if (state.products.isNotEmpty) {
+        List<Product> products = state.products;
+        int productCount = products.length;
+        return GridView.builder(
+            itemCount: productCount,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, childAspectRatio: 0.4),
+            itemBuilder: (context, index) {
+              return SizedBox(
+                height: 200,
+                child: Padding(
+                  padding: EdgeInsets.all(3),
+                  child: Card(
+                    margin: EdgeInsets.all(5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Stack(
+                          children: [
+                            AspectRatio(
+                              aspectRatio: 0.8,
+                              child: products[index].images[0] != null
+                                  ? Image.network(
+                                      products[index].images[0],
+                                      fit: BoxFit.fill,
+                                      width: double.infinity,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              const Icon(Icons.broken_image),
+                                    )
+                                  : Container(color: Colors.grey),
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                height: 30,
+                                width: 40,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                        color: Theme.of(context).primaryColor,
+                                        width: 1),
+                                    borderRadius: BorderRadius.circular(5)),
+                                child: Text(
+                                  "ADD",
+                                  style: TextStyle(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          width: double.infinity,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Flexible(
+                                flex: 1,
+                                child: Container(
+                                  padding: EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  child: Text(
+                                    " 5kg ",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12),
+                                  ),
+                                ),
+                              ),
+                              Flexible(
+                                flex: 3,
+                                child: Container(
+                                  padding: EdgeInsets.all(2),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  child: Text(
+                                    "Wheat Atta",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            "Ashirvad Shudh Chakki Atta(100% Atta 0% Wheat)(5kg)",
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.timelapse,
+                              size: 15,
+                              color: Theme.of(context)
+                                  .primaryColor
+                                  .withValues(alpha: 0.7),
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text("18 MINS")
+                          ],
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              "9%",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).primaryColor),
+                            ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text(
+                              "OFF",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).primaryColor),
+                            )
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Icon(Icons.currency_rupee),
+                            Text(
+                              "200",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                            SizedBox(width: 7),
+                            Row(
+                              children: [
+                                Text(
+                                  "MRP",
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                                SizedBox(width: 3),
+                                Text(
+                                  "250",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        )
+                      ],
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
-                  onPressed: () => _addToCart(product),
-                  child: const Text("ADD TO CART"),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+              );
+            });
+      }
 
-  void _showSearch(BuildContext context) {
-    showSearch(
-      context: context,
-      delegate: ProductSearchDelegate(_products),
-    );
-  }
-
-  void _showProductDetails(Product product) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return ProductDetailsSheet(product: product);
-      },
-    );
-  }
-
-  void _addToCart(Product product) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Added ${product.name} to cart"),
-        action: SnackBarAction(
-          label: "UNDO",
-          onPressed: () {},
-        ),
-      ),
-    );
+      return Container();
+    });
   }
 
   void _goToCart(BuildContext context) {
     // Navigation to cart screen would go here
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Cart screen would open here")),
-    );
-  }
-}
-
-class Product {
-  final String name;
-  final double price;
-  final String imageUrl;
-
-  Product({
-    required this.name,
-    required this.price,
-    required this.imageUrl,
-  });
-}
-
-// Search Delegate
-class ProductSearchDelegate extends SearchDelegate {
-  final List<Product> products;
-
-  ProductSearchDelegate(this.products);
-
-  @override
-  List<Widget> buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear),
-        onPressed: () {
-          query = '';
-        },
-      )
-    ];
-  }
-
-  @override
-  Widget buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null);
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return _buildSearchResults();
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return _buildSearchResults();
-  }
-
-  Widget _buildSearchResults() {
-    final results = query.isEmpty
-        ? products
-        : products
-            .where((p) => p.name.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-
-    return ListView.builder(
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        final product = results[index];
-        return ListTile(
-          leading: Image.network(product.imageUrl,
-              width: 50, height: 50, fit: BoxFit.cover),
-          title: Text(product.name),
-          subtitle: Text("₹${product.price}"),
-          onTap: () {
-            close(context, product);
-          },
-        );
-      },
-    );
-  }
-}
-
-// Product Details Sheet
-class ProductDetailsSheet extends StatelessWidget {
-  final Product product;
-
-  const ProductDetailsSheet({super.key, required this.product});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [],
-      ),
     );
   }
 }

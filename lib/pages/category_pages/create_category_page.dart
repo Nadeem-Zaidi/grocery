@@ -8,6 +8,7 @@ import 'package:grocery_app/database_service.dart/category/firestore_category_se
 import 'package:grocery_app/pages/select_category/select_category.dart';
 import 'package:grocery_app/widgets/image_picker.dart';
 import 'package:grocery_app/widgets/overlay.dart';
+import '../../models/category.dart';
 import '../../widgets/category_path_string.dart';
 import '../../widgets/category_parent_selection_dialog.dart';
 import '../../utils/screen_utils.dart';
@@ -45,14 +46,14 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
   String current = "";
 
   void _onSave() async {
-    var state = context.read<CreateCategoryBloc>().state;
-    context.read<CreateCategoryBloc>().add(CreateCategory());
+    // var state = context.read<CreateCategoryBloc>().state;
+    // context.read<CreateCategoryBloc>().add(CreateCategory());
 
     // if (_formKey.currentState!.validate()) {
     //   var categoryName = _categoryNameController.text;
 
     //   Map<String, dynamic> dataToUpdate = {
-    //     "name": categoryName,
+    //     "name": ca tegoryName,
     //     "parent": categoryName == "self" ? "",
     //     "path":
     //         categoryName == "self" ? "/$categoryName" : stateData.categoryPath,
@@ -62,9 +63,16 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
     // }
   }
 
+  void testingHurray(Category? category) {
+    context
+        .read<CreateCategoryBloc>()
+        .add(Setpath(fixed: category!.path ?? "", parentId: category.id!));
+  }
+
   @override
   Widget build(BuildContext context) {
     final categoryPathStringCubit = context.read<CreateCategoryBloc>();
+
     final screenWidth = ScreenUtils.getScreenWidth(context);
     final screenHeight = ScreenUtils.getScreenHeight(context);
     final sizedBoxSpacing = screenHeight * 0.020;
@@ -121,6 +129,8 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
                         Text("Select Parent Category"),
                         IconButton(
                           onPressed: () {
+                            final createCategoryBloc =
+                                context.read<CreateCategoryBloc>();
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) => MultiBlocProvider(
@@ -133,7 +143,11 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
                                     BlocProvider.value(
                                         value: categoryPathStringCubit),
                                   ],
-                                  child: SelectCategory(),
+                                  child: SelectCategory(
+                                    onCategorySelect: (category) {
+                                      testingHurray(category);
+                                    },
+                                  ),
                                 ),
                               ),
                             );

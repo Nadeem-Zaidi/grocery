@@ -1,70 +1,102 @@
 part of 'product_bloc.dart';
 
 @immutable
-class ProductState {
+class ProductState extends Equatable {
   final String? productName;
   final String? productBrand;
   final String? productCategory;
   final String? sellingUnit;
-  final String? quantityInBox;
-  String? quantity;
-  final String? mrp;
-  final String? sellingPrice;
-  String? discount;
+  final int? quantityInBox;
+  final int? quantity;
+  final double? mrp;
+  final double? sellingPrice;
+  final double? discount;
   final List<Product> products;
   final List<String> imageUrls;
   final List<XFile> imageFiles;
   final List<String> imageUploadedUrls;
   final List<String> description;
+  final String? summary;
+  final String? keyFeatures;
   final bool isLoading;
   final String? error;
   final bool showQuantityInBox;
   final String? user;
+  final String? productNameInputError;
+  final String? brandInputError;
+  final String? sellingUnitInputError;
+  final String? mrpInputError;
+  final String? sellingPriceInputError;
+  final String? discountInputError;
+  final String? availableQuantityError;
+  final String? descriptionInputError;
+  final String? quantityInBoxInputError;
 
-  ProductState(
-      {this.productName,
-      this.productBrand,
-      this.productCategory,
-      this.sellingUnit,
-      this.quantityInBox,
-      this.quantity,
-      this.mrp,
-      this.sellingPrice,
-      this.discount,
-      this.products = const [],
-      this.imageUrls = const [],
-      this.imageFiles = const [],
-      this.imageUploadedUrls = const [],
-      this.description = const [],
-      this.isLoading = false,
-      this.error,
-      this.showQuantityInBox = false,
-      this.user});
+  const ProductState({
+    this.productName,
+    this.productBrand,
+    this.productCategory,
+    this.sellingUnit,
+    this.quantityInBox,
+    this.quantity,
+    this.mrp,
+    this.sellingPrice,
+    this.discount,
+    this.products = const [],
+    this.imageUrls = const [],
+    this.imageFiles = const [],
+    this.imageUploadedUrls = const [],
+    this.description = const [],
+    this.summary,
+    this.keyFeatures,
+    this.isLoading = false,
+    this.error,
+    this.showQuantityInBox = false,
+    this.user,
+    this.productNameInputError,
+    this.brandInputError,
+    this.sellingUnitInputError,
+    this.mrpInputError,
+    this.sellingPriceInputError,
+    this.discountInputError,
+    this.availableQuantityError,
+    this.descriptionInputError,
+    this.quantityInBoxInputError,
+  });
 
-  /// Factory constructor for initial state
-  factory ProductState.initial() {
-    return ProductState();
-  }
+  factory ProductState.initial() => const ProductState();
 
-  ProductState copyWith(
-      {String? productName,
-      String? productBrand,
-      String? productCategory,
-      String? sellingUnit,
-      String? quantityInBox,
-      String? quantity,
-      String? mrp,
-      String? sellingPrice,
-      String? discount,
-      List<Product>? products,
-      List<String>? imageUrls,
-      List<XFile>? imageFiles,
-      List<String>? imageUploadedUrls,
-      List<String>? description,
-      bool? isLoading,
-      String? error,
-      bool? showQuantityInBox,
-      String? user}) {
+  ProductState copyWith({
+    String? productName,
+    String? productBrand,
+    String? productCategory,
+    String? sellingUnit,
+    int? quantityInBox,
+    int? quantity,
+    double? mrp,
+    double? sellingPrice,
+    double? discount,
+    List<Product>? products,
+    List<String>? imageUrls,
+    List<XFile>? imageFiles,
+    List<String>? imageUploadedUrls,
+    List<String>? description,
+    String? summary,
+    String? keyFeatures,
+    bool? isLoading,
+    String? error,
+    bool? showQuantityInBox,
+    String? user,
+    String? productNameInputError,
+    String? brandInputError,
+    String? sellingUnitInputError,
+    String? mrpInputError,
+    String? sellingPriceInputError,
+    String? discountInputError,
+    String? availableQuantityError,
+    String? descriptionInputError,
+    String? quantityInBoxInputError,
+  }) {
     return ProductState(
       productName: productName ?? this.productName,
       productBrand: productBrand ?? this.productBrand,
@@ -75,67 +107,67 @@ class ProductState {
       mrp: mrp ?? this.mrp,
       sellingPrice: sellingPrice ?? this.sellingPrice,
       discount: discount ?? this.discount,
-      products: products ?? List.unmodifiable(this.products),
-      imageUrls: imageUrls ?? List.unmodifiable(this.imageUrls),
-      imageFiles: imageFiles ?? List.unmodifiable(this.imageFiles),
-      imageUploadedUrls:
-          imageUploadedUrls ?? List.unmodifiable(this.imageUploadedUrls),
-      description: description ?? List.unmodifiable(this.description),
+      products: products ?? this.products,
+      imageUrls: imageUrls ?? this.imageUrls,
+      imageFiles: imageFiles ?? this.imageFiles,
+      imageUploadedUrls: imageUploadedUrls ?? this.imageUploadedUrls,
+      description: description ?? this.description,
+      summary: summary ?? this.keyFeatures,
+      keyFeatures: keyFeatures ?? this.keyFeatures,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
       showQuantityInBox: showQuantityInBox ?? this.showQuantityInBox,
       user: user ?? this.user,
+      productNameInputError:
+          productNameInputError ?? this.productNameInputError,
+      brandInputError: brandInputError ?? this.brandInputError,
+      sellingUnitInputError:
+          sellingUnitInputError ?? this.sellingUnitInputError,
+      mrpInputError: mrpInputError ?? this.mrpInputError,
+      sellingPriceInputError:
+          sellingPriceInputError ?? this.sellingPriceInputError,
+      discountInputError: discountInputError ?? this.discountInputError,
+      availableQuantityError:
+          availableQuantityError ?? this.availableQuantityError,
+      descriptionInputError:
+          descriptionInputError ?? this.descriptionInputError,
+      quantityInBoxInputError:
+          quantityInBoxInputError ?? this.quantityInBoxInputError,
     );
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is ProductState &&
-        other.productName == productName &&
-        other.productBrand == productBrand &&
-        other.productCategory == productCategory &&
-        other.sellingUnit == sellingUnit &&
-        other.quantityInBox == quantityInBox &&
-        other.mrp == mrp &&
-        other.sellingPrice == sellingPrice &&
-        const DeepCollectionEquality().equals(other.products, products) &&
-        const DeepCollectionEquality().equals(other.imageUrls, imageUrls) &&
-        const DeepCollectionEquality().equals(other.imageFiles, imageFiles) &&
-        const DeepCollectionEquality()
-            .equals(other.imageUploadedUrls, imageUploadedUrls) &&
-        const DeepCollectionEquality().equals(other.description, description) &&
-        other.isLoading == isLoading &&
-        other.error == error &&
-        other.showQuantityInBox == showQuantityInBox &&
-        other.user == user &&
-        other.discount == discount &&
-        other.quantity == quantity;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(
+  List<Object?> get props => [
         productName,
         productBrand,
         productCategory,
         sellingUnit,
         quantityInBox,
+        quantity,
         mrp,
         sellingPrice,
-        const DeepCollectionEquality().hash(products),
-        const DeepCollectionEquality().hash(imageUrls),
-        const DeepCollectionEquality().hash(imageFiles),
-        const DeepCollectionEquality().hash(imageUploadedUrls),
-        const DeepCollectionEquality().hash(description),
+        discount,
+        products,
+        imageUrls,
+        imageFiles.map((f) => f.path).toList(),
+        imageUploadedUrls,
+        description,
+        summary,
+        keyFeatures,
         isLoading,
         error,
         showQuantityInBox,
         user,
-        discount,
-        quantity);
-  }
+        productNameInputError,
+        brandInputError,
+        sellingUnitInputError,
+        mrpInputError,
+        sellingPriceInputError,
+        discountInputError,
+        availableQuantityError,
+        descriptionInputError,
+        quantityInBoxInputError,
+      ];
 
   @override
   String toString() {
@@ -145,19 +177,30 @@ class ProductState {
         'productCategory: $productCategory, '
         'sellingUnit: $sellingUnit, '
         'quantityInBox: $quantityInBox, '
+        'quantity: $quantity, '
         'mrp: $mrp, '
         'sellingPrice: $sellingPrice, '
-        'products: ${products.length}, '
-        'imageUrls: ${imageUrls.length}, '
-        'imageFiles: ${imageFiles.length}, '
-        'imageUploadedUrls: ${imageUploadedUrls.length}, '
+        'discount: $discount, '
+        'products: ${products.length} items, '
+        'imageUrls: ${imageUrls.length} urls, '
+        'imageFiles: ${imageFiles.length} files, '
+        'imageUploadedUrls: ${imageUploadedUrls.length} urls, '
         'description: $description, '
+        'summary: $summary, '
+        'keyFeatures: $keyFeatures'
         'isLoading: $isLoading, '
         'error: $error, '
-        'showQuantityInBox: $showQuantityInBox'
-        'user:$user '
-        'quantity:$quantity '
-        'discount:$discount '
+        'showQuantityInBox: $showQuantityInBox, '
+        'user: $user, '
+        'productNameInputError: $productNameInputError, '
+        'brandInputError: $brandInputError, '
+        'sellingUnitInputError: $sellingUnitInputError, '
+        'mrpInputError: $mrpInputError, '
+        'sellingPriceInputError: $sellingPriceInputError, '
+        'discountInputError: $discountInputError, '
+        'availableQuantityError: $availableQuantityError, '
+        'descriptionInputError: $descriptionInputError, '
+        'quantityInBoxInputError: $quantityInBoxInputError'
         ')';
   }
 }

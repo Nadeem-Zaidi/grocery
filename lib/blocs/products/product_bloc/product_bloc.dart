@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:grocery_app/database_service.dart/inventory/firebase_inventory_service.dart';
 import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
@@ -70,6 +72,18 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           setQuantity(emit, q);
         case ProductCreate():
           await createProduct(emit);
+        case ClearMrpError():
+          _clearMrpError(emit);
+
+        case SetSummary(summaryText: String summary):
+          _setSummary(emit, summary);
+
+        case SetKeyFeatures(keyFeatureText: String keyFeatures):
+          _setKeyFeatures(emit, keyFeatures);
+
+        case SetKeyFeatures():
+          // TODO: Handle this case.
+          throw UnimplementedError();
       }
     });
   }
@@ -194,7 +208,9 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         "name",
         "brand",
         "category",
-        "description"
+        "description",
+        "summary",
+        "keyfeatures"
       ];
 
       Map<String, dynamic> productMap = {
@@ -202,6 +218,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         "brand": state.productBrand,
         "category": state.productCategory,
         "description": state.description,
+        "summary": state.summary,
+        "keyfeatures": state.keyFeatures
       };
 
       List<String> missingProductField = productMap.entries
@@ -237,7 +255,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
             .where((entry) => (entry.value == null || entry.value == ""))
             .map((item) => item.key)
             .toList();
-        if (inventoryMissingFields.isEmpty) {
+        if (inventoryMissingFields.isNotEmpty) {
           emit(state.copyWith(
               error:
                   "Inventory fiels ${inventoryMissingFields.join(",")} missing"));
@@ -246,9 +264,13 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
         Inventory? inventory =
             await inventoryDb.create(Inventory.fromMap(inventoryMap));
+
+        emit(state.copyWith(isLoading: false));
       }
     } catch (e) {
       print("Error occured in product creation ==> ${e.toString()}");
+      emit(
+          state.copyWith(isLoading: false, error: "Error in creating product"));
     }
   }
 
@@ -299,15 +321,48 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }
 
   void quantityBox(Emitter<ProductState> emit, String value) {
-    emit(state.copyWith(quantityInBox: value));
+    int? q = int.tryParse(value);
+    if (q == null) {
+      emit(state.copyWith(
+          quantityInBoxInputError: "Invalid input,,expects Int"));
+    }
+    emit(state.copyWith(quantityInBox: q, quantityInBoxInputError: null));
   }
 
   void productMrp(Emitter<ProductState> emit, String value) {
-    emit(state.copyWith(mrp: value));
+    if (value.isEmpty) {
+      emit(state.copyWith(mrpInputError: "MRP cannot be empty"));
+      return;
+    }
+
+    final double? mrp = double.tryParse(value);
+
+    if (mrp == null) {
+      emit(state.copyWith(
+          mrpInputError: "Invalid input. Please enter a valid number"));
+    }
+
+    if (mrp == null) {
+      emit(state.copyWith(
+          mrpInputError: "Invalid input. Please enter a valid number"));
+    } else if (mrp <= 0) {
+      emit(state.copyWith(mrpInputError: "MRP must be greater than 0"));
+    } else {
+      emit(state.copyWith(
+        mrp: mrp,
+        mrpInputError: "", // Clear any previous error
+      ));
+    }
   }
 
   void productSP(Emitter<ProductState> emit, String value) {
-    emit(state.copyWith(sellingPrice: value));
+    double? sellingPrice = double.tryParse(value);
+    if (sellingPrice == null) {
+      emit(state.copyWith(
+          sellingPriceInputError: "Invalid input,expects number"));
+    }
+    emit(state.copyWith(
+        sellingPrice: sellingPrice, sellingPriceInputError: null));
   }
 
   void setCategory(Emitter<ProductState> emit, String value) {
@@ -315,10 +370,30 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   }
 
   void setDiscount(Emitter<ProductState> emit, String value) {
-    emit(state.copyWith(discount: value));
+    double? discount = double.tryParse(value);
+    if (discount == null) {
+      emit(state.copyWith(discountInputError: "Invalid input"));
+    }
+    emit(state.copyWith(discount: discount, discountInputError: null));
   }
 
   void setQuantity(Emitter<ProductState> emit, String value) {
-    emit(state.copyWith(quantity: value));
+    int? quantity = int.tryParse(value);
+    if (quantity == null) {
+      emit(state.copyWith(availableQuantityError: "Invalid input"));
+    }
+    emit(state.copyWith(quantity: quantity, availableQuantityError: null));
+  }
+
+  void _clearMrpError(Emitter<ProductState> emit) {
+    emit(state.copyWith(mrpInputError: null));
+  }
+
+  void _setSummary(Emitter<ProductState> emit, String summary) {
+    emit(state.copyWith(summary: summary));
+  }
+
+  void _setKeyFeatures(Emitter<ProductState> emit, String keyFeatures) {
+    emit(state.copyWith(keyFeatures: keyFeatures));
   }
 }

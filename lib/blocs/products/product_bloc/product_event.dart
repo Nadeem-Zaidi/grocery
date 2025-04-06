@@ -76,6 +76,18 @@ class SetQuantity extends ProductEvent {
   SetQuantity(this.quantity);
 }
 
+class SetSummary extends ProductEvent {
+  String summaryText;
+  SetSummary(this.summaryText);
+}
+
+class SetKeyFeatures extends ProductEvent {
+  String keyFeatureText;
+  SetKeyFeatures(this.keyFeatureText);
+}
+
+class ClearMrpError extends ProductEvent {}
+
 class ShowQuantityInBoxField extends ProductEvent {}
 
 class ProductCreate extends ProductEvent {}

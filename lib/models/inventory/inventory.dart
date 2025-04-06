@@ -7,11 +7,11 @@ class Inventory {
   final String? productId;
   final String? sku;
   final String? unit;
-  final String? quantityInBox;
-  final String? quantityAvailable;
-  final String? mrp;
-  final String? sellingPrice;
-  final String? discount;
+  final int? quantityInBox;
+  final int? quantityAvailable;
+  final double? mrp;
+  final double? sellingPrice;
+  final double? discount;
 
   Inventory({
     this.id,
@@ -31,11 +31,11 @@ class Inventory {
     String? productId,
     String? sku,
     String? unit,
-    String? quantityInBox,
-    String? quantityAvailable,
-    String? mrp,
-    String? sellingPrice,
-    String? discount,
+    int? quantityInBox,
+    int? quantityAvailable,
+    double? mrp,
+    double? sellingPrice,
+    double? discount,
   }) {
     return Inventory(
       id: id ?? this.id,
@@ -73,11 +73,19 @@ class Inventory {
       productId: map['productId']?.toString(),
       sku: map['sku']?.toString(),
       unit: map['unit']?.toString(),
-      quantityInBox: map['quantityInBox']?.toString(),
-      quantityAvailable: map['quantityAvailable']?.toString(),
-      mrp: map['mrp']?.toString(),
-      sellingPrice: map['sellingPrice']?.toString(),
-      discount: map['discount']?.toString(),
+      quantityInBox: map['quantityInBox'] != null
+          ? int.tryParse(map['quantityInBox'].toString())
+          : null,
+      quantityAvailable: map['quantityAvailable'] != null
+          ? int.tryParse(map['quantityAvailable'].toString())
+          : null,
+      mrp: map['mrp'] != null ? double.tryParse(map['mrp'].toString()) : null,
+      sellingPrice: map['sellingPrice'] != null
+          ? double.tryParse(map['sellingPrice'].toString())
+          : null,
+      discount: map['discount'] != null
+          ? double.tryParse(map['discount'].toString())
+          : null,
     );
   }
 

@@ -7,7 +7,11 @@ import '../../blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import '../../models/category.dart';
 
 class SelectCategory extends StatefulWidget {
-  const SelectCategory({super.key});
+  final Function(Category) onCategorySelect;
+  const SelectCategory({
+    super.key,
+    required this.onCategorySelect,
+  });
 
   @override
   State<SelectCategory> createState() => _SelectCategoryState();
@@ -199,10 +203,7 @@ class _SelectCategoryState extends State<SelectCategory> {
         title: Text(category.name!),
         subtitle: Text(category.path!),
         onTap: () {
-          context.read<CreateCategoryBloc>().add(
-                Setpath(
-                    fixed: category.path ?? "", parentId: category.id ?? ""),
-              );
+          widget.onCategorySelect(category);
           Navigator.of(context).pop();
         },
       ),
