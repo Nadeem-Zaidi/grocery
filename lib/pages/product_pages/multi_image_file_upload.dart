@@ -13,10 +13,10 @@ class MultiImageUploadScreen extends StatefulWidget {
 
 class _MultiImageUploadScreenState extends State<MultiImageUploadScreen> {
   final ImagePicker _picker = ImagePicker();
-  List<XFile> _imageFiles = [];
+  final List<XFile> _imageFiles = [];
 
   Future<void> _pickImages() async {
-    final List<XFile>? pickedFiles = await _picker.pickMultiImage(
+    final List<XFile> pickedFiles = await _picker.pickMultiImage(
       imageQuality: 85,
       maxWidth: 1440,
     );

@@ -4,7 +4,7 @@ import 'package:grocery_app/blocs/categories/category_update/category_update_blo
 import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart'; // Import your cubit
 
 class WImagePickerUpdate extends StatelessWidget {
-  WImagePickerUpdate({super.key});
+  const WImagePickerUpdate({super.key});
 
   @override
   Widget build(BuildContext context) {

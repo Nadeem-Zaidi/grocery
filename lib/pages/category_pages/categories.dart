@@ -216,8 +216,10 @@ class _CategoryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            color:
-                Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
+            color: Theme.of(context)
+                .colorScheme
+                .surfaceContainerHighest
+                .withOpacity(0.5),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(

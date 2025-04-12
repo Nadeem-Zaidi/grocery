@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import 'package:grocery_app/blocs/products/fetch_product/fetch_product_bloc.dart';
+import 'package:grocery_app/pages/product_pages/product_detail.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../blocs/products/cart/cart_bloc.dart';
 import '../../models/category.dart';
 import '../../models/product/product.dart';
 
@@ -19,7 +21,6 @@ class _ProductListState extends State<ProductList> {
 
   @override
   Widget build(BuildContext context) {
-    print(context.read<FetchProductBloc>().state);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Atta, Rice & Dal"),
@@ -43,7 +44,7 @@ class _ProductListState extends State<ProductList> {
               if (state.childrenCategories.isNotEmpty) {
                 List<Category> childrenCat = state.childrenCategories;
                 return SizedBox(
-                  width: 80, // Give it a reasonable width
+                  width: 60, // Give it a reasonable width
                   child: ListView.builder(
                     physics: const AlwaysScrollableScrollPhysics(),
                     itemCount: childrenCat.length,
@@ -93,7 +94,7 @@ class _ProductListState extends State<ProductList> {
                                           .primaryContainer
                                       : Theme.of(context)
                                           .colorScheme
-                                          .surfaceVariant,
+                                          .surfaceContainerHighest,
                                 ),
                                 child: childrenCat[index].url != null
                                     ? ClipRRect(
@@ -179,179 +180,252 @@ class _ProductListState extends State<ProductList> {
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2, childAspectRatio: 0.4),
             itemBuilder: (context, index) {
-              return SizedBox(
-                height: 200,
-                child: Padding(
-                  padding: EdgeInsets.all(3),
-                  child: Card(
-                    margin: EdgeInsets.all(5),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Stack(
-                          children: [
-                            AspectRatio(
-                              aspectRatio: 0.8,
-                              child: products[index].images[0] != null
-                                  ? Image.network(
-                                      products[index].images[0],
-                                      fit: BoxFit.fill,
-                                      width: double.infinity,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                              const Icon(Icons.broken_image),
-                                    )
-                                  : Container(color: Colors.grey),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Container(
-                                height: 30,
-                                width: 40,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    border: Border.all(
-                                        color: Theme.of(context).primaryColor,
-                                        width: 1),
-                                    borderRadius: BorderRadius.circular(5)),
-                                child: Text(
-                                  "ADD",
-                                  style: TextStyle(
-                                      color: Colors.green,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Container(
-                          width: double.infinity,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              return InkWell(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) =>
+                          ProductDetailPage(product: products[index])));
+                },
+                child: SizedBox(
+                  height: 200,
+                  child: Padding(
+                    padding: EdgeInsets.all(3),
+                    child: Card(
+                      margin: EdgeInsets.all(5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Stack(
                             children: [
-                              Flexible(
-                                flex: 1,
-                                child: Container(
-                                  padding: EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  child: Text(
-                                    " 5kg ",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12),
-                                  ),
-                                ),
+                              AspectRatio(
+                                aspectRatio: 0.8,
+                                child: products[index].images[0] != null
+                                    ? Image.network(
+                                        products[index].images[0],
+                                        fit: BoxFit.fill,
+                                        width: double.infinity,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(Icons.broken_image),
+                                      )
+                                    : Container(color: Colors.grey),
                               ),
-                              Flexible(
-                                flex: 3,
-                                child: Container(
-                                  padding: EdgeInsets.all(2),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
-                                  child: Text(
-                                    "Wheat Atta",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12),
-                                  ),
-                                ),
-                              ),
+                              BlocBuilder<CartBloc, CartState>(
+                                builder: (context, state) {
+                                  final productInCart =
+                                      state.items[products[index].id];
+                                  final quantity = productInCart?.quantity ?? 0;
+                                  if (quantity > 0) {
+                                    return Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: Container(
+                                        height: 35,
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(10)),
+                                        child: Row(
+                                          children: [
+                                            IconButton(
+                                                onPressed: () {
+                                                  context.read<CartBloc>().add(
+                                                      CartItemRemoved(
+                                                          products[index].id!));
+                                                },
+                                                icon: Icon(
+                                                  Icons.remove,
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
+                                                )),
+                                            Text(
+                                              quantity.toString(),
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Theme.of(context)
+                                                      .primaryColor),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                context.read<CartBloc>().add(
+                                                      CartItemAdded(
+                                                          products[index].id!),
+                                                    );
+                                              },
+                                              icon: Icon(
+                                                Icons.add,
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  return Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: InkWell(
+                                      onTap: () {
+                                        context.read<CartBloc>().add(
+                                            CartItemAdded(products[index].id!));
+                                      },
+                                      child: Container(
+                                        height: 30,
+                                        width: 40,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            border: Border.all(
+                                                color: Theme.of(context)
+                                                    .primaryColor,
+                                                width: 1),
+                                            borderRadius:
+                                                BorderRadius.circular(5)),
+                                        child: Text(
+                                          "ADD",
+                                          style: TextStyle(
+                                              color: Colors.green,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              )
                             ],
                           ),
-                        ),
-                        SizedBox(height: 10),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            "Ashirvad Shudh Chakki Atta(100% Atta 0% Wheat)(5kg)",
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          SizedBox(
+                            height: 10,
                           ),
-                        ),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.timelapse,
-                              size: 15,
-                              color: Theme.of(context)
-                                  .primaryColor
-                                  .withValues(alpha: 0.7),
-                            ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Text("18 MINS")
-                          ],
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "9%",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).primaryColor),
-                            ),
-                            SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              "OFF",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).primaryColor),
-                            )
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.currency_rupee),
-                            Text(
-                              "200",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 18),
-                            ),
-                            SizedBox(width: 7),
-                            Row(
+                          SizedBox(
+                            width: double.infinity,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                Text(
-                                  "MRP",
-                                  style: TextStyle(fontSize: 12),
+                                Flexible(
+                                  flex: 1,
+                                  child: Container(
+                                    padding: EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .primaryColor
+                                          .withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Text(
+                                      "${products[index].quantityInBox}${products[index].unit}",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12),
+                                    ),
+                                  ),
                                 ),
-                                SizedBox(width: 3),
-                                Text(
-                                  "250",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    decoration: TextDecoration.lineThrough,
+                                Flexible(
+                                  flex: 3,
+                                  child: Container(
+                                    padding: EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .primaryColor
+                                          .withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(5),
+                                    ),
+                                    child: Text(
+                                      "Wheat Atta",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12),
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                          ],
-                        )
-                      ],
+                          ),
+                          SizedBox(height: 10),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              products[index].name ?? "",
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.timelapse,
+                                size: 15,
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withValues(alpha: 0.7),
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text("18 MINS")
+                            ],
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                products[index].discount.toString(),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                "OFF",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor),
+                              )
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.currency_rupee),
+                              Text(
+                                products[index]
+                                    .sellingPrice!
+                                    .round()
+                                    .toString(),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              SizedBox(width: 7),
+                              Row(
+                                children: [
+                                  Text(
+                                    "MRP",
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                  SizedBox(width: 3),
+                                  Text(
+                                    products[index].mrp!.round().toString(),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      decoration: TextDecoration.lineThrough,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),

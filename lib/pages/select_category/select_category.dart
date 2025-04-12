@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../blocs/categories/create_category_bloc/category_create_bloc.dart';
 import '../../blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import '../../models/category.dart';
 

@@ -12,7 +12,7 @@ class CreateCategoryState {
   final String? fixedPath;
   final String? parentId;
 
-  CreateCategoryState({
+  const CreateCategoryState({
     this.error,
     required this.categories, // Now required
     required this.name,

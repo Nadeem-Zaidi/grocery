@@ -10,7 +10,6 @@ import 'package:grocery_app/database_service.dart/inventory/firebase_inventory_s
 import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
 import 'package:grocery_app/pages/product_pages/product_list.dart';
 import 'package:grocery_app/widgets/category_drawer.dart';
-import 'package:shimmer/shimmer.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -186,7 +185,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                                                     BlocProvider<
                                                         FetchProductBloc>(
                                                       create: (context) =>
-                                                          FetchProductBloc()
+                                                          FetchProductBloc(
+                                                              productService)
                                                             ..add(
                                                               FetchProducts(
                                                                   "just for test"),

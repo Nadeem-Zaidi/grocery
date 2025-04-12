@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart';
-import 'package:grocery_app/blocs/categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import 'package:grocery_app/database_service.dart/category/firestore_category_service.dart';
 import 'package:grocery_app/pages/select_category/select_category.dart';
@@ -10,7 +9,6 @@ import 'package:grocery_app/widgets/image_picker.dart';
 import 'package:grocery_app/widgets/overlay.dart';
 import '../../models/category.dart';
 import '../../widgets/category_path_string.dart';
-import '../../widgets/category_parent_selection_dialog.dart';
 import '../../utils/screen_utils.dart';
 
 class CreateCategorypage extends StatefulWidget {

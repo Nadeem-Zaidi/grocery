@@ -63,11 +63,6 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
   @override
   Future<Category?> create(Category category) async {
     // Validate input category
-    if (category == null) {
-      throw ArgumentError('Category cannot be null');
-    }
-
-    // Convert to map and remove unwanted fields
     Map<String, dynamic> categoryMap = category.toJson();
     categoryMap.removeWhere(
         (key, value) => (key == "id" || value == "" || value == null));

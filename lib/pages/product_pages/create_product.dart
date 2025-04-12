@@ -193,21 +193,26 @@ class _CreateProductState extends State<CreateProduct> {
               const SizedBox(height: 24),
               buildTextField(context,
                   keyboardType: TextInputType.numberWithOptions(),
-                  controller: _sellingPrice,
-                  label: "Selling Price",
-                  hint: "Enter the Selling Price",
-                  icon: Icons.currency_rupee, onChanged: (value) {
-                context.read<ProductBloc>().add(SellingPrice(value));
-              }),
-
-              buildTextField(context,
-                  keyboardType: TextInputType.numberWithOptions(),
                   controller: _discount,
                   label: "Discount",
                   hint: "0.00",
-                  icon: Icons.currency_rupee, onChanged: (value) {
+                  icon: Icons.percent_rounded, onChanged: (value) {
                 context.read<ProductBloc>().add(SetDiscount(value));
               }),
+              BlocBuilder<ProductBloc, ProductState>(
+                builder: (context, state) {
+                  _sellingPrice.text = state.sellingPrice.toString();
+                  return buildTextField(context,
+                      keyboardType: TextInputType.numberWithOptions(),
+                      controller: _sellingPrice,
+                      isSelectable: true,
+                      label: "Selling Price",
+                      hint: "Enter the Selling Price",
+                      icon: Icons.currency_rupee, onChanged: (value) {
+                    context.read<ProductBloc>().add(SellingPrice(value));
+                  });
+                },
+              ),
               const SizedBox(height: 24),
               buildTextField(context,
                   keyboardType: TextInputType.numberWithOptions(),
@@ -287,7 +292,7 @@ class _CreateProductState extends State<CreateProduct> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceVariant,
+                            color: theme.colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Column(
@@ -332,7 +337,7 @@ class _CreateProductState extends State<CreateProduct> {
               BlocBuilder<ProductBloc, ProductState>(builder: (context, state) {
                 return buildTextField(
                   context,
-                  controller: _sellingUnit,
+                  controller: _summary,
                   label: "Product Summary",
                   hint: "Add Product Summary",
                   maxLines: 3,
@@ -348,7 +353,7 @@ class _CreateProductState extends State<CreateProduct> {
               BlocBuilder<ProductBloc, ProductState>(builder: (context, state) {
                 return buildTextField(
                   context,
-                  controller: _sellingUnit,
+                  controller: _keyFeatures,
                   label: "Key Features",
                   hint: "Add Product key Feature",
                   maxLines: 3,

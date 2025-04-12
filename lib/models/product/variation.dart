@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class Product {
   final String id;

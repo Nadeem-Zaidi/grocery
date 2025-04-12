@@ -15,7 +15,7 @@ class CategoryUpdatePage extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<CategoryUpdatePage> {
-  TextEditingController _categoryname = TextEditingController();
+  final TextEditingController _categoryname = TextEditingController();
   @override
   Widget build(BuildContext context) {
     String? path = context.read<CategoryUpdateBloc>().state.existingPath;

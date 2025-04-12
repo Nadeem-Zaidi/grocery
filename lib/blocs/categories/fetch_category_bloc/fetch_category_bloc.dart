@@ -36,7 +36,7 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
             childrenCategories: childCategories, isFetching: false));
       }
     } catch (e) {
-      print("Can not fetch the child category due to error ==> ${e}");
+      print("Can not fetch the child category due to error ==> $e");
       emit(state.copyWith(isFetching: false, error: e.toString()));
     }
   }

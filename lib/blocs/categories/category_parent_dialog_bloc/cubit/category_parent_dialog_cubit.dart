@@ -1,9 +1,6 @@
 import 'package:bloc/bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_app/database_service.dart/idatabase_service.dart';
 import 'package:meta/meta.dart';
-
-import '../../../../models/category.dart';
 
 part 'category_parent_dialog_state.dart';
 

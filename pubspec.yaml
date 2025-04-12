@@ -46,6 +46,7 @@ dependencies:
   shimmer: ^3.0.0
   equatable: ^2.0.7
   cloud_functions: ^5.4.0
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:

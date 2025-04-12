@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../models/category.dart';
-
 abstract class IdatabaseService<T> {
   Future<(List<T>, DocumentSnapshot?)> getAll(int limit,
       [DocumentSnapshot? lastDocument]);

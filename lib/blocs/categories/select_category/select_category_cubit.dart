@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:grocery_app/pages/select_category/select_category.dart';
 
 import '../../../models/category.dart';
 

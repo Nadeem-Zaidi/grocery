@@ -8,10 +8,8 @@ import 'package:grocery_app/database_service.dart/inventory/firebase_inventory_s
 import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
 
 import 'package:grocery_app/pages/category_pages/categories.dart';
-import 'package:grocery_app/pages/category_pages/create_category_page.dart';
 import 'package:grocery_app/pages/product_pages/create_product.dart';
 
-import '../blocs/categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
 import '../database_service.dart/category/firestore_category_service.dart';
 
 class CategoryDrawer extends StatefulWidget {

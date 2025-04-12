@@ -29,7 +29,8 @@ class FirestoreProductService implements IdatabaseService<Product> {
     }
   }
 
-  Future<(List<Product>, DocumentSnapshot?)> fetchProducts(int limit,
+  @override
+  Future<(List<Product>, DocumentSnapshot?)> getAll(int limit,
       [DocumentSnapshot? lastDocument]) async {
     List<Product> documents = [];
     CollectionReference collectionReference =
@@ -68,6 +69,7 @@ class FirestoreProductService implements IdatabaseService<Product> {
     return (documents, null);
   }
 
+  @override
   Future<Product?> getById(String id) async {
     try {
       DocumentReference productDocument =
@@ -85,13 +87,6 @@ class FirestoreProductService implements IdatabaseService<Product> {
       throw Exception(
           "Failed to fetch product: $e"); // Throw a meaningful exception
     }
-  }
-
-  @override
-  Future<(List<Product>, DocumentSnapshot<Object?>?)> getAll(int limit,
-      [DocumentSnapshot<Object?>? lastDocument]) {
-    // TODO: implement getAll
-    throw UnimplementedError();
   }
 
   @override

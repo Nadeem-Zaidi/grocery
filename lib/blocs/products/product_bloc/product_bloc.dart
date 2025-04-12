@@ -1,16 +1,15 @@
 import 'dart:io';
 import 'package:bloc/bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:fpdart/fpdart.dart';
+
 import 'package:grocery_app/database_service.dart/inventory/firebase_inventory_service.dart';
 import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
-import 'package:collection/collection.dart';
 
 import '../../../models/inventory/inventory.dart';
 import '../../../models/product/product.dart';
@@ -37,8 +36,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           throw UnimplementedError();
         case RemoveImage(index: int index):
           removeImage(emit, index);
-        case UploadImages():
-          await uploadImages(emit);
+
         case AddDescription(description: String description):
           addDescription(emit, description);
         case RemoveDescription(index: int index):
@@ -84,6 +82,8 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         case SetKeyFeatures():
           // TODO: Handle this case.
           throw UnimplementedError();
+        case UploadImages():
+          () {};
       }
     });
   }
@@ -92,7 +92,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     try {
       emit(state.copyWith(isLoading: true));
 
-      final List<XFile>? pickedFiles = await _picker.pickMultiImage();
+      final List<XFile> pickedFiles = await _picker.pickMultiImage();
 
       if (pickedFiles != null && pickedFiles.length <= 6) {
         emit(state.copyWith(
@@ -129,47 +129,6 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         error: 'Failed to remove image: ${e.toString()}',
       ));
     }
-  }
-
-  Future<void> uploadImages(Emitter<ProductState> emit) async {
-    for (var i in state.imageFiles) {
-      print(i.path);
-    }
-
-    print(state.toString());
-    // if (state.imageFiles.isEmpty) return;
-
-    // List<String> urls = [];
-
-    // try {
-    //   emit(state.copyWith(isLoading: true));
-
-    //   for (XFile file in state.imageFiles) {
-    //     File imageFile = File(file.path);
-    //     String fileName = DateTime.now().microsecondsSinceEpoch.toString();
-    //     Reference storageRef =
-    //         FirebaseStorage.instance.ref().child("images/$fileName.jpg");
-
-    //     UploadTask uploadTask = storageRef.putFile(imageFile);
-    //     TaskSnapshot snapshot = await uploadTask;
-    //     String url = await snapshot.ref.getDownloadURL();
-
-    //     if (url.isEmpty) {
-    //       throw Exception("Image upload failed, no URL returned.");
-    //     }
-
-    //     urls.add(url);
-    //   }
-
-    //   if (urls.isEmpty) {
-    //     throw Exception("Could not upload any images");
-    //   }
-
-    //   emit(state.copyWith(isLoading: false, imageUloadedUrls: urls));
-    // } catch (e) {
-    //   print("Error during image upload: $e");
-    //   emit(state.copyWith(isLoading: false, error: e.toString()));
-    // }
   }
 
   /// **Create Product with Uploaded Images**
@@ -210,7 +169,13 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         "category",
         "description",
         "summary",
-        "keyfeatures"
+        "keyfeatures",
+        "parentId",
+        "unit",
+        "quantityInBox",
+        "mrp",
+        "sellingPrice",
+        "discount",
       ];
 
       Map<String, dynamic> productMap = {
@@ -219,7 +184,14 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
         "category": state.productCategory,
         "description": state.description,
         "summary": state.summary,
-        "keyfeatures": state.keyFeatures
+        "keyfeatures": state.keyFeatures,
+        "parentId": "productId",
+        "unit": state.sellingUnit,
+        "quantityInBox": state.quantityInBox,
+        "quantityAvailable": state.quantity,
+        "mrp": state.mrp,
+        "sellingPrice": state.sellingPrice,
+        "discount": state.discount
       };
 
       List<String> missingProductField = productMap.entries
@@ -340,18 +312,14 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     if (mrp == null) {
       emit(state.copyWith(
           mrpInputError: "Invalid input. Please enter a valid number"));
-    }
-
-    if (mrp == null) {
-      emit(state.copyWith(
-          mrpInputError: "Invalid input. Please enter a valid number"));
     } else if (mrp <= 0) {
       emit(state.copyWith(mrpInputError: "MRP must be greater than 0"));
     } else {
       emit(state.copyWith(
-        mrp: mrp,
-        mrpInputError: "", // Clear any previous error
-      ));
+          mrp: mrp,
+          mrpInputError: "",
+          sellingPrice: mrp // Clear any previous error
+          ));
     }
   }
 
@@ -372,9 +340,23 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
   void setDiscount(Emitter<ProductState> emit, String value) {
     double? discount = double.tryParse(value);
     if (discount == null) {
-      emit(state.copyWith(discountInputError: "Invalid input"));
+      emit(state.copyWith(
+        discountInputError: "Invalid input",
+        sellingPrice: 0,
+      ));
+      return; // Stop here if invalid
     }
-    emit(state.copyWith(discount: discount, discountInputError: null));
+
+    double mrp = state.mrp ?? 0.0;
+    double sp = mrp - ((mrp * discount) / 100);
+
+    print("hurray we got the selling price: $sp");
+
+    emit(state.copyWith(
+      discount: discount,
+      discountInputError: null,
+      sellingPrice: sp,
+    ));
   }
 
   void setQuantity(Emitter<ProductState> emit, String value) {

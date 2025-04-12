@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart'; // Import your cubit
 
 class WImagePicker extends StatelessWidget {
-  WImagePicker({super.key});
+  const WImagePicker({super.key});
 
   @override
   Widget build(BuildContext context) {
