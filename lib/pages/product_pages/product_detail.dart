@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/products/cart/cart_bloc.dart';
 import '../../models/product/product.dart';
+import '../../widgets/add_to_cart_button.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
@@ -68,7 +69,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 
   void _onCartButtonAppeared() {
-    print('Cart button became visible');
     setState(() {
       _stickButton = false;
     });
@@ -252,21 +252,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
                       // Add to cart button
                       SizedBox(
+                        key: _cartButtonKey,
                         width: double.infinity,
-                        child: ElevatedButton(
-                          key: _cartButtonKey,
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            backgroundColor: Theme.of(context).primaryColor,
-                          ),
-                          onPressed: () {},
-                          child: const Text(
-                            'Add to cart',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                        child: BlocBuilder<CartBloc, CartState>(
+                          builder: (context, state) {
+                            return addToCartButton(
+                              widget.product,
+                              context
+                                  .read<CartBloc>()
+                                  .state
+                                  .items[widget.product.id!],
+                              context,
+                            );
+                          },
                         ),
                       )
                     ],
@@ -287,158 +285,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, -5),
-                        ),
-                      ],
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: BlocBuilder<CartBloc, CartState>(
-                      builder: (context, state) {
-                        final productInCart = state.items[widget.product.id!];
-                        final quantity = productInCart?.quantity ?? 0;
-
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Product info
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${widget.product.quantityInBox} ${widget.product.unit}",
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    // Current price
-                                    Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.currency_rupee,
-                                          size: 18,
-                                        ),
-                                        Text(
-                                          widget.product.sellingPrice!
-                                              .round()
-                                              .toString(),
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(width: 8),
-                                    // MRP with strike-through
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "MRP ",
-                                          style: TextStyle(
-                                            color: Colors.grey.shade600,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        Text(
-                                          widget.product.mrp.toString(),
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey.shade600,
-                                            decoration:
-                                                TextDecoration.lineThrough,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-
-                            // Quantity controls
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).primaryColor,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: quantity > 0
-                                  ? Row(
-                                      children: [
-                                        // Decrease button
-                                        IconButton(
-                                          color: Colors.white,
-                                          onPressed: () {
-                                            context.read<CartBloc>().add(
-                                                CartItemRemoved(
-                                                    widget.product.id!));
-                                          },
-                                          icon: Icon(
-                                            Icons.remove,
-                                            color: Colors.white,
-                                          ),
-                                          splashRadius: 20,
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(),
-                                        ),
-
-                                        // Quantity
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8),
-                                          child: Text(
-                                            quantity.toString(),
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                                color: Colors.white),
-                                          ),
-                                        ),
-
-                                        // Increase button
-                                        IconButton(
-                                          onPressed: () {
-                                            context.read<CartBloc>().add(
-                                                CartItemAdded(
-                                                    widget.product.id!));
-                                          },
-                                          icon: const Icon(
-                                            Icons.add,
-                                            color: Colors.white,
-                                          ),
-                                          splashRadius: 20,
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(),
-                                        ),
-                                      ],
-                                    )
-                                  : ElevatedButton(
-                                      onPressed: () {
-                                        context.read<CartBloc>().add(
-                                            CartItemAdded(widget.product.id!));
-                                      },
-                                      child: Text("Add To Cart"),
-                                    ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
+                  child: BlocBuilder<CartBloc, CartState>(
+                    builder: (context, state) {
+                      final productInCart = state.items[widget.product.id!];
+                      return addToCartButton(
+                          widget.product, productInCart, context);
+                    },
                   ),
                 )
               : const SizedBox.shrink(),

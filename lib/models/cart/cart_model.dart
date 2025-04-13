@@ -1,13 +1,12 @@
 class CartItem {
   final String productId;
-
   final int quantity;
-  final double? price; // Add this line
+  final double? price;
   final DateTime updatedAt;
 
   CartItem({
     required this.productId,
-    this.price, // Add this to constructor
+    this.price,
     this.quantity = 1,
     DateTime? updatedAt,
   }) : updatedAt = updatedAt ?? DateTime.now();
@@ -15,31 +14,28 @@ class CartItem {
   CartItem copyWith({
     String? productId,
     int? quantity,
-    double? price, // Add this
+    double? price,
     DateTime? updatedAt,
   }) {
     return CartItem(
       productId: productId ?? this.productId,
-
       quantity: quantity ?? this.quantity,
-      price: price ?? this.price, // Add this
+      price: price ?? this.price,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
   Map<String, dynamic> toMap() => {
         'productId': productId,
-
         'quantity': quantity,
-        'price': price, // Add this
+        'price': price,
         'updatedAt': updatedAt.toIso8601String(),
       };
 
   factory CartItem.fromMap(Map<String, dynamic> map) => CartItem(
         productId: map['productId'],
-
         quantity: map['quantity'],
-        price: map['price']?.toDouble() ?? 0.0, // Add this with null check
+        price: map['price']?.toDouble() ?? 0.0,
         updatedAt: DateTime.parse(map['updatedAt']),
       );
 }

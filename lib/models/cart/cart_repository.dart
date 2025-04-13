@@ -127,9 +127,10 @@ class CartRepository {
     _isSyncing = true;
 
     try {
+      //get the current user details
       final user = _auth.currentUser;
       if (user == null) return;
-
+      //getting the "carts" collection reference
       final cartRef = _firestore.collection('carts').doc(user.uid);
       final remoteData = (await cartRef.get()).data();
 
@@ -173,14 +174,12 @@ class CartRepository {
       final localItem = entry.value;
       final remoteItem = mergedItems[entry.key];
 
-      // 🔥 If item exists in local but not in remote OR has a newer update
       if (localItem.updatedAt
           .isAfter(remoteItem?.updatedAt ?? DateTime(1970))) {
         mergedItems[entry.key] = localItem;
       }
     }
 
-    // 🔥 Step 1: Detect deletions (present in remote but not in local)
     for (final remoteKey in remote.items.keys) {
       if (!local.items.containsKey(remoteKey)) {
         mergedItems.remove(remoteKey); // Explicitly remove deleted item
