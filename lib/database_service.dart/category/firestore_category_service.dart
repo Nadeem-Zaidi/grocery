@@ -154,18 +154,29 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
   }
 
   @override
-  Future<List<Category>> whereClause(
-      Query Function(CollectionReference) queryBuilder) async {
-    List<Category> documents = [];
+  Future<(List<Category>, DocumentSnapshot?)> whereClause(
+      Query Function(CollectionReference) queryBuilder,
+      [DocumentSnapshot? lastDocument]) async {
+    List<Category> categories = [];
 
     try {
       Query query = queryBuilder(firestore.collection(collectionName));
-      QuerySnapshot querySnapshot = await query.get();
 
-      documents = querySnapshot.docs.map((doc) {
+      if (lastDocument != null) {
+        query = query.startAfterDocument(lastDocument);
+      }
+
+      QuerySnapshot qs = await query.get().timeout(Duration(seconds: 5));
+      if (qs.docs.isEmpty) {
+        return (<Category>[], null);
+      }
+
+      categories = qs.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>? ?? {};
         return Category.fromMap({...data, "id": doc.id});
       }).toList();
+
+      return (categories, lastDocument);
     } on FirebaseException catch (e) {
       print("Firestore error: ${e.message}");
       rethrow;
@@ -176,7 +187,5 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
       print("Unexpected error: $e");
       rethrow;
     }
-
-    return documents;
   }
 }

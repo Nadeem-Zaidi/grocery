@@ -6,5 +6,7 @@ abstract class IdatabaseService<T> {
   Future<T?> getById(String id);
   Future<T?> create(T data);
   Future<T?> update(Map<String, dynamic> data);
-  Future<List<T>> whereClause(Query Function(CollectionReference) queryBuilder);
+  Future<(List<T>, DocumentSnapshot?)> whereClause(
+      Query Function(CollectionReference) queryBuilder,
+      [DocumentSnapshot? lastDocument]);
 }

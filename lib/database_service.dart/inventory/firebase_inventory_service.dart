@@ -50,8 +50,9 @@ class FirestoreInventoryService implements IdatabaseService<Inventory> {
   }
 
   @override
-  Future<List<Inventory>> whereClause(
-      Query<Object?> Function(CollectionReference<Object?> p1) queryBuilder) {
+  Future<(List<Inventory>, DocumentSnapshot?)> whereClause(
+      Query<Object?> Function(CollectionReference<Object?> p1) queryBuilder,
+      [DocumentSnapshot? lastDocument]) {
     // TODO: implement whereClause
     throw UnimplementedError();
   }

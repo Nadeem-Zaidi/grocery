@@ -20,7 +20,7 @@ class _MultiImageUploadScreenState extends State<MultiImageUploadScreen> {
       imageQuality: 85,
       maxWidth: 1440,
     );
-    if (pickedFiles != null && pickedFiles.isNotEmpty) {
+    if (pickedFiles.isNotEmpty) {
       setState(() {
         _imageFiles.addAll(pickedFiles);
       });

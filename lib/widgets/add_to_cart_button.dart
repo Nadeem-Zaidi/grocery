@@ -7,7 +7,7 @@ import '../models/product/product.dart';
 
 Widget addToCartButton(
     Product product, CartItem? cartItem, BuildContext context,
-    [Key? trackKey = null]) {
+    [Key? trackKey]) {
   return cartItem != null
       ? Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

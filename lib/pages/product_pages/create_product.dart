@@ -1,17 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/blocs/categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import 'package:grocery_app/blocs/products/product_bloc/product_bloc.dart';
 import 'package:grocery_app/database_service.dart/category/firestore_category_service.dart';
 import 'package:grocery_app/pages/select_category/select_category.dart';
-import 'package:grocery_app/widgets/checkbox.dart';
 import 'package:grocery_app/widgets/overlay.dart';
 import '../../models/category.dart';
 import '../../utils/screen_utils.dart';
-import '../../widgets/category_parent_selection_dialog.dart';
-import '../../widgets/category_selection_for_product.dart';
 import '../../widgets/textfield.dart';
 import 'multi_image_file_upload.dart';
 

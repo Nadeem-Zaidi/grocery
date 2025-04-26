@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/categories/category_update/category_update_bloc.dart';
 import '../../utils/screen_utils.dart';
-import '../../widgets/image_picker.dart';
 import '../../widgets/image_picker_update.dart';
 import '../../widgets/overlay.dart';
 

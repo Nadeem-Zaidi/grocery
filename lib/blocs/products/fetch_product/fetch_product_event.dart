@@ -3,8 +3,14 @@ part of 'fetch_product_bloc.dart';
 @immutable
 sealed class FetchProductEvent {}
 
-// ignore: must_be_immutable
+@immutable
 class FetchProducts extends FetchProductEvent {
-  String categoryString;
+  final String categoryString;
   FetchProducts(this.categoryString);
+}
+
+@immutable
+class FetchProductWhere extends FetchProductEvent {
+  final String categoryString;
+  FetchProductWhere(this.categoryString);
 }

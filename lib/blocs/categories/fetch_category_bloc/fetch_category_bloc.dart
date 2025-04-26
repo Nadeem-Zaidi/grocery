@@ -28,12 +28,13 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
       Emitter<FetchCategoryState> emit, String id) async {
     try {
       emit(state.copyWith(isFetching: true));
-      List<Category> childCategories = await dbService.whereClause(
-              (collection) => collection.where('parent', isEqualTo: id))
-          as List<Category>;
+      var (childCategories, lastDoc) = await dbService.whereClause(
+          (collection) => collection.where('parent', isEqualTo: id));
+
       if (childCategories.isNotEmpty) {
         emit(state.copyWith(
-            childrenCategories: childCategories, isFetching: false));
+            childrenCategories: childCategories as List<Category>,
+            isFetching: false));
       }
     } catch (e) {
       print("Can not fetch the child category due to error ==> $e");

@@ -8,6 +8,8 @@ class FirestoreProductService implements IdatabaseService<Product> {
   String collectionName;
   FirestoreProductService(
       {required this.fireStore, required this.collectionName});
+
+  //method to create the product record
   @override
   Future<Product?> create(Product product) async {
     Map<String, dynamic> productMap = product.toMap();
@@ -96,9 +98,28 @@ class FirestoreProductService implements IdatabaseService<Product> {
   }
 
   @override
-  Future<List<Product>> whereClause(
-      Query<Object?> Function(CollectionReference<Object?> p1) queryBuilder) {
-    // TODO: implement whereClause
-    throw UnimplementedError();
+  Future<(List<Product>, DocumentSnapshot?)> whereClause(
+      Query<Object?> Function(CollectionReference<Object?> p1) queryBuilder,
+      [DocumentSnapshot? lastDocument]) async {
+    List<Product> products = [];
+    try {
+      Query query = queryBuilder(fireStore.collection(collectionName));
+      if (lastDocument != null) {
+        query = query.startAfterDocument(lastDocument);
+      }
+      QuerySnapshot qs =
+          await query.orderBy("name").get().timeout(Duration(seconds: 5));
+      if (qs.docs.isEmpty) {
+        return (<Product>[], lastDocument);
+      }
+      products = qs.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return Product.fromMap({...data, "id": doc.id});
+      }).toList();
+
+      return (products, lastDocument);
+    } catch (e) {
+      rethrow;
+    }
   }
 }

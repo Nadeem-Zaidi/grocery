@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import 'package:grocery_app/blocs/products/fetch_product/fetch_product_bloc.dart';
 import 'package:grocery_app/pages/product_pages/product_detail.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../blocs/products/cart/cart_bloc.dart';
 import '../../models/category.dart';
@@ -18,6 +17,29 @@ class ProductList extends StatefulWidget {
 
 class _ProductListState extends State<ProductList> {
   int _selectedCategoryIndex = 0;
+
+  // @override
+  // void initState() {
+  //   var catState = context.read<FetchCategoryBloc>().state;
+  //   print("hurray category string is here ");
+  //   // print(catState.childrenCategories[0].path);
+  //   print("hurray category string");
+  //   context
+  //       .read<FetchProductBloc>()
+  //       .add(FetchProductWhere(catState.childrenCategories[0].name!));
+  //   super.initState();
+  // }
+
+  @override
+  void didChangeDependencies() {
+    var catState = context.watch<FetchCategoryBloc>().state;
+
+    if (catState.childrenCategories.isNotEmpty) {
+      context.read<FetchProductBloc>().add(FetchProductWhere(
+          catState.childrenCategories[_selectedCategoryIndex].name!));
+    }
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +77,8 @@ class _ProductListState extends State<ProductList> {
                           setState(
                             () {
                               _selectedCategoryIndex = index;
+                              context.read<FetchProductBloc>().add(
+                                  FetchProductWhere(childrenCat[index].name!));
                               // Here you would typically filter products by category
                             },
                           );

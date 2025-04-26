@@ -7,7 +7,6 @@ import 'package:grocery_app/pages/category_pages/category_update_page.dart';
 import 'package:grocery_app/pages/category_pages/create_category_page.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../blocs/categories/category_parent_dialog_bloc/cubit/category_parent_dialog_cubit.dart';
 import '../../blocs/categories/create_category_bloc/category_create_bloc.dart';
 import '../../database_service.dart/category/firestore_category_service.dart';
 import '../../models/category.dart';

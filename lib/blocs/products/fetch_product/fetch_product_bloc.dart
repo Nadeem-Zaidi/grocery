@@ -15,6 +15,8 @@ class FetchProductBloc extends Bloc<FetchProductEvent, FetchProductState> {
       switch (event) {
         case FetchProducts(categoryString: String category):
           await _fetchProducts(emit, category);
+        case FetchProductWhere(categoryString: String cs):
+          await _productWhere(emit, cs);
       }
     });
   }
@@ -68,6 +70,23 @@ class FetchProductBloc extends Bloc<FetchProductEvent, FetchProductState> {
             lastDocument: newLastDocument,
             isLoading: false));
       }
+    } catch (e) {
+      print("error occured while fetching products duie to ==$e");
+      emit(state.copyWith(error: e.toString(), isLoading: false));
+    }
+  }
+
+  Future<void> _productWhere(
+      Emitter<FetchProductState> emit, String categoryString) async {
+    try {
+      var (products, lastDoc) = await productDb.whereClause(
+          (collection) =>
+              collection.where("tags", arrayContains: categoryString),
+          state.lastDocument);
+      emit(state.copyWith(
+          products: products as List<Product>,
+          lastDocument: lastDoc,
+          isLoading: false));
     } catch (e) {
       print("error occured while fetching products duie to ==$e");
       emit(state.copyWith(error: e.toString(), isLoading: false));

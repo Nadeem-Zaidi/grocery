@@ -8,8 +8,11 @@ import 'package:grocery_app/database_service.dart/category/firestore_category_se
 import 'package:grocery_app/database_service.dart/dashboard/firebase_dashboard_service.dart';
 import 'package:grocery_app/database_service.dart/inventory/firebase_inventory_service.dart';
 import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
+import 'package:grocery_app/models/category.dart';
+import 'package:grocery_app/models/sections/section.dart';
 import 'package:grocery_app/pages/product_pages/product_list.dart';
 import 'package:grocery_app/widgets/category_drawer.dart';
+import 'package:grocery_app/widgets/sliver_category.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -20,7 +23,7 @@ class Home extends StatefulWidget {
 
 // 1. Change your state class to be a TickerProviderStateMixin
 class _HomeState extends State<Home> with TickerProviderStateMixin {
-  List<Map<String, dynamic>> content = [];
+  List<Section> content = [];
   bool _isLoading = true;
   FirestoreProductService productService = FirestoreProductService(
       fireStore: FirebaseFirestore.instance, collectionName: "products");
@@ -33,13 +36,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     try {
       FirebaseDashBoard dashBoard =
           FirebaseDashBoard(FirebaseFirestore.instance);
-      List<Map<String, dynamic>> rawData = await dashBoard.getAll();
+      List<Section> rawData = await dashBoard.getAll();
 
       setState(() {
         content = rawData;
         _isLoading = false;
       });
     } catch (e) {
+      print(e);
       setState(() {
         _isLoading = false;
       });
@@ -137,18 +141,19 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       if (!_isLoading && content.isNotEmpty)
                         ...content
                             .map((category) => [
-                                  SliverToBoxAdapter(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        category.keys.first,
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
+                                  if (category.type == "category")
+                                    SliverToBoxAdapter(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          category.name ?? "",
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
                                   SliverGrid(
                                     gridDelegate:
                                         const SliverGridDelegateWithFixedCrossAxisCount(
@@ -157,8 +162,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                                     ),
                                     delegate: SliverChildBuilderDelegate(
                                       (context, index) {
-                                        var categoryName = category.keys.first;
-                                        var items = category[categoryName];
+                                        var categoryName = category.name!;
+                                        var items =
+                                            category.elements as List<Category>;
 
                                         return InkWell(
                                           onTap: () {
@@ -178,77 +184,28 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                                                           collectionName:
                                                               "categories",
                                                         ),
-                                                      )..add(FetchCategoryChildren(
-                                                              items[index]
-                                                                  ['id'])),
+                                                      )..add(
+                                                              FetchCategoryChildren(
+                                                                  items[index]
+                                                                      .id!),
+                                                            ),
                                                     ),
                                                     BlocProvider<
-                                                        FetchProductBloc>(
-                                                      create: (context) =>
-                                                          FetchProductBloc(
-                                                              productService)
-                                                            ..add(
-                                                              FetchProducts(
-                                                                  "just for test"),
-                                                            ),
-                                                    )
+                                                            FetchProductBloc>(
+                                                        create: (context) =>
+                                                            FetchProductBloc(
+                                                                productService))
                                                   ],
                                                   child: ProductList(),
                                                 ),
                                               ),
                                             );
                                           },
-                                          child: Card(
-                                            margin: EdgeInsets.all(5),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: AspectRatio(
-                                                    aspectRatio: 1.2,
-                                                    child: items[index]
-                                                                    ['url'] !=
-                                                                null &&
-                                                            items[index]['url']
-                                                                .isNotEmpty
-                                                        ? Image.network(
-                                                            items[index]['url'],
-                                                            fit: BoxFit.cover,
-                                                            width:
-                                                                double.infinity,
-                                                            errorBuilder: (context,
-                                                                    error,
-                                                                    stackTrace) =>
-                                                                const Icon(Icons
-                                                                    .broken_image),
-                                                          )
-                                                        : Container(
-                                                            color: Colors.grey),
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Text(
-                                                    items[index]['name'] ??
-                                                        'Unnamed',
-                                                    style: const TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.w500),
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                          child: DashboardCategory(
+                                              category: items[index]),
                                         );
                                       },
-                                      childCount:
-                                          category[category.keys.first].length,
+                                      childCount: category.elements.length,
                                     ),
                                   ),
                                 ])

@@ -94,7 +94,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
 
       final List<XFile> pickedFiles = await _picker.pickMultiImage();
 
-      if (pickedFiles != null && pickedFiles.length <= 6) {
+      if (pickedFiles.length <= 6) {
         emit(state.copyWith(
           isLoading: false,
           imageFiles: [

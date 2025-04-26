@@ -7,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
 import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
 import 'package:grocery_app/blocs/products/cart/cart_bloc.dart';
-import 'package:grocery_app/models/cart/cart_repository.dart';
 
 import 'package:grocery_app/router/route_generator.dart';
 import 'package:grocery_app/theme/theme_data.dart';

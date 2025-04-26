@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/categories/category_update/category_update_bloc.dart';
-import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart'; // Import your cubit
+// Import your cubit
 
 class WImagePickerUpdate extends StatelessWidget {
   const WImagePickerUpdate({super.key});
