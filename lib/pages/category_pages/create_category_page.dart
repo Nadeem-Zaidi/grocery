@@ -44,8 +44,8 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
   String current = "";
 
   void _onSave() async {
-    // var state = context.read<CreateCategoryBloc>().state;
-    // context.read<CreateCategoryBloc>().add(CreateCategory());
+    var state = context.read<CreateCategoryBloc>().state;
+    context.read<CreateCategoryBloc>().add(CreateCategory());
 
     // if (_formKey.currentState!.validate()) {
     //   var categoryName = _categoryNameController.text;
@@ -95,7 +95,7 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
           }
 
           if (state.categories.isNotEmpty) {
-            Navigator.pushReplacementNamed(context, '/categories');
+            Navigator.pop(context);
           }
         },
         child: SingleChildScrollView(

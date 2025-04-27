@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
+import 'package:grocery_app/blocs/dashboard_builder/cubit/dashboard_builder_cubit.dart';
 import 'package:grocery_app/blocs/products/fetch_product/fetch_product_bloc.dart';
 import 'package:grocery_app/database_service.dart/category/firestore_category_service.dart';
 import 'package:grocery_app/database_service.dart/dashboard/firebase_dashboard_service.dart';
@@ -12,6 +13,7 @@ import 'package:grocery_app/models/category.dart';
 import 'package:grocery_app/models/sections/section.dart';
 import 'package:grocery_app/pages/product_pages/product_list.dart';
 import 'package:grocery_app/widgets/category_drawer.dart';
+import 'package:grocery_app/widgets/shop_by_store.dart';
 import 'package:grocery_app/widgets/sliver_category.dart';
 
 class Home extends StatefulWidget {
@@ -21,259 +23,256 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-// 1. Change your state class to be a TickerProviderStateMixin
-class _HomeState extends State<Home> with TickerProviderStateMixin {
-  List<Section> content = [];
-  bool _isLoading = true;
+class _HomeState extends State<Home> {
+  final ScrollController _scrollController = ScrollController();
+
   FirestoreProductService productService = FirestoreProductService(
-      fireStore: FirebaseFirestore.instance, collectionName: "products");
+    fireStore: FirebaseFirestore.instance,
+    collectionName: "products",
+  );
 
   FirestoreInventoryService inventoryService = FirestoreInventoryService(
-      fireStore: FirebaseFirestore.instance, collectionName: "inventory");
-  late TabController _tabController; // Add TabController
+    fireStore: FirebaseFirestore.instance,
+    collectionName: "inventory",
+  );
 
-  Future<void> fetchData() async {
-    try {
-      FirebaseDashBoard dashBoard =
-          FirebaseDashBoard(FirebaseFirestore.instance);
-      List<Section> rawData = await dashBoard.getAll();
-
-      setState(() {
-        content = rawData;
-        _isLoading = false;
-      });
-    } catch (e) {
-      print(e);
-      setState(() {
-        _isLoading = false;
-      });
-      // Handle error appropriately
-    }
-  }
+  FirebaseDashBoard dashBoardService = FirebaseDashBoard(
+    FirebaseFirestore.instance,
+  );
 
   @override
   void initState() {
     super.initState();
-    fetchData();
-
-    _tabController =
-        TabController(length: 6, vsync: this); // Initialize controller
+    _scrollController.addListener(_onScroll);
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose(); // Dispose controller
-    super.dispose();
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        !context.read<DashboardBuilderCubit>().state.hasReachedMax) {
+      context.read<DashboardBuilderCubit>().fetchSections();
+    }
   }
-
-  // ... keep your existing methods ...
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
-        listeners: [
-          BlocListener<AuthCubit, AuthState>(
-            listenWhen: (p, c) => p.isLoggedIn != c.isLoggedIn && !c.isLoggedIn,
-            listener: (context, state) {
-              Navigator.of(context).pushReplacementNamed('/signinsignup');
-            },
-          ),
-        ],
-        child: Scaffold(
-          body: DefaultTabController(
-            length: 6, // Number of tabs
-            initialIndex: 0,
-            child: NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) {
-                return [
-                  SliverAppBar(
-                    expandedHeight: 250,
-                    toolbarHeight: 100,
-                    floating: true,
-                    pinned: true,
-                    bottom: PreferredSize(
-                      preferredSize: const Size.fromHeight(150.0),
-                      child: Column(
+      listeners: [
+        BlocListener<AuthCubit, AuthState>(
+          listenWhen: (p, c) => p.isLoggedIn != c.isLoggedIn && !c.isLoggedIn,
+          listener: (context, state) {
+            Navigator.of(context).pushReplacementNamed('/signinsignup');
+          },
+        ),
+      ],
+      child: Scaffold(
+        drawer: const CategoryDrawer(),
+        body: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 250,
+              pinned: true,
+              floating: true,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Padding(
+                  padding: const EdgeInsets.only(top: 100, left: 16, right: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Delivery in",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            height: 60,
-                            padding: EdgeInsets.all(5),
-                            child: TextField(
-                              decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  prefix: Icon(
-                                    Icons.search,
-                                    color: Colors.purple,
-                                  )),
+                          const Text(
+                            "10 minutes",
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
-                          TabBar(
-                            labelColor: Colors.white,
-                            controller: _tabController,
-                            isScrollable: true,
-
-                            // Enables horizontal scrolling
-                            tabs: [
-                              Tab(icon: Icon(Icons.home), text: 'Home'),
-                              Tab(
-                                  icon: Icon(Icons.favorite),
-                                  text: 'Favorites'),
-                              Tab(icon: Icon(Icons.person), text: 'Profile'),
-                              Tab(
-                                  icon: Icon(Icons.shopping_cart),
-                                  text: 'Cart'),
-                              Tab(icon: Icon(Icons.settings), text: 'Settings'),
-                              Tab(icon: Icon(Icons.info), text: 'About'),
-                            ],
-                          ),
+                          IconButton(
+                            onPressed: () {},
+                            icon: const Icon(
+                              Icons.person,
+                              size: 36,
+                              color: Colors.white,
+                            ),
+                          )
                         ],
+                      ),
+                      Row(
+                        children: [
+                          const Text(
+                            "Home",
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Row(
+                            children: const [
+                              Text(
+                                "Niknampur Road",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Icon(Icons.arrow_drop_down, color: Colors.white),
+                            ],
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(100),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search...',
+                      filled: true,
+                      fillColor: Colors.white,
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
-                ];
-              },
-              body: TabBarView(
-                controller: _tabController,
-                children: [
-                  CustomScrollView(
-                    slivers: [
-                      if (!_isLoading && content.isNotEmpty)
-                        ...content
-                            .map((category) => [
-                                  if (category.type == "category")
-                                    SliverToBoxAdapter(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text(
-                                          category.name ?? "",
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  SliverGrid(
-                                    gridDelegate:
-                                        const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 4,
-                                      childAspectRatio: 2 / 3,
-                                    ),
-                                    delegate: SliverChildBuilderDelegate(
-                                      (context, index) {
-                                        var categoryName = category.name!;
-                                        var items =
-                                            category.elements as List<Category>;
-
-                                        return InkWell(
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    MultiBlocProvider(
-                                                  providers: [
-                                                    BlocProvider<
-                                                        FetchCategoryBloc>(
-                                                      create: (context) =>
-                                                          FetchCategoryBloc(
-                                                        FirestoreCategoryService(
-                                                          firestore:
-                                                              FirebaseFirestore
-                                                                  .instance,
-                                                          collectionName:
-                                                              "categories",
-                                                        ),
-                                                      )..add(
-                                                              FetchCategoryChildren(
-                                                                  items[index]
-                                                                      .id!),
-                                                            ),
-                                                    ),
-                                                    BlocProvider<
-                                                            FetchProductBloc>(
-                                                        create: (context) =>
-                                                            FetchProductBloc(
-                                                                productService))
-                                                  ],
-                                                  child: ProductList(),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                          child: DashboardCategory(
-                                              category: items[index]),
-                                        );
-                                      },
-                                      childCount: category.elements.length,
-                                    ),
-                                  ),
-                                ])
-                            .expand((x) => x),
-                    ],
-                  ),
-                  CustomScrollView(
-                    slivers: [
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return ListTile(
-                            title: Text("Home Content $index"),
-                          );
-                        }, childCount: 20),
-                      )
-                    ],
-                  ),
-                  // Content for Profile tab
-                  CustomScrollView(
-                    slivers: [
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return ListTile(
-                            title: Text("Profile Content $index"),
-                          );
-                        }, childCount: 20),
-                      )
-                    ],
-                  ),
-                  CustomScrollView(
-                    slivers: [
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return ListTile(
-                            title: Text("Profile Content $index"),
-                          );
-                        }, childCount: 20),
-                      )
-                    ],
-                  ),
-                  CustomScrollView(
-                    slivers: [
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return ListTile(
-                            title: Text("Profile Content $index"),
-                          );
-                        }, childCount: 20),
-                      )
-                    ],
-                  ),
-                  CustomScrollView(
-                    slivers: [
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate((context, index) {
-                          return ListTile(
-                            title: Text("Profile Content $index"),
-                          );
-                        }, childCount: 20),
-                      )
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-          drawer: const CategoryDrawer(),
-          // ),
-        ));
+
+            // Corrected BlocBuilder
+            BlocBuilder<DashboardBuilderCubit, DashboardBuilderState>(
+              builder: (context, state) {
+                if (state.sections.isEmpty) {
+                  return const SliverToBoxAdapter(child: SizedBox.shrink());
+                }
+                if (state.sections.isEmpty && state.isLoading) {
+                  return const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                // Build slivers dynamically
+                return SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final Section category = state.sections[index];
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min, // Add this
+                        children: [
+                          SizedBox(
+                            height: 20,
+                          ),
+                          _buildHeader(category.type!, category.name!),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            padding: EdgeInsets.zero,
+                            itemCount: category.elements.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              childAspectRatio: 2 / 3,
+                            ),
+                            itemBuilder: (context, itemIndex) {
+                              final items = category.elements;
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => MultiBlocProvider(
+                                        providers: [
+                                          BlocProvider<FetchCategoryBloc>(
+                                            create: (context) =>
+                                                FetchCategoryBloc(
+                                              FirestoreCategoryService(
+                                                firestore:
+                                                    FirebaseFirestore.instance,
+                                                collectionName: "categories",
+                                              ),
+                                            )..add(
+                                                    FetchCategoryChildren(
+                                                        items[itemIndex].id!),
+                                                  ),
+                                          ),
+                                          BlocProvider<FetchProductBloc>(
+                                            create: (context) =>
+                                                FetchProductBloc(
+                                                    productService),
+                                          ),
+                                        ],
+                                        child: const ProductList(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: _buildSection(
+                                    category.type!, items[itemIndex]),
+                              );
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                    childCount:
+                        state.sections.length + (state.isLoading ? 1 : 0),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
+}
+
+Widget _buildSection(String type, Category category) {
+  if (type == "category") {
+    return DashboardCategory(category: category);
+  }
+  if (type == "store") {
+    return ShopByStore(category: category);
+  }
+  return Container();
+}
+
+Widget _buildHeader(String type, String name) {
+  if (type == "store") {
+    return const Text(
+      "Shop By Store",
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  return Text(
+    name,
+    style: const TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+    ),
+  );
 }

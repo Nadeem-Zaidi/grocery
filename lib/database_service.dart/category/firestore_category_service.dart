@@ -120,9 +120,6 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
 
   @override
   Future<Category?> update(Map<String, dynamic> data) async {
-    print("from category update");
-    print(data);
-    print("from category update");
     List<String> allowedFields = ["id", 'name', 'parent', 'path', 'url'];
     List<String> dataFields = data.keys.toList();
     List<String> invalidFields = dataFields

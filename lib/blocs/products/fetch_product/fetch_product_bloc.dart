@@ -81,15 +81,22 @@ class FetchProductBloc extends Bloc<FetchProductEvent, FetchProductState> {
     try {
       var (products, lastDoc) = await productDb.whereClause(
           (collection) =>
-              collection.where("tags", arrayContains: categoryString),
+              collection.where("tags", arrayContains: categoryString).limit(2),
           state.lastDocument);
-      emit(state.copyWith(
-          products: products as List<Product>,
-          lastDocument: lastDoc,
-          isLoading: false));
+
+      if (products.isEmpty) {
+        state.copyWith(hasReachedMax: true);
+      } else {
+        emit(state.copyWith(
+            products: products as List<Product>,
+            lastDocument: lastDoc,
+            isLoading: false));
+      }
     } catch (e) {
       print("error occured while fetching products duie to ==$e");
       emit(state.copyWith(error: e.toString(), isLoading: false));
+    } finally {
+      emit(state.copyWith(isLoading: false));
     }
   }
 }

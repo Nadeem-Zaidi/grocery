@@ -6,7 +6,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
 import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
+import 'package:grocery_app/blocs/dashboard_builder/cubit/dashboard_builder_cubit.dart';
 import 'package:grocery_app/blocs/products/cart/cart_bloc.dart';
+import 'package:grocery_app/database_service.dart/dashboard/firebase_dashboard_service.dart';
 
 import 'package:grocery_app/router/route_generator.dart';
 import 'package:grocery_app/theme/theme_data.dart';
@@ -53,6 +55,10 @@ class MyApp extends StatelessWidget {
               prefs: context.read<SharedPreferences>(),
             )..add(CartInitRequested()),
           ),
+          BlocProvider<DashboardBuilderCubit>(
+              create: (context) => DashboardBuilderCubit(
+                  dbService: FirebaseDashBoard(FirebaseFirestore.instance))
+                ..fetchSections())
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

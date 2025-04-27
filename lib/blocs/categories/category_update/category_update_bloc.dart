@@ -129,11 +129,6 @@ class CategoryUpdateBloc
       String? parentId = category.parent;
       String newPath = newName;
 
-      print("parent id status");
-      print(parentId == "");
-
-      print("parent id status");
-
       if (parentId != null && parentId != "") {
         Category? parentDoc = await dbService.getById(parentId);
         if (parentDoc != null) {
@@ -141,11 +136,6 @@ class CategoryUpdateBloc
           newPath = "$parentPath/$newName";
         }
       }
-      print("after");
-      print(oldPath);
-      print(parentId);
-      print(newPath);
-      print("after");
 
       Category updatedDoc = await dbService.update({
         "id": categoryId,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:grocery_app/widgets/cart_increment_decrement.dart';
 
 import '../blocs/products/cart/cart_bloc.dart';
 import '../models/cart/cart_model.dart';
@@ -93,50 +94,14 @@ Widget addToCartButton(
                 child: cartItem.quantity > 0
                     ? Row(
                         children: [
-                          // Decrease button
-                          IconButton(
-                            color: Colors.white,
-                            onPressed: () {
-                              context
-                                  .read<CartBloc>()
-                                  .add(CartItemRemoved(product.id!));
-                            },
-                            icon: Icon(
-                              Icons.remove,
-                              color: Colors.white,
+                          SizedBox(
+                            child: CartIncrementDecrement(
+                              productId: product.id!,
+                              quantity: cartItem.quantity,
+                              height: 50,
+                              width: 150,
                             ),
-                            splashRadius: 20,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-
-                          // Quantity
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: Text(
-                              cartItem.quantity.toString(),
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Colors.white),
-                            ),
-                          ),
-
-                          // Increase button
-                          IconButton(
-                            onPressed: () {
-                              context
-                                  .read<CartBloc>()
-                                  .add(CartItemAdded(product.id!));
-                            },
-                            icon: const Icon(
-                              Icons.add,
-                              color: Colors.white,
-                            ),
-                            splashRadius: 20,
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
+                          )
                         ],
                       )
                     : ElevatedButton(

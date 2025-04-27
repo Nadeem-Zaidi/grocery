@@ -12,6 +12,7 @@ class FirestoreProductService implements IdatabaseService<Product> {
   //method to create the product record
   @override
   Future<Product?> create(Product product) async {
+    //convert the incoming product to map
     Map<String, dynamic> productMap = product.toMap();
     productMap.removeWhere(
         (key, value) => (key == "id" || value == "" || value == null));
@@ -19,6 +20,9 @@ class FirestoreProductService implements IdatabaseService<Product> {
     if (productMap.isEmpty) {
       throw Exception("Valid Form data is required");
     }
+
+    /*** Add the logic here for the mandatory fields,remove the case of getting null in the ui */
+    List<String> mandatoryFields = ["url", "name", "description", ""];
 
     try {
       DocumentReference productRef = fireStore.collection(collectionName).doc();
@@ -107,8 +111,10 @@ class FirestoreProductService implements IdatabaseService<Product> {
       if (lastDocument != null) {
         query = query.startAfterDocument(lastDocument);
       }
-      QuerySnapshot qs =
-          await query.orderBy("name").get().timeout(Duration(seconds: 5));
+      QuerySnapshot qs = await query
+          .orderBy("name", descending: false)
+          .get()
+          .timeout(Duration(seconds: 5));
       if (qs.docs.isEmpty) {
         return (<Product>[], lastDocument);
       }
