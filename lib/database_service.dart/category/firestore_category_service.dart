@@ -20,7 +20,6 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
           .orderBy('name', descending: true)
           .limit(limit);
 
-      // Use the parameter (not a new variable)
       if (lastDocument != null) {
         query = query.startAfterDocument(lastDocument);
       }
@@ -48,72 +47,75 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
 
   @override
   Future<Category?> getById(String id) async {
-    DocumentReference docRef = firestore.collection(collectionName).doc(id);
-    DocumentSnapshot docSnapShot = await docRef.get();
-    if (docSnapShot.exists) {
+    try {
+      DocumentReference docRef = firestore.collection(collectionName).doc(id);
+      DocumentSnapshot docSnapShot = await docRef.get();
+
+      if (!docSnapShot.exists) {
+        return null;
+      }
       Map<String, dynamic> doc = docSnapShot.data() as Map<String, dynamic>;
       doc["id"] = docSnapShot.id;
 
       return Category.fromMap(doc);
-    } else {
-      return null;
+    } catch (e) {
+      rethrow;
     }
   }
 
   @override
   Future<Category?> create(Category category) async {
-    // Validate input category
-    Map<String, dynamic> categoryMap = category.toJson();
-    categoryMap.removeWhere(
-        (key, value) => (key == "id" || value == "" || value == null));
-
-    // Validate required fields
-    final requiredFields = ['name', 'path', 'url'];
-    for (final field in requiredFields) {
-      if (categoryMap[field] == null) {
-        throw ArgumentError('Error: $field cannot be null');
-      }
-    }
-
-    // Additional name validation
-    final name = categoryMap['name'] as String?;
-    if (name == null || name.isEmpty) {
-      throw ArgumentError('Error: "name" cannot be null or empty');
-    }
-
-    // Prepare path and parent
-    String newPath = name;
-    final parent = categoryMap['parent'] as String? ?? '';
-
-    // Get reference for new category
-    final newCategoryRef = firestore.collection(collectionName).doc();
-
-    // Handle parent path if parent exists
-    if (parent.isNotEmpty) {
-      final parentDoc =
-          await firestore.collection(collectionName).doc(parent).get();
-      if (parentDoc.exists) {
-        final parentPath = parentDoc['path'] as String? ?? '';
-        newPath = "$parentPath/$name";
-      } else {
-        throw ArgumentError('Error: Specified parent category does not exist');
-      }
-    }
-
-    // Prepare complete data
-    final categoryData = {
-      "id": newCategoryRef.id,
-      "name": name,
-      "parent": parent,
-      "path": newPath,
-      "url": categoryMap['url'],
-    };
-
     try {
-      await newCategoryRef.set(categoryData);
-      return Category.fromMap(categoryData);
+      Map<String, dynamic> categoryMap = category.toJson();
+      categoryMap.removeWhere(
+          (key, value) => (key == "id" || value == "" || value == null));
+
+      // Validate required fields
+      final requiredFields = ['name', 'path', 'url'];
+      for (final field in requiredFields) {
+        if (categoryMap[field] == null) {
+          throw ArgumentError('Error: $field cannot be null');
+        }
+      }
+
+      final name = categoryMap['name'] as String?;
+      if (name == null || name.isEmpty) {
+        throw ArgumentError('Error: "name" cannot be null or empty');
+      }
+
+      String newPath = name;
+      final parent = categoryMap['parent'] as String? ?? '';
+
+      final newCategoryRef = firestore.collection(collectionName).doc();
+      if (parent.isNotEmpty) {
+        final parentDoc =
+            await firestore.collection(collectionName).doc(parent).get();
+        if (parentDoc.exists) {
+          final parentPath = parentDoc['path'] as String? ?? '';
+          newPath = "$parentPath/$name";
+        } else {
+          throw ArgumentError(
+              'Error: Specified parent category does not exist');
+        }
+      }
+
+      // Prepare complete data
+      final categoryData = {
+        "id": newCategoryRef.id,
+        "name": name,
+        "parent": parent,
+        "path": newPath,
+        "url": categoryMap['url'],
+      };
+
+      try {
+        await newCategoryRef.set(categoryData);
+        return Category.fromMap(categoryData);
+      } catch (e) {
+        print("Error creating category: $e");
+        rethrow;
+      }
     } catch (e) {
-      print("Error creating category: $e");
       rethrow;
     }
   }
@@ -151,7 +153,7 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
   }
 
   @override
-  Future<(List<Category>, DocumentSnapshot?)> whereClause(
+  Future<(List<Category>, DocumentSnapshot?, bool)> whereClause(
       Query Function(CollectionReference) queryBuilder,
       [DocumentSnapshot? lastDocument]) async {
     List<Category> categories = [];
@@ -165,7 +167,7 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
 
       QuerySnapshot qs = await query.get().timeout(Duration(seconds: 5));
       if (qs.docs.isEmpty) {
-        return (<Category>[], null);
+        return (<Category>[], null, true);
       }
 
       categories = qs.docs.map((doc) {
@@ -173,7 +175,7 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
         return Category.fromMap({...data, "id": doc.id});
       }).toList();
 
-      return (categories, lastDocument);
+      return (categories, lastDocument, false);
     } on FirebaseException catch (e) {
       print("Firestore error: ${e.message}");
       rethrow;
@@ -184,5 +186,25 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
       print("Unexpected error: $e");
       rethrow;
     }
+  }
+
+  @override
+  Future<void> dispose() {
+    // TODO: implement dispose
+    throw UnimplementedError();
+  }
+
+  @override
+  void startStream(
+      {int limit = 10,
+      DocumentSnapshot<Object?>? lastDocument,
+      String orderByField = 'name',
+      bool descending = false}) {
+    // TODO: implement startStream
+  }
+
+  @override
+  void stopStream() {
+    // TODO: implement stopStream
   }
 }

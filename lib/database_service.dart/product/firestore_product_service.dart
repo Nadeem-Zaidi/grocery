@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_app/database_service.dart/idatabase_service.dart';
 
@@ -8,6 +10,13 @@ class FirestoreProductService implements IdatabaseService<Product> {
   String collectionName;
   FirestoreProductService(
       {required this.fireStore, required this.collectionName});
+  final StreamController<(List<Product>, DocumentSnapshot?)>
+      _productStreamController =
+      StreamController<(List<Product>, DocumentSnapshot?)>.broadcast();
+  StreamSubscription<QuerySnapshot>? _productsSubscription;
+
+  Stream<(List<Product>, DocumentSnapshot?)> get productsStream =>
+      _productStreamController.stream;
 
   //method to create the product record
   @override
@@ -87,7 +96,8 @@ class FirestoreProductService implements IdatabaseService<Product> {
       }
 
       final data = productSnapshot.data() as Map<String, dynamic>;
-      return Product.fromMap(data);
+      print({...data, id: productSnapshot.id});
+      return Product.fromMap({...data, "id": productSnapshot.id});
     } catch (e) {
       print("Error fetching product by ID: $e"); // Log the error
       throw Exception(
@@ -102,7 +112,7 @@ class FirestoreProductService implements IdatabaseService<Product> {
   }
 
   @override
-  Future<(List<Product>, DocumentSnapshot?)> whereClause(
+  Future<(List<Product>, DocumentSnapshot?, bool)> whereClause(
       Query<Object?> Function(CollectionReference<Object?> p1) queryBuilder,
       [DocumentSnapshot? lastDocument]) async {
     List<Product> products = [];
@@ -111,21 +121,62 @@ class FirestoreProductService implements IdatabaseService<Product> {
       if (lastDocument != null) {
         query = query.startAfterDocument(lastDocument);
       }
-      QuerySnapshot qs = await query
-          .orderBy("name", descending: false)
-          .get()
-          .timeout(Duration(seconds: 5));
+      QuerySnapshot qs = await query.get().timeout(Duration(seconds: 5));
       if (qs.docs.isEmpty) {
-        return (<Product>[], lastDocument);
+        return (<Product>[], lastDocument, true);
       }
       products = qs.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         return Product.fromMap({...data, "id": doc.id});
       }).toList();
 
-      return (products, lastDocument);
+      return (products, qs.docs.last, false);
     } catch (e) {
       rethrow;
     }
+  }
+
+  @override
+  void startStream(
+      {int limit = 4,
+      DocumentSnapshot<Object?>? lastDocument,
+      String orderByField = 'name',
+      bool descending = false}) {
+    _productsSubscription?.cancel();
+
+    Query query =
+        fireStore.collection(collectionName).orderBy(orderByField).limit(limit);
+
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+
+    _productsSubscription = query.snapshots().listen((snapShot) {
+      final products = snapShot.docs.map((doc) {
+        return Product.fromMap(
+            {...doc.data() as Map<String, dynamic>, "id": doc.id});
+      }).toList();
+      final newLastDocument =
+          snapShot.docs.isNotEmpty ? snapShot.docs.last : null;
+
+      if (!_productStreamController.isClosed) {
+        _productStreamController.add((products, newLastDocument));
+      }
+    }, onError: (error) {
+      if (!_productStreamController.isClosed) {
+        _productStreamController.addError(error);
+      }
+    });
+  }
+
+  @override
+  void stopStream() {
+    _productsSubscription?.cancel();
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _productStreamController.close();
+    stopStream();
   }
 }

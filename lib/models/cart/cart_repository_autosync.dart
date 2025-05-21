@@ -14,6 +14,7 @@ class CartRepository {
   final SharedPreferences _prefs;
   final StreamController<Cart> _cartController =
       StreamController<Cart>.broadcast();
+  StreamSubscription<DocumentSnapshot>? _remoteCartSubscription;
 
   static const _localCartKey = 'local_cart';
   static const _syncDebounceTime = Duration(seconds: 2);
@@ -40,16 +41,75 @@ class CartRepository {
       _localCart = _parseLocalCart(json);
       _cartController.add(_localCart);
     }
-    await _syncWithRemote();
+
+    await _setupRemoteListener();
+    await _syncWithRemote(force: true);
+  }
+
+  Future<void> _setupRemoteListener() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    _remoteCartSubscription?.cancel();
+    _remoteCartSubscription = _firestore
+        .collection('carts')
+        .doc(user.uid)
+        .snapshots()
+        .listen((snapshot) async {
+      if (!snapshot.exists) return;
+
+      final remoteCart = _parseRemoteCart(snapshot.data()!);
+
+      // Only update if remote cart is newer than our local version
+      if (remoteCart.lastLocalUpdate.isAfter(_localCart.lastLocalUpdate)) {
+        _localCart = remoteCart;
+        _cartController.add(_localCart);
+        await _saveLocalCart();
+      }
+    });
+  }
+
+  Future<void> _syncWithRemote({bool force = false}) async {
+    if (_isSyncing && !force) return;
+    _isSyncing = true;
+
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return;
+
+      final cartRef = _firestore.collection('carts').doc(user.uid);
+      final remoteSnapshot = await cartRef.get();
+
+      if (!remoteSnapshot.exists) {
+        // No remote cart exists yet, just push our local version
+        await cartRef.set(_cartToFirestoreMap(_localCart));
+        return;
+      }
+
+      final remoteData = remoteSnapshot.data()!;
+      final remoteCart = _parseRemoteCart(remoteData);
+
+      // Only merge if our local cart is newer than remote
+      if (_localCart.lastLocalUpdate.isAfter(remoteCart.lastLocalUpdate)) {
+        await cartRef.set(_cartToFirestoreMap(_localCart));
+      }
+    } catch (e, stack) {
+      developer.log('Cart sync failed', error: e, stackTrace: stack);
+    } finally {
+      _isSyncing = false;
+    }
   }
 
   Future<void> addToCart({
     required String productId,
     int quantity = 1,
   }) async {
-    // ignore: unnecessary_string_interpolations
-    final itemKey = '$productId';
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
+    final itemKey = productId;
     _localCart = _localCart.copyWith(
+      userId: userId,
       items: {
         ..._localCart.items,
         itemKey: (_localCart.items[itemKey] ??
@@ -69,11 +129,15 @@ class CartRepository {
   }
 
   Future<void> removeFromCart(String productId) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
     final itemKey = productId;
     final newItems = {..._localCart.items};
     newItems.remove(itemKey);
 
     _localCart = _localCart.copyWith(
+      userId: userId,
       items: newItems,
       lastLocalUpdate: DateTime.now(),
     );
@@ -83,11 +147,15 @@ class CartRepository {
   }
 
   Future<void> decreaseQuantity(String productId) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
     final item = _localCart.items[productId];
     if (item == null) return;
 
     if (item.quantity > 1) {
       _localCart = _localCart.copyWith(
+        userId: userId,
         items: {
           ..._localCart.items,
           productId: item.copyWith(
@@ -98,7 +166,6 @@ class CartRepository {
         lastLocalUpdate: DateTime.now(),
       );
     } else {
-      // If only 1 left, remove item
       await removeFromCart(productId);
       return;
     }
@@ -109,7 +176,10 @@ class CartRepository {
   }
 
   Future<void> clearCart() async {
-    _localCart = Cart(userId: _localCart.userId);
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
+    _localCart = Cart(userId: userId);
     _cartController.add(_localCart);
     await _saveLocalCart();
     await _syncWithRemote(force: true);
@@ -120,48 +190,34 @@ class CartRepository {
     _syncDebounceTimer = Timer(_syncDebounceTime, () => _syncWithRemote());
   }
 
-  Future<void> _syncWithRemote({bool force = false}) async {
-    if (_isSyncing && !force) return;
-    _isSyncing = true;
+  // Future<void> _syncWithRemote({bool force = false}) async {
+  //   if (_isSyncing && !force) return;
+  //   _isSyncing = true;
 
-    try {
-      final user = _auth.currentUser;
-      if (user == null) return;
-      //getting the "carts" collection reference
-      final cartRef = _firestore.collection('carts').doc(user.uid);
-      final remoteData = (await cartRef.get()).data();
+  //   try {
+  //     final user = _auth.currentUser;
+  //     if (user == null) return;
 
-      final remoteCart = remoteData != null
-          ? _parseRemoteCart(remoteData)
-          : Cart(userId: user.uid);
+  //     final cartRef = _firestore.collection('carts').doc(user.uid);
+  //     final remoteSnapshot = await cartRef.get();
+  //     final remoteData = remoteSnapshot.data();
 
-      final mergedCart = _mergeCarts(local: _localCart, remote: remoteCart);
+  //     final remoteCart = remoteData != null
+  //         ? _parseRemoteCart(remoteData)
+  //         : Cart(userId: user.uid);
 
-      await cartRef.set(_cartToFirestoreMap(mergedCart));
+  //     final mergedCart = _mergeCarts(local: _localCart, remote: remoteCart);
 
-      _localCart = mergedCart;
-      _cartController.add(_localCart);
-      await _saveLocalCart();
-    } catch (e, stack) {
-      developer.log('Cart sync failed', error: e, stackTrace: stack);
-    } finally {
-      _isSyncing = false;
-    }
-  }
+  //     await cartRef.set(_cartToFirestoreMap(mergedCart));
 
-  // Cart _mergeCarts({required Cart local, required Cart remote}) {
-  //   final mergedItems = {...remote.items};
-  //   for (final entry in local.items.entries) {
-  //     if (entry.value.updatedAt
-  //         .isAfter(mergedItems[entry.key]?.updatedAt ?? DateTime(1970))) {
-  //       mergedItems[entry.key] = entry.value;
-  //     }
+  //     _localCart = mergedCart;
+  //     _cartController.add(_localCart);
+  //     await _saveLocalCart();
+  //   } catch (e, stack) {
+  //     developer.log('Cart sync failed', error: e, stackTrace: stack);
+  //   } finally {
+  //     _isSyncing = false;
   //   }
-  //   return Cart(
-  //     items: mergedItems,
-  //     userId: local.userId ?? remote.userId,
-  //     lastLocalUpdate: DateTime.now(),
-  //   );
   // }
 
   Cart _mergeCarts({required Cart local, required Cart remote}) {
@@ -174,12 +230,6 @@ class CartRepository {
       if (localItem.updatedAt
           .isAfter(remoteItem?.updatedAt ?? DateTime(1970))) {
         mergedItems[entry.key] = localItem;
-      }
-    }
-
-    for (final remoteKey in remote.items.keys) {
-      if (!local.items.containsKey(remoteKey)) {
-        mergedItems.remove(remoteKey); // Explicitly remove deleted item
       }
     }
 
@@ -206,7 +256,7 @@ class CartRepository {
   Map<String, dynamic> _cartToFirestoreMap(Cart cart) {
     return {
       'userId': cart.userId,
-      'updatedAt': FieldValue.serverTimestamp(),
+      'updatedAt': DateTime.now().toUtc(),
       'items': cart.items.map((key, value) => MapEntry(key, value.toMap())),
     };
   }

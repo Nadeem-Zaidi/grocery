@@ -27,8 +27,8 @@ android {
         applicationId = "com.example.grocery_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 33
+        targetSdk = 33
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
@@ -44,4 +44,12 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {// Use the latest version
+    implementation "com.google.android.gms:play-services-location:21.2.0" // Latest version
+    implementation "com.google.android.gms:play-services-base:18.4.0" // Add base dependency
+    implementation "com.google.android.gms:play-services-location:21.2.0"
+    implementation "com.google.android.gms:play-services-base:18.4.0"
+    implementation "com.google.android.gms:play-services-basement:18.3.0"
 }

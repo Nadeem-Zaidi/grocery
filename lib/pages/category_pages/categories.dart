@@ -10,6 +10,8 @@ import 'package:shimmer/shimmer.dart';
 import '../../blocs/categories/create_category_bloc/category_create_bloc.dart';
 import '../../database_service.dart/category/firestore_category_service.dart';
 import '../../models/category.dart';
+import '../../widgets/empty_state.dart';
+import '../../widgets/error_widget.dart';
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});
@@ -61,17 +63,17 @@ class _CategoriesPageState extends State<CategoriesPage> {
           if (state.isFetching && state.categories.isEmpty) {
             return _buildShimmerLoader();
           }
-
+          //showing error wiget in the case of any error
           if (state.error != null) {
             return Center(
-              child: ErrorWidget(
+              child: AppErrorWidget(
                 message: state.error!,
                 onRetry: () =>
                     context.read<FetchCategoryBloc>().add(FetchCategories()),
               ),
             );
           }
-
+          //showing empty widget in the case list is empty
           if (state.categories.isEmpty) {
             return EmptyStateWidget(
               title: 'No Categories Found',
@@ -290,116 +292,6 @@ class _CategoryCard extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class ErrorWidget extends StatelessWidget {
-  final String message;
-  final VoidCallback onRetry;
-
-  const ErrorWidget({
-    super.key,
-    required this.message,
-    required this.onRetry,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Something went wrong',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton.tonal(
-              onPressed: onRetry,
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class EmptyStateWidget extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-
-  const EmptyStateWidget({
-    super.key,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                size: 48,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () {
-                // Navigate to create category
-              },
-              child: const Text('Add Category'),
-            ),
-          ],
         ),
       ),
     );

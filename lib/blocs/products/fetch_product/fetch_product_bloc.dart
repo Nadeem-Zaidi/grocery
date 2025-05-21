@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:grocery_app/database_service.dart/idatabase_service.dart';
+import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
 import 'package:meta/meta.dart';
 
 import '../../../models/product/product.dart';
@@ -9,51 +11,35 @@ part 'fetch_product_event.dart';
 part 'fetch_product_state.dart';
 
 class FetchProductBloc extends Bloc<FetchProductEvent, FetchProductState> {
-  IdatabaseService productDb;
-  FetchProductBloc(this.productDb) : super(FetchProductState.initial()) {
+  FirestoreProductService productDb;
+  FirebaseFirestore firestore;
+  FetchProductBloc(this.productDb, this.firestore)
+      : super(FetchProductState.initial()) {
     on<FetchProductEvent>((event, emit) async {
       switch (event) {
         case FetchProducts(categoryString: String category):
           await _fetchProducts(emit, category);
         case FetchProductWhere(categoryString: String cs):
           await _productWhere(emit, cs);
+        // case ProductStream(products: List<Product> products):
+        //   await _getProduct(emit, products);
+        // case ProductsUpdated(
+        //     products: List<Product> p,
+        //     lastDocument: DocumentSnapshot? ld
+        //   ):
+        //   await _productsUpdated(emit, p, ld);
+        // case LoadProducts():
+        //   await _loadProducts();
+        // case LoadMore():
+        //   await _loadMore();
+        // case ProductNext(
+        //     products: List<Product> p,
+        //     lastDocument: DocumentSnapshot? ld
+        //   ):
+        //   _productNext(emit, p, ld);
       }
     });
   }
-
-  // Future<void> _fetchProduct(
-  //     Emitter<FetchProductState> emit, String categoryString) async {
-  //   int pageSize = 10;
-  //   String? startAfterName;
-  //   try {
-  //     final HttpsCallable callable =
-  //         FirebaseFunctions.instance.httpsCallable('getPaginatedProducts');
-  //     final response = await callable.call(<String, dynamic>{
-  //       'pageSize': pageSize,
-  //       if (startAfterName != null) 'startAfterName': startAfterName,
-  //     });
-
-  //     final data = response.data;
-
-  //     List<dynamic> products = data['products'];
-  //     print(products);
-  //     String? nextPageToken = data['nextPageToken'];
-  //     List<Product> productList = products
-  //         .map((item) => Product.fromMap(Map<String, dynamic>.from(item)))
-  //         .toList();
-
-  //     emit(state.copyWith(products: productList, isLoading: false));
-
-  //     if (nextPageToken != null) {
-  //       print('Next page token: $nextPageToken');
-  //       // Store it to fetch the next page
-  //     }
-  //   } on FirebaseFunctionsException catch (e) {
-  //     print('Functions Exception: ${e.code} - ${e.message}');
-  //   } catch (e) {
-  //     print('Unknown error: $e');
-  //   }
-  // }
 
   Future<void> _fetchProducts(
       Emitter<FetchProductState> emit, String category) async {
@@ -79,16 +65,18 @@ class FetchProductBloc extends Bloc<FetchProductEvent, FetchProductState> {
   Future<void> _productWhere(
       Emitter<FetchProductState> emit, String categoryString) async {
     try {
-      var (products, lastDoc) = await productDb.whereClause(
-          (collection) =>
-              collection.where("tags", arrayContains: categoryString).limit(2),
+      var (products, lastDoc, hasReachedmax) = await productDb.whereClause(
+          (collection) => collection
+              .where("tags", arrayContains: categoryString)
+              .orderBy("name")
+              .limit(5),
           state.lastDocument);
 
       if (products.isEmpty) {
-        state.copyWith(hasReachedMax: true);
+        emit(state.copyWith(hasReachedMax: true));
       } else {
         emit(state.copyWith(
-            products: products as List<Product>,
+            products: [...state.products, ...products],
             lastDocument: lastDoc,
             isLoading: false));
       }
@@ -99,4 +87,73 @@ class FetchProductBloc extends Bloc<FetchProductEvent, FetchProductState> {
       emit(state.copyWith(isLoading: false));
     }
   }
+
+  // Future<void> _getProduct(
+  //     Emitter<FetchProductState> emit, List<Product> products) async {
+  //   try {
+  //     state.copyWith(isLoading: true);
+  //     emit(state.copyWith(products: [...products]));
+  //   } catch (e) {
+  //     print(e);
+  //     emit(state.copyWith(error: e.toString(), isLoading: false));
+  //   } finally {
+  //     emit(state.copyWith(isLoading: false));
+  //   }
+  // }
+
+  // Future<void> _loadProducts() async {
+  //   productDb.startStream();
+  //   _productsSubscription = productDb.productsStream.listen((tuple) {
+  //     var (products, lastDocument) = tuple;
+  //     add(ProductsUpdated(products: products, lastDocument: lastDocument));
+  //   }, onError: (error) {});
+  // }
+
+  // Future<void> _productsUpdated(Emitter<FetchProductState> emit,
+  //     List<Product> products, DocumentSnapshot? ld) async {
+  //   try {
+  //     emit(state.copyWith(isLoading: true));
+  //     emit(state.copyWith(products: [...products], lastDocument: ld));
+
+  //     emit(state.copyWith(isLoading: false));
+  //   } catch (error) {
+  //     state.copyWith(error: error.toString(), isLoading: false);
+  //   } finally {
+  //     state.copyWith(isLoading: false);
+  //   }
+  // }
+
+  // Future<void> _loadMore() async {
+  //   state.copyWith(isLoading: true);
+  //   productDb.startStream(lastDocument: state.lastDocument);
+  //   _productsSubscription = productDb.productsStream.listen((tuple) {
+  //     var (products, lastDocument) = tuple;
+  //     add(ProductNext(products: products, lastDocument: lastDocument));
+  //   }, onError: (error) {});
+  // }
+
+  // Future<void> _productNext(
+  //     emit, List<Product> products, DocumentSnapshot? ld) async {
+  //   try {
+  //     emit(state.copyWith(isLoading: true));
+  //     if (products.isEmpty) {
+  //       emit(state.copyWith(hasReachedMax: true));
+  //     } else {
+  //       emit(state.copyWith(products: [...products], lastDocument: ld));
+  //     }
+
+  //     emit(state.copyWith(isLoading: false));
+  //   } catch (error) {
+  //     state.copyWith(error: error.toString(), isLoading: false);
+  //   } finally {
+  //     state.copyWith(isLoading: false);
+  //   }
+  // }
+
+  // @override
+  // Future<void> close() {
+  //   _productsSubscription?.cancel();
+  //   productDb.dispose();
+  //   return super.close();
+  // }
 }

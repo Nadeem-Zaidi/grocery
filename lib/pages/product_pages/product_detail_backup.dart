@@ -26,11 +26,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(() {
-      setState(() {
-        _scrollOffset = _scrollController.offset;
-      });
-    });
+    // _scrollController.addListener(() {
+    //   setState(() {
+    // _scrollOffset = _scrollController.offset;
+    // _scrollController.addListener(_checkCartButtonVisibility);
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   _checkCartButtonVisibility(); // Initial check
+    // });
+    //   });
+    // });
   }
 
   // void _checkCartButtonVisibility() {
@@ -85,9 +89,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   Widget build(BuildContext context) {
     final double appBarOpacity =
         (_scrollOffset / (_imageHeight - _appBarHeight)).clamp(0.0, 1.0);
-
     final double imageTop = -_scrollOffset * 0.5;
-
     final double imageScale =
         1.0 - (_scrollOffset / _imageHeight * 0.5).clamp(0.0, 0.5);
 
@@ -108,7 +110,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           extendBodyBehindAppBar: true,
           appBar: AppBar(
             backgroundColor: appBarOpacity > 0.7
-                ? Theme.of(context).primaryColor
+                ? Colors.white
                 : Colors.white.withValues(alpha: appBarOpacity),
             elevation: appBarOpacity > 0.5 ? 2 : 0.0,
             title: Opacity(
@@ -116,29 +118,22 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               child: Text(
                 product.name ?? "",
                 style: TextStyle(
-                    color: appBarOpacity > 0.7 ? Colors.white : Colors.black),
+                    color: appBarOpacity > 0.5 ? Colors.black : Colors.white),
               ),
             ),
-            leading: Container(
-              margin: EdgeInsets.only(left: 2),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(100),
-                  color: Theme.of(context).primaryColor),
-              child: IconButton(
-                icon: Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
-              ),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back,
+                  color: appBarOpacity > 0.5 ? Colors.black : Colors.white),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
           body: Stack(
             children: [
               CustomScrollView(
-                controller: _scrollController,
+                // controller: _scrollController,
                 slivers: [
                   //Sliver App Bar
                   SliverAppBar(
-                    automaticallyImplyLeading:
-                        false, // ← This removes the back button
                     expandedHeight: _imageHeight,
                     backgroundColor: Colors.white,
                     stretch: true,

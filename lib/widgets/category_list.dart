@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 
-import '../blocs/products/fetch_product/fetch_product_bloc.dart';
 import '../models/category.dart';
 
 class CategoryList extends StatefulWidget {
@@ -22,14 +22,9 @@ class _CategoryListState extends State<CategoryList> {
       itemBuilder: (context, index) {
         return InkWell(
           onTap: () {
-            setState(
-              () {
-                context
-                    .read<FetchProductBloc>()
-                    .add(FetchProductWhere(childrenCat[index].name!));
-                // Here you would typically filter products by category
-              },
-            );
+            context
+                .read<FetchCategoryBloc>()
+                .add(SetCurrentChild(childrenCat[index].name!));
           },
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),

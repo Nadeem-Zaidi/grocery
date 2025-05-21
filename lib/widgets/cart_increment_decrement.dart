@@ -53,14 +53,14 @@ class _CartIncrementDecrementState extends State<CartIncrementDecrement> {
   Widget _buildDecrementButton(BuildContext context) {
     return InkWell(
       onTap: () => _removeItem(context),
-      child: Icon(Icons.remove, color: Colors.white, size: 22),
+      child: Icon(Icons.remove, color: Colors.white, size: 18),
     );
   }
 
   Widget _buildIncrementButton(BuildContext context) {
     return InkWell(
       onTap: () => _addItem(context),
-      child: Icon(Icons.add, color: Colors.white, size: 22),
+      child: Icon(Icons.add, color: Colors.white, size: 18),
     );
   }
 

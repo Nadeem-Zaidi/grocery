@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import 'package:grocery_app/blocs/products/product_bloc/product_bloc.dart';
 import 'package:grocery_app/database_service.dart/category/firestore_category_service.dart';
+import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
 import 'package:grocery_app/pages/select_category/select_category.dart';
 import 'package:grocery_app/widgets/overlay.dart';
 import '../../models/category.dart';
@@ -34,6 +35,8 @@ class _CreateProductState extends State<CreateProduct> {
   bool isChecked = false;
   FirestoreCategoryService categoryService = FirestoreCategoryService(
       firestore: FirebaseFirestore.instance, collectionName: "categories");
+  FirestoreProductService productService = FirestoreProductService(
+      fireStore: FirebaseFirestore.instance, collectionName: "products");
 
   @override
   void dispose() {
@@ -129,9 +132,9 @@ class _CreateProductState extends State<CreateProduct> {
                             builder: (context) => MultiBlocProvider(
                               providers: [
                                 BlocProvider(
-                                  create: (context) =>
-                                      FetchCategoryBloc(categoryService)
-                                        ..add(FetchCategories()),
+                                  create: (context) => FetchCategoryBloc(
+                                      categoryService, productService)
+                                    ..add(FetchCategories()),
                                 )
                               ],
                               child: SelectCategory(

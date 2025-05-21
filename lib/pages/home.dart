@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import 'package:grocery_app/blocs/dashboard_builder/cubit/dashboard_builder_cubit.dart';
+import 'package:grocery_app/blocs/location/cubit/location_cubit.dart';
 import 'package:grocery_app/blocs/products/fetch_product/fetch_product_bloc.dart';
 import 'package:grocery_app/database_service.dart/category/firestore_category_service.dart';
 import 'package:grocery_app/database_service.dart/dashboard/firebase_dashboard_service.dart';
@@ -15,6 +17,7 @@ import 'package:grocery_app/pages/product_pages/product_list.dart';
 import 'package:grocery_app/widgets/category_drawer.dart';
 import 'package:grocery_app/widgets/shop_by_store.dart';
 import 'package:grocery_app/widgets/sliver_category.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -54,8 +57,38 @@ class _HomeState extends State<Home> {
     }
   }
 
+  Future<Map<String, double>?> getLocation() async {
+    // 1. Check if permission is already granted
+    // var status = await Permission.location.status;
+    // if (!status.isGranted) {
+    //   // 2. Request permission if not granted
+    //   status = await Permission.location.request();
+    //   if (!status.isGranted) {
+    //     print("Location permission permanently denied");
+    //     return null;
+    //   }
+    // }
+
+    // 3. Only call native code AFTER permission is confirmed
+    try {
+      Map<String, dynamic> location = await LocationService.getLocation();
+      print(location);
+      return {
+        'latitude': location['latitude'],
+        'longitude': location['longitude'],
+      };
+    } catch (e) {
+      print("Location fetch error: $e");
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    print("hurray my location");
+    print(getLocation());
+
+    print("hurray my location");
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthCubit, AuthState>(
@@ -205,21 +238,33 @@ class _HomeState extends State<Home> {
                                           BlocProvider<FetchCategoryBloc>(
                                             create: (context) =>
                                                 FetchCategoryBloc(
-                                              FirestoreCategoryService(
-                                                firestore:
-                                                    FirebaseFirestore.instance,
-                                                collectionName: "categories",
-                                              ),
-                                            )..add(
+                                                    FirestoreCategoryService(
+                                                      firestore:
+                                                          FirebaseFirestore
+                                                              .instance,
+                                                      collectionName:
+                                                          "categories",
+                                                    ),
+                                                    productService)
+                                                  ..add(
                                                     FetchCategoryChildren(
-                                                        items[itemIndex].id!),
+                                                        items[itemIndex].id!,
+                                                        items[itemIndex].name),
                                                   ),
                                           ),
                                           BlocProvider<FetchProductBloc>(
                                             create: (context) =>
-                                                FetchProductBloc(
-                                                    productService),
+                                                FetchProductBloc(productService,
+                                                    FirebaseFirestore.instance),
                                           ),
+                                          // BlocProvider<FetchProductBloc>(
+                                          //   create: (context) =>
+                                          //       FetchProductBloc(productService,
+                                          //           FirebaseFirestore.instance)
+                                          //         ..add(
+                                          //           LoadProducts(),
+                                          //         ),
+                                          // ),
                                         ],
                                         child: const ProductList(),
                                       ),
@@ -275,4 +320,28 @@ Widget _buildHeader(String type, String name) {
       fontWeight: FontWeight.bold,
     ),
   );
+}
+
+class LocationService {
+  static const platform = MethodChannel('com.example.grocery_app/location');
+
+  static Future<Map<String, double>> getLocation() async {
+    // 1. Request location permission
+    var status = await Permission.location.request();
+
+    if (!status.isGranted) {
+      throw 'Location permission not granted';
+    }
+
+    // 2. Call Kotlin native code
+    try {
+      final result = await platform.invokeMethod<Map>('getDeviceLocation');
+      return {
+        'latitude': result?['latitude'] ?? 0.0,
+        'longitude': result?['longitude'] ?? 0.0,
+      };
+    } on PlatformException catch (e) {
+      throw 'Location fetch error: ${e.message}';
+    }
+  }
 }

@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_app/database_service.dart/idatabase_service.dart';
 import 'package:grocery_app/models/category.dart';
-import 'package:grocery_app/models/sections/dashboared_element.dart';
 
 import '../../models/sections/section.dart';
 
@@ -106,10 +104,30 @@ class FirebaseDashBoard implements IdatabaseService<Section> {
   }
 
   @override
-  Future<(List<Section>, DocumentSnapshot<Object?>?)> whereClause(
+  Future<(List<Section>, DocumentSnapshot<Object?>?, bool)> whereClause(
       Query<Object?> Function(CollectionReference<Object?> p1) queryBuilder,
       [DocumentSnapshot<Object?>? lastDocument]) {
     // TODO: implement whereClause
     throw UnimplementedError();
+  }
+
+  @override
+  Future<void> dispose() {
+    // TODO: implement dispose
+    throw UnimplementedError();
+  }
+
+  @override
+  void startStream(
+      {int limit = 10,
+      DocumentSnapshot<Object?>? lastDocument,
+      String orderByField = 'name',
+      bool descending = false}) {
+    // TODO: implement startStream
+  }
+
+  @override
+  void stopStream() {
+    // TODO: implement stopStream
   }
 }

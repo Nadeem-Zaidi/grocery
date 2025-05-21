@@ -5,7 +5,7 @@ final ThemeData myAppTheme = ThemeData(
   colorScheme: ColorScheme.light(
     primary: Colors.deepPurple, // Primary color
     secondary: Colors.amber, // Background color
-    surface: Colors.grey[200]!, // Surface color (e.g., cards, dialogs)
+    surface: Colors.white, // Surface color (e.g., cards, dialogs)
     error: Colors.red, // Error color
     onPrimary: Colors.white, // Text/icon color on primary color
     onSecondary: Colors.black, // Text/icon color on background color

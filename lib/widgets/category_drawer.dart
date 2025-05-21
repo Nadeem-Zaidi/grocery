@@ -50,10 +50,13 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                     providers: [
                       BlocProvider(
                         create: (context) => FetchCategoryBloc(
-                          FirestoreCategoryService(
-                              firestore: FirebaseFirestore.instance,
-                              collectionName: "categories"),
-                        )..add(FetchCategories()),
+                            FirestoreCategoryService(
+                                firestore: FirebaseFirestore.instance,
+                                collectionName: "categories"),
+                            FirestoreProductService(
+                                fireStore: FirebaseFirestore.instance,
+                                collectionName: "products"))
+                          ..add(FetchCategories()),
                       ),
                       BlocProvider(
                         create: (context) => CreateCategoryBloc(

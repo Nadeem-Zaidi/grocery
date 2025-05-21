@@ -9,5 +9,17 @@ class FetchCategories extends FetchCategoryEvent {
 
 class FetchCategoryChildren extends FetchCategoryEvent {
   String categoryId;
-  FetchCategoryChildren(this.categoryId);
+  String categoryName;
+  FetchCategoryChildren(this.categoryId, this.categoryName);
 }
+
+class FetchProductWithChildren extends FetchCategoryEvent {
+  FetchProductWithChildren();
+}
+
+class SetCurrentChild extends FetchCategoryEvent {
+  String name;
+  SetCurrentChild(this.name);
+}
+
+class FetchNext extends FetchCategoryEvent {}

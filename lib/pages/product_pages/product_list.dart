@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
-import 'package:grocery_app/blocs/products/fetch_product/fetch_product_bloc.dart';
-import 'package:grocery_app/pages/product_pages/product_detail.dart';
-import 'package:grocery_app/widgets/add_button.dart';
 import 'package:grocery_app/widgets/build_product_grid.dart';
-import 'package:grocery_app/widgets/cart_increment_decrement.dart';
 import 'package:grocery_app/widgets/category_list.dart';
+import 'package:grocery_app/widgets/empty_state.dart';
+import 'package:grocery_app/widgets/error_widget.dart';
 
-import '../../blocs/products/cart/cart_bloc.dart';
 import '../../models/category.dart';
-import '../../models/product/product.dart';
 
 class ProductList extends StatefulWidget {
   const ProductList({super.key});
@@ -20,37 +16,13 @@ class ProductList extends StatefulWidget {
 }
 
 class _ProductListState extends State<ProductList> {
-  int _selectedCategoryIndex = 0;
-
-  // @override
-  // void initState() {
-  //   var catState = context.read<FetchCategoryBloc>().state;
-  //   print("hurray category string is here ");
-  //   // print(catState.childrenCategories[0].path);
-  //   print("hurray category string");
-  //   context
-  //       .read<FetchProductBloc>()
-  //       .add(FetchProductWhere(catState.childrenCategories[0].name!));
-  //   super.initState();
-  // }
-
-  @override
-  void didChangeDependencies() {
-    var catState = context.watch<FetchCategoryBloc>().state;
-
-    if (catState.childrenCategories.isNotEmpty) {
-      context.read<FetchProductBloc>().add(FetchProductWhere(
-          catState.childrenCategories[_selectedCategoryIndex].name!));
-    }
-    super.didChangeDependencies();
-  }
-
   @override
   Widget build(BuildContext context) {
-    print("I am running");
+    String appBarName =
+        context.read<FetchCategoryBloc>().state.categoryName ?? "";
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Atta, Rice & Dal"),
+        title: Text(appBarName),
         actions: [
           IconButton(
             onPressed: () {},
@@ -69,17 +41,14 @@ class _ProductListState extends State<ProductList> {
           BlocBuilder<FetchCategoryBloc, FetchCategoryState>(
             builder: (context, state) {
               if (state.childrenCategories.isNotEmpty) {
-                print("is this running");
                 List<Category> childrenCat = state.childrenCategories;
                 return SizedBox(
-                  width: 60,
+                  width: 50,
                   child: CategoryList(categories: childrenCat),
                   // Give it a reasonable width
                 );
               }
-              return Center(
-                child: CircularProgressIndicator(),
-              ); // Maintain consistent width
+              return Container(); // Maintain consistent width
             },
           ),
           // Vertical divider
@@ -88,22 +57,32 @@ class _ProductListState extends State<ProductList> {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: BlocBuilder<FetchProductBloc, FetchProductState>(
+              child: BlocBuilder<FetchCategoryBloc, FetchCategoryState>(
                   builder: (context, state) {
-                if (state.products.isNotEmpty) {
-                  return BuildProductGrid(products: state.products);
+                if (state.error != null) {
+                  return Center(
+                    child: AppErrorWidget(
+                        message: "Some thing went wrong in fetching products",
+                        onRetry: () {}),
+                  );
                 }
-                return Container();
+                if (state.products.isEmpty) {
+                  return EmptyStateWidget(
+                      title: "No Product Found",
+                      subtitle: "",
+                      icon: Icons.category_outlined);
+                }
+                return BuildProductGrid(products: state.products);
               }),
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _goToCart(context),
-        label: const Text("View Cart"),
-        icon: const Icon(Icons.shopping_cart),
-      ),
+      // floatingActionButton: FloatingActionButton.extended(
+      //   onPressed: () => _goToCart(context),
+      //   label: const Text("View Cart"),
+      //   icon: const Icon(Icons.shopping_cart),
+      // ),
     );
   }
 
