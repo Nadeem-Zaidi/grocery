@@ -32,6 +32,15 @@ class ProductState extends Equatable {
   final String? descriptionInputError;
   final String? quantityInBoxInputError;
 
+  final String? manufacturer;
+  final String? fssaiLicense;
+  final String? shelfLife;
+  final String? type;
+  final String? countryOfOrigin;
+  final String? customerCareDetails;
+  final String? seller;
+  final String? disclaimer;
+
   const ProductState({
     this.productName,
     this.productBrand,
@@ -62,6 +71,14 @@ class ProductState extends Equatable {
     this.availableQuantityError,
     this.descriptionInputError,
     this.quantityInBoxInputError,
+    this.manufacturer,
+    this.fssaiLicense,
+    this.shelfLife,
+    this.type,
+    this.countryOfOrigin,
+    this.customerCareDetails,
+    this.seller,
+    this.disclaimer,
   });
 
   factory ProductState.initial() => const ProductState();
@@ -96,44 +113,59 @@ class ProductState extends Equatable {
     String? availableQuantityError,
     String? descriptionInputError,
     String? quantityInBoxInputError,
+    String? manufacturer,
+    String? fssaiLicense,
+    String? shelfLife,
+    String? type,
+    String? countryOfOrigin,
+    String? customerCareDetails,
+    String? seller,
+    String? disclaimer,
   }) {
     return ProductState(
-      productName: productName ?? this.productName,
-      productBrand: productBrand ?? this.productBrand,
-      productCategory: productCategory ?? this.productCategory,
-      sellingUnit: sellingUnit ?? this.sellingUnit,
-      quantityInBox: quantityInBox ?? this.quantityInBox,
-      quantity: quantity ?? this.quantity,
-      mrp: mrp ?? this.mrp,
-      sellingPrice: sellingPrice ?? this.sellingPrice,
-      discount: discount ?? this.discount,
-      products: products ?? this.products,
-      imageUrls: imageUrls ?? this.imageUrls,
-      imageFiles: imageFiles ?? this.imageFiles,
-      imageUploadedUrls: imageUploadedUrls ?? this.imageUploadedUrls,
-      description: description ?? this.description,
-      summary: summary ?? this.keyFeatures,
-      keyFeatures: keyFeatures ?? this.keyFeatures,
-      isLoading: isLoading ?? this.isLoading,
-      error: error ?? this.error,
-      showQuantityInBox: showQuantityInBox ?? this.showQuantityInBox,
-      user: user ?? this.user,
-      productNameInputError:
-          productNameInputError ?? this.productNameInputError,
-      brandInputError: brandInputError ?? this.brandInputError,
-      sellingUnitInputError:
-          sellingUnitInputError ?? this.sellingUnitInputError,
-      mrpInputError: mrpInputError ?? this.mrpInputError,
-      sellingPriceInputError:
-          sellingPriceInputError ?? this.sellingPriceInputError,
-      discountInputError: discountInputError ?? this.discountInputError,
-      availableQuantityError:
-          availableQuantityError ?? this.availableQuantityError,
-      descriptionInputError:
-          descriptionInputError ?? this.descriptionInputError,
-      quantityInBoxInputError:
-          quantityInBoxInputError ?? this.quantityInBoxInputError,
-    );
+        productName: productName ?? this.productName,
+        productBrand: productBrand ?? this.productBrand,
+        productCategory: productCategory ?? this.productCategory,
+        sellingUnit: sellingUnit ?? this.sellingUnit,
+        quantityInBox: quantityInBox ?? this.quantityInBox,
+        quantity: quantity ?? this.quantity,
+        mrp: mrp ?? this.mrp,
+        sellingPrice: sellingPrice ?? this.sellingPrice,
+        discount: discount ?? this.discount,
+        products: products ?? this.products,
+        imageUrls: imageUrls ?? this.imageUrls,
+        imageFiles: imageFiles ?? this.imageFiles,
+        imageUploadedUrls: imageUploadedUrls ?? this.imageUploadedUrls,
+        description: description ?? this.description,
+        summary: summary ?? this.keyFeatures,
+        keyFeatures: keyFeatures ?? this.keyFeatures,
+        isLoading: isLoading ?? this.isLoading,
+        error: error ?? this.error,
+        showQuantityInBox: showQuantityInBox ?? this.showQuantityInBox,
+        user: user ?? this.user,
+        productNameInputError:
+            productNameInputError ?? this.productNameInputError,
+        brandInputError: brandInputError ?? this.brandInputError,
+        sellingUnitInputError:
+            sellingUnitInputError ?? this.sellingUnitInputError,
+        mrpInputError: mrpInputError ?? this.mrpInputError,
+        sellingPriceInputError:
+            sellingPriceInputError ?? this.sellingPriceInputError,
+        discountInputError: discountInputError ?? this.discountInputError,
+        availableQuantityError:
+            availableQuantityError ?? this.availableQuantityError,
+        descriptionInputError:
+            descriptionInputError ?? this.descriptionInputError,
+        quantityInBoxInputError:
+            quantityInBoxInputError ?? this.quantityInBoxInputError,
+        manufacturer: manufacturer ?? this.manufacturer,
+        fssaiLicense: manufacturer ?? this.manufacturer,
+        shelfLife: shelfLife ?? this.shelfLife,
+        type: type ?? this.type,
+        countryOfOrigin: countryOfOrigin ?? this.countryOfOrigin,
+        customerCareDetails: customerCareDetails ?? this.customerCareDetails,
+        seller: seller ?? this.seller,
+        disclaimer: disclaimer ?? this.disclaimer);
   }
 
   @override
@@ -167,6 +199,14 @@ class ProductState extends Equatable {
         availableQuantityError,
         descriptionInputError,
         quantityInBoxInputError,
+        manufacturer,
+        fssaiLicense,
+        shelfLife,
+        type,
+        countryOfOrigin,
+        customerCareDetails,
+        seller,
+        disclaimer,
       ];
 
   @override
@@ -201,6 +241,14 @@ class ProductState extends Equatable {
         'availableQuantityError: $availableQuantityError, '
         'descriptionInputError: $descriptionInputError, '
         'quantityInBoxInputError: $quantityInBoxInputError'
+        'manufacturer:$manufacturer, '
+        'fssaiLicense:$fssaiLicense, '
+        'shelfLife:$shelfLife, '
+        'type:$type, '
+        'countryOfOrigin:$countryOfOrigin, '
+        'customerCareDetails:$customerCareDetails '
+        'seller:$seller,'
+        'disclaimer:$disclaimer, '
         ')';
   }
 }

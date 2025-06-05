@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 Widget buildTextField(
   BuildContext context, {
-  required TextEditingController controller,
+  TextEditingController? controller,
   required String label,
   required String hint,
   IconData? icon,

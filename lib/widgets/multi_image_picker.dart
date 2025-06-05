@@ -44,10 +44,10 @@ class _MultiImageUploadScreenState extends State<MultiImageUploadScreen> {
         // Modern pick button with icon
         FilledButton.icon(
           onPressed: () {
-            context.read<ProductBloc>().add(PickImages());
+            _pickImages();
           },
           icon: const Icon(Icons.add_photo_alternate_outlined),
-          label: const Text("SELECT IMAGES"),
+          label: const Text("SELECT IMAGES "),
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(
@@ -60,70 +60,60 @@ class _MultiImageUploadScreenState extends State<MultiImageUploadScreen> {
 
         // Image grid with elegant card design
         Expanded(
-          child: BlocBuilder<ProductBloc, ProductState>(
-            builder: (context, state) {
-              if (state.imageFiles.isNotEmpty) {
-                return GridView.builder(
-                  padding: const EdgeInsets.all(8),
-                  itemCount: state.imageFiles.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 1,
-                  ),
-                  itemBuilder: (context, index) {
-                    return _buildImageCard(
-                        index, colorScheme, state.imageFiles);
-                  },
-                );
-              } else {
-                return const SizedBox.shrink();
-              }
-            },
-          ),
-        ),
+            child: _imageFiles.isNotEmpty
+                ? GridView.builder(
+                    padding: const EdgeInsets.all(8),
+                    itemCount: _imageFiles.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 1,
+                    ),
+                    itemBuilder: (context, index) {
+                      return _buildImageCard(index, colorScheme, _imageFiles);
+                    },
+                  )
+                : const SizedBox.shrink()),
 
         const SizedBox(height: 16),
 
-        BlocBuilder<ProductBloc, ProductState>(builder: (context, state) {
-          if (state.imageFiles.isNotEmpty) {
-            return AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: FilledButton(
-                key: ValueKey(state.imageFiles.isEmpty),
-                onPressed: state.imageFiles.isNotEmpty
-                    ? () {
-                        context.read<ProductBloc>().add(UploadImages());
-                      }
-                    : null,
-                style: FilledButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: colorScheme.onPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 2,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.cloud_upload_outlined),
-                    const SizedBox(width: 8),
-                    Text(
-                      "UPLOAD (${state.imageFiles.length})",
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+        (_imageFiles.isNotEmpty)
+            ? AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: FilledButton(
+                  key: ValueKey(_imageFiles.isEmpty),
+                  onPressed: _imageFiles.isNotEmpty
+                      ? () {
+                          context.read<ProductBloc>().add(UploadImages());
+                        }
+                      : null,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
+                    elevation: 2,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.cloud_upload_outlined),
+                      const SizedBox(width: 8),
+                      Text(
+                        "UPLOAD (${_imageFiles.length})",
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          }
-          return _buildEmptyState(Theme.of(context));
-        })
+              )
+            : _buildEmptyState(Theme.of(context))
 
         // Upload button with conditional styling
       ],
@@ -191,7 +181,7 @@ class _MultiImageUploadScreenState extends State<MultiImageUploadScreen> {
                 ),
               ),
               onPressed: () {
-                context.read<ProductBloc>().add(RemoveImage(index));
+                _removeImage(index);
               },
             ),
           ),

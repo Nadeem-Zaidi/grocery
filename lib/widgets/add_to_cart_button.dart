@@ -21,10 +21,10 @@ Widget addToCartButton(
                 offset: const Offset(0, -5),
               ),
             ],
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-            ),
+            // borderRadius: const BorderRadius.only(
+            //   topLeft: Radius.circular(16),
+            //   topRight: Radius.circular(16),
+            // ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

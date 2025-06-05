@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/products/cart/cart_bloc.dart';
 import 'package:grocery_app/blocs/products/product_detail/product_detail_bloc.dart';
 import 'package:grocery_app/widgets/error_widget.dart';
+import 'package:grocery_app/widgets/image_slider.dart';
 import '../../models/product/product.dart';
 import '../../widgets/add_to_cart_button.dart';
 
@@ -27,9 +28,16 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(() {
-      setState(() {
-        _scrollOffset = _scrollController.offset;
-      });
+      if (mounted) {
+        // Check if widget is still mounted
+        final newOffset = _scrollController.offset;
+        if ((newOffset - _scrollOffset).abs() > 2.0) {
+          // Only update if significant change
+          setState(() {
+            _scrollOffset = newOffset;
+          });
+        }
+      }
     });
   }
 
@@ -83,14 +91,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    List<String> imageTest = [
+      "https://firebasestorage.googleapis.com/v0/b/grocerybynadeem.firebasestorage.app/o/images%2F1743949693165971.jpg?alt=media&token=ae140e73-1b1e-4df4-bb08-f04319990952",
+      "https://firebasestorage.googleapis.com/v0/b/grocerybynadeem.firebasestorage.app/o/images%2F1745911917021505.jpg?alt=media&token=3835ad95-5a19-411b-bcf8-b1adb07628b1"
+    ];
     final double appBarOpacity =
         (_scrollOffset / (_imageHeight - _appBarHeight)).clamp(0.0, 1.0);
-
     final double imageTop = -_scrollOffset * 0.5;
-
     final double imageScale =
         1.0 - (_scrollOffset / _imageHeight * 0.5).clamp(0.0, 0.5);
-
     return BlocConsumer<ProductDetailBloc, ProductDetailState>(
       listener: (context, state) {
         // TODO: implement listener
@@ -132,217 +141,217 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           ),
           body: Stack(
             children: [
-              CustomScrollView(
-                controller: _scrollController,
-                slivers: [
-                  //Sliver App Bar
-                  SliverAppBar(
-                    automaticallyImplyLeading:
-                        false, // ← This removes the back button
-                    expandedHeight: _imageHeight,
-                    backgroundColor: Colors.white,
-                    stretch: true,
-                    flexibleSpace: FlexibleSpaceBar(
-                      stretchModes: const [StretchMode.zoomBackground],
-                      background: Transform.translate(
-                        offset: Offset(0, imageTop),
-                        child: Transform.scale(
-                          scale: imageScale,
-                          child: Image.network(
-                            product.images[0],
-                            fit: BoxFit.cover,
-                          ),
+              Positioned(
+                top: 18,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                    //Sliver App Bar
+                    SliverAppBar(
+                      automaticallyImplyLeading: false,
+                      expandedHeight: _imageHeight,
+                      backgroundColor: Colors.white,
+                      stretch: true,
+                      flexibleSpace: FlexibleSpaceBar(
+                        stretchModes: const [StretchMode.zoomBackground],
+                        background: Transform.translate(
+                          offset: Offset(0, imageTop),
+                          child: ImageSlider(imageUrls: imageTest),
+                          // child: Transform.scale(
+                          //     scale: imageScale,
+                          //     child: ImageSlider(imageUrls: imageTest)),
                         ),
                       ),
                     ),
-                  ),
 
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Product title and details
-                          Text(
-                            product.name ?? "",
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '${product.quantityInBox} ${product.unit}',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 16),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Product title and details
+                            Text(
+                              product.name ?? "",
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '${product.quantityInBox} ${product.unit}',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 16),
 
-                          // Price information
-                          Row(
-                            children: [
-                              Text(
-                                '₹${product.sellingPrice}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineMedium
-                                    ?.copyWith(
+                            // Price information
+                            Row(
+                              children: [
+                                Text(
+                                  '₹${product.sellingPrice}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                const SizedBox(width: 8),
+                                if (product.discount! > 0)
+                                  Text(
+                                    '${product.discount}% OFF',
+                                    style: TextStyle(
+                                      color: Colors.green,
                                       fontWeight: FontWeight.bold,
                                     ),
-                              ),
-                              const SizedBox(width: 8),
-                              if (product.discount! > 0)
-                                Text(
-                                  '${product.discount}% OFF',
-                                  style: TextStyle(
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
                                   ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'MRP ₹${product.mrp} (inclusive of all taxes)',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '₹${(product.sellingPrice! / (product.quantityInBox! * 100)).toStringAsFixed(1)}/100 g',
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                          const SizedBox(height: 24),
-
-                          InkWell(
-                            onTap: () {
-                              context
-                                  .read<ProductDetailBloc>()
-                                  .add(ShowProductDetails());
-                            },
-                            child: BlocBuilder<ProductDetailBloc,
-                                ProductDetailState>(
-                              buildWhen: (previous, current) =>
-                                  previous.viewProductDetails !=
-                                  current.viewProductDetails,
-                              builder: (context, state) {
-                                print("hurrat state");
-                                print(state.viewProductDetails);
-                                return Row(
-                                  children: [
-                                    Text(
-                                      'View product details',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    Icon(
-                                      state.viewProductDetails
-                                          ? Icons.expand_less
-                                          : Icons.expand_more,
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                          if (state.viewProductDetails) ...[
-                            const SizedBox(height: 16),
-                            if (product.summary != null &&
-                                product.summary!.isNotEmpty)
-                              _buildDetailSection(product),
-                            // if (widget.product.keyFeatures != null &&
-                            //     widget.product.keyFeatures!.isNotEmpty)
-                            //   _buildDetailSection(
-                            //       'Key Features', widget.product.keyFeatures!),
-                          ],
-                          const SizedBox(height: 24),
-
-                          // Explore all products
-                          Container(
-                            height: 80,
-                            alignment: Alignment.center,
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                color: Colors.grey.shade100),
-                            child: Row(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(),
-                                  child: Image.network(product.images[0]),
-                                ),
-                                SizedBox(width: 10),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      product.brand!,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18),
-                                    ),
-                                    const Text("Explore all products",
-                                        style: TextStyle(fontSize: 16))
-                                  ],
-                                ),
                               ],
                             ),
-                          ),
-                          const SizedBox(height: 24),
+                            const SizedBox(height: 4),
+                            Text(
+                              'MRP ₹${product.mrp} (inclusive of all taxes)',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '₹${(product.sellingPrice! / (product.quantityInBox! * 100)).toStringAsFixed(1)}/100 g',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 24),
 
-                          // Similar products section
-                          const Text(
-                            'Similar products',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18),
-                          ),
-                          const SizedBox(height: 16),
-                          _buildSimilarProducts(),
-                          const SizedBox(height: 40),
+                            InkWell(
+                              onTap: () {
+                                context
+                                    .read<ProductDetailBloc>()
+                                    .add(ShowProductDetails());
+                              },
+                              child: BlocBuilder<ProductDetailBloc,
+                                  ProductDetailState>(
+                                buildWhen: (previous, current) =>
+                                    previous.viewProductDetails !=
+                                    current.viewProductDetails,
+                                builder: (context, state) {
+                                  print("hurrat state");
+                                  print(state.viewProductDetails);
+                                  return Row(
+                                    children: [
+                                      Text(
+                                        'View product details',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                      Icon(
+                                        state.viewProductDetails
+                                            ? Icons.expand_less
+                                            : Icons.expand_more,
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                            if (state.viewProductDetails) ...[
+                              const SizedBox(height: 16),
+                              if (product.summary != null &&
+                                  product.summary!.isNotEmpty)
+                                _buildDetailSection(product),
+                              // if (widget.product.keyFeatures != null &&
+                              //     widget.product.keyFeatures!.isNotEmpty)
+                              //   _buildDetailSection(
+                              //       'Key Features', widget.product.keyFeatures!),
+                            ],
+                            const SizedBox(height: 24),
 
-                          // Add to cart button
-                          // SizedBox(
-                          //   key: _cartButtonKey,
-                          //   width: double.infinity,
-                          //   child: BlocBuilder<CartBloc, CartState>(
-                          //     builder: (context, state) {
-                          //       return addToCartButton(
-                          //         product,
-                          //         context
-                          //             .read<CartBloc>()
-                          //             .state
-                          //             .items[product.id!],
-                          //         context,
-                          //       );
-                          //     },
-                          //   ),
-                          // )
-                        ],
+                            // Explore all products
+                            Container(
+                              height: 80,
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Colors.grey.shade100),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(),
+                                    child: Image.network(product.images[0]),
+                                  ),
+                                  SizedBox(width: 10),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        product.brand!,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18),
+                                      ),
+                                      const Text("Explore all products",
+                                          style: TextStyle(fontSize: 16))
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Similar products section
+                            const Text(
+                              'Similar products',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildSimilarProducts(),
+                            const SizedBox(height: 40),
+
+                            // Add to cart button
+                            // SizedBox(
+                            //   key: _cartButtonKey,
+                            //   width: double.infinity,
+                            //   child: BlocBuilder<CartBloc, CartState>(
+                            //     builder: (context, state) {
+                            //       return addToCartButton(
+                            //         product,
+                            //         context
+                            //             .read<CartBloc>()
+                            //             .state
+                            //             .items[product.id!],
+                            //         context,
+                            //       );
+                            //     },
+                            //   ),
+                            // )
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      return ListTile(
-                        title: Text("Home Content $index"),
-                      );
-                    }, childCount: 20),
-                  )
-                ],
-              ),
-              _stickButton
-                  ? Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: BlocBuilder<CartBloc, CartState>(
-                        builder: (context, state) {
-                          final productInCart = state.items[product.id!];
-                          return addToCartButton(
-                              product, productInCart, context);
-                        },
-                      ),
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        return ListTile(
+                          title: Text("Home Content $index"),
+                        );
+                      }, childCount: 20),
                     )
-                  : const SizedBox.shrink(),
+                  ],
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: BlocBuilder<CartBloc, CartState>(
+                  builder: (context, state) {
+                    final productInCart = state.items[product.id!];
+                    return addToCartButton(product, productInCart, context);
+                  },
+                ),
+              )
             ],
           ),
         );

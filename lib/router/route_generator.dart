@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/authentication/presentation/otp_screen.dart';
+import 'package:grocery_app/forms/cosmetic.dart';
 import 'package:grocery_app/pages/category_pages/create_category_page.dart';
 import 'package:grocery_app/pages/product_pages/product_list.dart';
 
@@ -12,7 +13,8 @@ class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings setting) {
     switch (setting.name) {
       case '/':
-        return MaterialPageRoute(builder: (_) => const LandingPage());
+        return MaterialPageRoute(builder: (_) => const CosmeticForm());
+      // return MaterialPageRoute(builder: (_) => const LandingPage());
       case '/home':
         return MaterialPageRoute(builder: (_) => const Home());
       // return MaterialPageRoute(

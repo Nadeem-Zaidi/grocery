@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
 import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
+import 'package:grocery_app/blocs/beauty_cosmetics/bloc/cosmetic_bloc.dart';
 import 'package:grocery_app/blocs/dashboard_builder/cubit/dashboard_builder_cubit.dart';
 import 'package:grocery_app/blocs/location/cubit/location_cubit.dart';
 import 'package:grocery_app/blocs/products/cart/cart_bloc.dart';
@@ -61,6 +62,11 @@ class MyApp extends StatelessWidget {
                 dbService: FirebaseDashBoard(FirebaseFirestore.instance))
               ..fetchSections(),
           ),
+
+          BlocProvider<CosmeticBloc>(
+              create: (context) =>
+                  CosmeticBloc(firestore: FirebaseFirestore.instance)
+                    ..add(FormInitialized()))
           // BlocProvider<LocationCubit>(
           //     create: (context) => LocationCubit()..getCurrentPosition())
         ],

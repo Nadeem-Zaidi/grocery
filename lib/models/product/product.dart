@@ -18,6 +18,15 @@ class Product {
   final double? mrp;
   final double? sellingPrice;
   final double? discount;
+  final String? manufacturer;
+  //
+  final String? fssaiLicense;
+  final String? shelfLife;
+  final String? type;
+  final String? countryOfOrigin;
+  final String? customerCareDet;
+  final String? seller;
+  final String? disclaimer;
 
   const Product({
     this.id,
@@ -37,6 +46,14 @@ class Product {
     this.mrp,
     this.sellingPrice,
     this.discount,
+    this.manufacturer,
+    this.fssaiLicense,
+    this.shelfLife,
+    this.type,
+    this.countryOfOrigin, 
+    this.customerCareDet,
+    this.seller,
+    this.disclaimer,
   })  : images = images ?? const [],
         description = description ?? const [],
         tags = tags ?? const [];

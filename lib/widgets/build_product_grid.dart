@@ -133,6 +133,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                         height: screenHeight * 0.010,
                       ),
                     ),
+                    //product quantity section
                     Flexible(
                       flex: 2,
                       child: SizedBox(
@@ -157,6 +158,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                                 ),
                               ),
                             ),
+                            //product type
                             Flexible(
                               child: Container(
                                 padding: EdgeInsets.all(screenHeight * 0.003),
@@ -179,6 +181,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                         ),
                       ),
                     ),
+                    //product name
                     Flexible(child: SizedBox(height: screenHeight * 0.0010)),
                     Flexible(
                       flex: 4,
@@ -193,6 +196,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                         ),
                       ),
                     ),
+                    //delivery time
                     Flexible(
                       child: Row(
                         children: [
@@ -213,11 +217,13 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                         ],
                       ),
                     ),
+                    //vertical gap
                     Flexible(
                       child: SizedBox(
                         height: screenHeight * 0.006,
                       ),
                     ),
+                    //discount and off section
                     Flexible(
                       child: Row(
                         children: [
@@ -241,6 +247,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                         ],
                       ),
                     ),
+                    //selling price and mrp section
                     Flexible(
                       flex: 2,
                       child: Row(
