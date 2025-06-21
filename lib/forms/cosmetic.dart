@@ -1,34 +1,130 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/blocs/beauty_cosmetics/bloc/cosmetic_bloc.dart';
+import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart';
 import 'package:grocery_app/extensions/capitalize_first.dart';
 import 'package:grocery_app/widgets/multi_image_picker.dart';
 import 'package:grocery_app/widgets/textfield.dart';
+import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart'
+    as formState;
 
 import '../models/form_config/form_config.dart';
 
-class CosmeticForm extends StatelessWidget {
+class CosmeticForm extends StatefulWidget {
   const CosmeticForm({super.key});
+
+  @override
+  State<CosmeticForm> createState() => _CosmeticFormState();
+}
+
+class _CosmeticFormState extends State<CosmeticForm> {
+  final _scrollController = ScrollController();
+  Map<String, TextEditingController> _textControllers = {};
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    final bloc = context.read<FormBloc>();
+    bloc.add(FormInitialized());
+    final fieldMap = context.read<FormBloc>().state.formConfigMap;
+
+    // Wait for next microtask (after state updates)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = bloc.state;
+      if (state.category != null &&
+          state.formConfigMap.containsKey("category")) {
+        final updatedConfig = state.formConfigMap["category"]!.copyWith(
+          defaultValue: state.category?.path,
+        );
+        bloc.add(
+          FieldChanged(
+              fieldKey: 'category',
+              value: state.category?.path,
+              datatype: 'text'),
+        );
+      }
+    });
+
+    fieldMap.forEach((key, config) {
+      _textControllers[key] =
+          TextEditingController(text: config.defaultValue?.toString() ?? '');
+    });
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent &&
+        !context.read<FormBloc>().state.hasReachedMax) {
+      context.read<FormBloc>().add(FormInitialized());
+    }
+  }
+
+  @override
+  void dispose() {
+    _textControllers.forEach((key, controller) => controller.dispose());
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Cosmetic Form")),
-      body: BlocSelector<CosmeticBloc, CosmeticState, List<String>>(
-        selector: (state) => state.formConfigMap.entries
-            .where((entry) => !entry.value.hidden)
-            .map((entry) => entry.key)
-            .toList(),
-        builder: (context, visibleFieldKeys) {
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: visibleFieldKeys.length,
-            itemBuilder: (context, index) {
-              final fieldKey = visibleFieldKeys[index];
-              return _FieldRenderer(fieldKey: fieldKey);
-            },
-          );
+      appBar: AppBar(title: BlocBuilder<FormBloc, formState.FormState>(
+        builder: (context, state) {
+          if (state.category != null) {
+            return Text(state.category!.path!);
+          }
+          return Text("Product Creation");
         },
+      )),
+      body: Stack(
+        children: [
+          BlocSelector<FormBloc, formState.FormState, List<String>>(
+            selector: (state) => state.formConfigMap.entries
+                .where((entry) => entry.value.toString().isNotEmpty)
+                .map((entry) => entry.key)
+                .toList(),
+            builder: (context, visibleFieldKeys) {
+              if (visibleFieldKeys.isEmpty) {
+                return Center(
+                    child: Container(
+                  child: Text("Form not configured for this category"),
+                ));
+              }
+              return ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: visibleFieldKeys.length,
+                itemBuilder: (context, index) {
+                  final fieldKey = visibleFieldKeys[index];
+                  TextEditingController controller =
+                      _textControllers.putIfAbsent(fieldKey, () {
+                    final config =
+                        context.read<FormBloc>().state.formConfigMap[fieldKey];
+                    return TextEditingController(
+                        text: config?.defaultValue?.toString() ?? '');
+                  });
+                  return _FieldRenderer(
+                    fieldKey: fieldKey,
+                    controller: controller,
+                  );
+                },
+              );
+            },
+          ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  context.read<FormBloc>().add(FormSave());
+                },
+                child: Text("Save"),
+              ),
+            ),
+          )
+        ],
       ),
     );
   }
@@ -36,8 +132,9 @@ class CosmeticForm extends StatelessWidget {
 
 class _FieldRenderer extends StatefulWidget {
   final String fieldKey;
+  final TextEditingController controller;
 
-  const _FieldRenderer({required this.fieldKey});
+  const _FieldRenderer({required this.fieldKey, required this.controller});
 
   @override
   State<_FieldRenderer> createState() => _FieldRendererState();
@@ -47,7 +144,7 @@ class _FieldRendererState extends State<_FieldRenderer> {
   bool toggleSwitch = true;
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<CosmeticBloc, CosmeticState, FormConfig?>(
+    return BlocSelector<FormBloc, formState.FormState, FormConfig?>(
       selector: (state) => state.formConfigMap[widget.fieldKey],
       builder: (context, config) {
         if (config == null || config.hidden) return const SizedBox.shrink();
@@ -56,57 +153,81 @@ class _FieldRendererState extends State<_FieldRenderer> {
         final label = config.label;
         if (fieldName == null || label == null) return const SizedBox.shrink();
 
-        final errorText = context.select<CosmeticBloc, String?>(
+        final errorText = context.select<FormBloc, String?>(
           (bloc) => bloc.state.errors[widget.fieldKey],
         );
 
         return Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: _buildFieldByType(
-              context,
-              config,
-              errorText,
-            ));
+                widget.controller, context, config, errorText, (value) {
+              context.read<FormBloc>().add(FieldChanged(
+                  fieldKey: widget.fieldKey,
+                  value: value,
+                  datatype: config.datatype!));
+            }));
       },
     );
   }
 
-  Widget _buildFieldByType(
+  Widget _buildFieldByType(TextEditingController controller,
       BuildContext context, FormConfig config, String? errorText,
-      [void Function(String value)? onChange, List<String> test = const []]) {
+      [void Function(String value)? onChange]) {
     switch (config.display) {
       case 'text':
+        if (config.fieldname == "category") {
+          return buildTextField(
+            controller: controller,
+            keyboardType: TextInputType.text,
+            context,
+            label: config.label ?? "Unbinded",
+            hint: config.hint ?? "",
+            maxLength: 20,
+            errorText: errorText,
+          );
+        }
         return buildTextField(
+          controller: controller,
           context,
+          keyboardType: TextInputType.text,
           label: config.label ?? "Unbinded",
-          hint: config.label ?? "",
+          hint: config.hint ?? "",
           maxLength: 20,
           onChanged: onChange,
+          errorText: errorText,
         );
       case 'number_input':
         return buildTextField(
+          controller: controller,
           context,
           label: config.label ?? "Unbinded",
-          hint: config.label ?? "",
-          keyboardType: TextInputType.number,
+          hint: config.hint ?? "",
+          keyboardType: TextInputType.numberWithOptions(decimal: false),
           maxLength: 10,
+          errorText: errorText,
           onChanged: onChange,
         );
       case 'textarea':
         return Column(
           children: [
             buildTextField(
+              controller: controller,
               context,
+              keyboardType: TextInputType.text,
               label: config.label ?? "Unbinded",
-              hint: config.label ?? "",
+              hint: config.hint ?? "",
               maxLines: 3,
+              errorText: errorText,
               onChanged: onChange,
             ),
           ],
         );
 
       case 'image_uploader':
-        return Container(height: 300, child: MultiImageUploadScreen());
+        return Container(
+          height: 300,
+          child: MultiImageUploadScreen(),
+        );
       // case 'text_readonly':
       //   return _buildReadOnlyField(context, config, errorText);
 
@@ -119,148 +240,38 @@ class _FieldRendererState extends State<_FieldRenderer> {
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             Switch(
-              // thumb color (round icon)
-              activeColor: Colors.amber,
-              activeTrackColor: Theme.of(context).primaryColor,
-              inactiveThumbColor: Colors.blueGrey.shade600,
-              inactiveTrackColor: Colors.grey.shade400,
-              splashRadius: 50.0,
-              // boolean variable value
-              value: toggleSwitch,
-              // changes the state of the switch
-              onChanged: (value) => setState(() {
-                toggleSwitch = value;
-              }),
-            ),
+                // thumb color (round icon)
+                activeColor: Colors.amber,
+                activeTrackColor: Theme.of(context).primaryColor,
+                inactiveThumbColor: Colors.blueGrey.shade600,
+                inactiveTrackColor: Colors.grey.shade400,
+                splashRadius: 50.0,
+                // boolean variable value
+                value: config.defaultValue.toString() == "true" ? true : false,
+                // changes the state of the switch
+                onChanged: (value) {
+                  context.read<FormBloc>().add(
+                        FieldChanged(
+                          fieldKey: config.fieldname!,
+                          value: value
+                              .toString(), // Store as 'true'/'false' string
+                          datatype: config.datatype ?? 'bool',
+                        ),
+                      );
+                }),
           ],
         );
       default:
-        return _buildTextField(
+        return buildTextField(
+          controller: controller,
           context,
-          config: config,
+          label: config.label ?? "Unbinded",
+          hint: config.hint ?? "",
+          keyboardType: TextInputType.number,
+          maxLength: 10,
           errorText: errorText,
-          keyboardType: TextInputType.text,
+          onChanged: onChange,
         );
     }
-  }
-
-  Widget _buildTextField(
-    BuildContext context, {
-    required FormConfig config,
-    required String? errorText,
-    required TextInputType keyboardType,
-  }) {
-    return buildTextField(context,
-        label: config.label ?? "Unbinded", hint: config.label ?? "");
-  }
-
-  Widget _buildCurrencyField(
-      BuildContext context, FormConfig config, String? errorText) {
-    return TextFormField(
-      decoration: InputDecoration(
-        labelText: config.label?.capitalizeFirst(),
-        errorText: errorText,
-        prefixText: '₹ ',
-        border: const OutlineInputBorder(),
-      ),
-      keyboardType: TextInputType.numberWithOptions(decimal: true),
-      onChanged: (value) {
-        context.read<CosmeticBloc>().add(
-              FieldChanged(fieldKey: config.fieldname!, value: value),
-            );
-      },
-    );
-  }
-
-  Widget _buildTextArea(
-      BuildContext context, FormConfig config, String? errorText) {
-    return TextFormField(
-      decoration: InputDecoration(
-        labelText: config.label?.capitalizeFirst(),
-        errorText: errorText,
-        border: const OutlineInputBorder(),
-      ),
-      maxLines: 2,
-      keyboardType: TextInputType.multiline,
-      onChanged: (value) {
-        context.read<CosmeticBloc>().add(
-              FieldChanged(fieldKey: config.fieldname!, value: value),
-            );
-      },
-    );
-  }
-
-  Widget _buildTextAreaArray(
-      BuildContext context, FormConfig config, String? errorText) {
-    // Implement your textarea array widget
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(config.label?.capitalizeFirst() ?? '',
-            style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        // Add your array input implementation here
-        Text('Textarea array input for ${config.fieldname}',
-            style: TextStyle(color: Colors.grey)),
-        if (errorText != null)
-          Text(errorText,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: Theme.of(context).colorScheme.error)),
-      ],
-    );
-  }
-
-  // Widget _buildSwitchField(
-  Widget _buildChipInput(
-      BuildContext context, FormConfig config, String? errorText) {
-    // Implement your chip input widget
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(config.label?.capitalizeFirst() ?? '',
-            style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        // Add your chip input implementation here
-        Wrap(
-          spacing: 8,
-          children: [
-            ActionChip(label: Text('Chip 1'), onPressed: () {}),
-            ActionChip(label: Text('Chip 2'), onPressed: () {}),
-          ],
-        ),
-        if (errorText != null)
-          Text(errorText,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: Theme.of(context).colorScheme.error)),
-      ],
-    );
-  }
-
-  Widget _buildImageUploader(
-      BuildContext context, FormConfig config, String? errorText) {
-    // Implement your image uploader widget
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(config.label?.capitalizeFirst() ?? '',
-            style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        // Add your image uploader implementation here
-        ElevatedButton(
-          onPressed: () {},
-          child: const Text('Upload Images'),
-        ),
-        if (errorText != null)
-          Text(errorText,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: Theme.of(context).colorScheme.error)),
-      ],
-    );
   }
 }

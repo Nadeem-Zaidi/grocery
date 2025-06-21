@@ -85,10 +85,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    print("hurray my location");
-    print(getLocation());
-
-    print("hurray my location");
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthCubit, AuthState>(

@@ -1,16 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart';
+import 'package:grocery_app/blocs/bloc/new_product/bloc/new_product_bloc.dart';
 import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
-import 'package:grocery_app/blocs/products/product_bloc/product_bloc.dart';
-import 'package:grocery_app/database_service.dart/inventory/firebase_inventory_service.dart';
+import 'package:grocery_app/database_service.dart/db_service.dart';
 import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
-
+import 'package:grocery_app/models/form_config/form_config.dart';
 import 'package:grocery_app/pages/category_pages/categories.dart';
-import 'package:grocery_app/pages/product_pages/create_product.dart';
-
+import 'package:grocery_app/pages/product_pages/new_product.dart';
+import 'package:grocery_app/service_locator/service_locator.dart';
 import '../database_service.dart/category/firestore_category_service.dart';
+import '../models/category.dart' as cat;
 
 class CategoryDrawer extends StatefulWidget {
   const CategoryDrawer({super.key});
@@ -83,16 +86,16 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (context) => ProductBloc(
-                      FirestoreProductService(
-                          fireStore: FirebaseFirestore.instance,
-                          collectionName: "products"),
-                      FirestoreInventoryService(
-                          fireStore: FirebaseFirestore.instance,
-                          collectionName: "inventory"),
-                    ),
-                    child: CreateProduct(),
+                  builder: (context) => MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                        create: (context) => NewProductBloc(
+                          dbService:
+                              ServiceLocator().get<DBService<cat.Category>>(),
+                        ),
+                      ),
+                    ],
+                    child: NewProduct(),
                   ),
                 ),
               );

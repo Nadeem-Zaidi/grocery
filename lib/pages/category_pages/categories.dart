@@ -10,6 +10,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../blocs/categories/create_category_bloc/category_create_bloc.dart';
 import '../../database_service.dart/category/firestore_category_service.dart';
 import '../../models/category.dart';
+import '../../widgets/category_card.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_widget.dart';
 
@@ -63,7 +64,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
           if (state.isFetching && state.categories.isEmpty) {
             return _buildShimmerLoader();
           }
-          //showing error wiget in the case of any error
+
           if (state.error != null) {
             return Center(
               child: AppErrorWidget(
@@ -95,7 +96,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       (context, index) {
                         if (index < state.categories.length) {
                           final category = state.categories[index];
-                          return _CategoryCard(
+                          return CategoryCard(
                             category: category,
                             onTap: () =>
                                 _navigateToUpdatePage(context, category),
@@ -196,104 +197,5 @@ class _CategoriesPageState extends State<CategoriesPage> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
-}
-
-class _CategoryCard extends StatelessWidget {
-  final Category category;
-  final VoidCallback onTap;
-
-  const _CategoryCard({
-    required this.category,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context)
-                .colorScheme
-                .surfaceContainerHighest
-                .withOpacity(0.5),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    category.url!,
-                    width: 56,
-                    height: 56,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          Icons.category,
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        category.name!,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (category.parent!.isNotEmpty)
-                        Text(
-                          'Parent: ${category.parent}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                color: Theme.of(context).colorScheme.outline,
-                              ),
-                        ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

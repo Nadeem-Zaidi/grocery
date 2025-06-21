@@ -6,13 +6,18 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
 import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
-import 'package:grocery_app/blocs/beauty_cosmetics/bloc/cosmetic_bloc.dart';
+import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart';
 import 'package:grocery_app/blocs/dashboard_builder/cubit/dashboard_builder_cubit.dart';
 import 'package:grocery_app/blocs/location/cubit/location_cubit.dart';
 import 'package:grocery_app/blocs/products/cart/cart_bloc.dart';
 import 'package:grocery_app/database_service.dart/dashboard/firebase_dashboard_service.dart';
+import 'package:grocery_app/database_service.dart/db_service.dart';
+import 'package:grocery_app/database_service.dart/register_factory.dart';
+import 'package:grocery_app/models/form_config/form_config.dart';
 
 import 'package:grocery_app/router/route_generator.dart';
+import 'package:grocery_app/service_locator/service_locator.dart';
+import 'package:grocery_app/service_locator/service_locator_func.dart';
 import 'package:grocery_app/theme/theme_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
@@ -29,7 +34,8 @@ void main() async {
   );
 
   final sharedPreferences = await SharedPreferences.getInstance();
-
+  registerServices();
+  registerModels();
   runApp(MyApp(sharedPreferences: sharedPreferences));
 }
 
@@ -63,10 +69,10 @@ class MyApp extends StatelessWidget {
               ..fetchSections(),
           ),
 
-          BlocProvider<CosmeticBloc>(
-              create: (context) =>
-                  CosmeticBloc(firestore: FirebaseFirestore.instance)
-                    ..add(FormInitialized()))
+          BlocProvider<FormBloc>(
+              create: (context) => FormBloc(
+                    dbService: ServiceLocator().get<DBService<FormConfig>>(),
+                  )..add(FormInitialized()))
           // BlocProvider<LocationCubit>(
           //     create: (context) => LocationCubit()..getCurrentPosition())
         ],

@@ -52,9 +52,8 @@ class FirestoreProductService implements IdatabaseService<Product> {
         fireStore.collection(collectionName);
 
     try {
-      Query query = collectionReference
-          .orderBy('name', descending: true) // Order by timestamp
-          .limit(limit);
+      Query query =
+          collectionReference.orderBy('name', descending: true).limit(limit);
 
       if (lastDocument != null) {
         query = query.startAfterDocument(lastDocument);

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 Widget buildTextField(
   BuildContext context, {
   TextEditingController? controller,
+  String? initialValue,
   required String label,
   required String hint,
   IconData? icon,
@@ -46,6 +47,7 @@ Widget buildTextField(
           ),
           child: TextFormField(
             controller: controller,
+            initialValue: initialValue,
             maxLines: maxLines,
             maxLength: maxLength,
             readOnly: isSelectable,
