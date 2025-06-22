@@ -1,15 +1,17 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:grocery_app/database_service.dart/IDBService.dart';
 import 'package:grocery_app/database_service.dart/idatabase_service.dart';
 
 import '../../../models/product/product.dart';
+import '../../../models/product/productt.dart';
 
 part 'product_detail_event.dart';
 part 'product_detail_state.dart';
 
 class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
-  IdatabaseService dbService;
+  IDBService<Productt> dbService;
   ProductDetailBloc({required this.dbService})
       : super(ProductDetailState.initial()) {
     on<ProductDetailEvent>((event, emit) async {
@@ -30,7 +32,7 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
       Emitter<ProductDetailState> emit, String id) async {
     try {
       emit(state.copyWith(isLoading: true));
-      Product? product = await dbService.getById(id);
+      Productt? product = await dbService.getById(id);
       if (product == null) {
         emit(state.copyWith(error: "Something went wrong in fetching product"));
       }
@@ -57,7 +59,6 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
   }
 
   void _showProductHighlights(Emitter<ProductDetailState> emit) {
-    print("i am running");
     try {
       emit(state.copyWith(showHighlights: !state.showHighlights));
     } catch (e) {

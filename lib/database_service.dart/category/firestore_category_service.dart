@@ -66,7 +66,7 @@ class FirestoreCategoryService implements IdatabaseService<Category> {
   @override
   Future<Category?> create(Category category) async {
     try {
-      Map<String, dynamic> categoryMap = category.toJson();
+      Map<String, dynamic> categoryMap = category.toMap();
       categoryMap.removeWhere(
           (key, value) => (key == "id" || value == "" || value == null));
 

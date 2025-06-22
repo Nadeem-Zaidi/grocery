@@ -1,4 +1,6 @@
-class Category {
+import '../database_service.dart/ientity.dart';
+
+class Category implements IEntity<Category> {
   String? id;
   String? name;
   String? parent;
@@ -7,6 +9,7 @@ class Category {
 
   Category({this.id, this.path, this.url, required this.name, this.parent});
 
+  @override
   Category copyWith(
       {String? id, String? name, String? parent, String? path, String? url}) {
     return Category(
@@ -27,7 +30,8 @@ class Category {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  @override
+  Map<String, dynamic> toMap() {
     return {"name": name, "parent": parent, "path": path, "url": url};
   }
 }

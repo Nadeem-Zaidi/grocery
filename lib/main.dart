@@ -8,7 +8,6 @@ import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
 import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
 import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart';
 import 'package:grocery_app/blocs/dashboard_builder/cubit/dashboard_builder_cubit.dart';
-import 'package:grocery_app/blocs/location/cubit/location_cubit.dart';
 import 'package:grocery_app/blocs/products/cart/cart_bloc.dart';
 import 'package:grocery_app/database_service.dart/dashboard/firebase_dashboard_service.dart';
 import 'package:grocery_app/database_service.dart/db_service.dart';
@@ -69,10 +68,6 @@ class MyApp extends StatelessWidget {
               ..fetchSections(),
           ),
 
-          BlocProvider<FormBloc>(
-              create: (context) => FormBloc(
-                    dbService: ServiceLocator().get<DBService<FormConfig>>(),
-                  )..add(FormInitialized()))
           // BlocProvider<LocationCubit>(
           //     create: (context) => LocationCubit()..getCurrentPosition())
         ],

@@ -4,7 +4,7 @@ part of 'fetch_category_bloc.dart';
 class FetchCategoryState extends Equatable {
   final List<Category> categories;
   final List<Category> childrenCategories;
-  final List<Product> products;
+  final List<Productt> products;
   final bool isFetching;
   final bool hasReachedMax;
   final bool hasReachedProductMax;
@@ -76,7 +76,7 @@ class FetchCategoryState extends Equatable {
   FetchCategoryState copyWith({
     List<Category>? categories,
     List<Category>? childrenCategories,
-    List<Product>? products,
+    List<Productt>? products,
     bool? isFetching,
     bool? hasReachedMax,
     bool? hasReachedProductMax,

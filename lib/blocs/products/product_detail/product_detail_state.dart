@@ -1,7 +1,7 @@
 part of 'product_detail_bloc.dart';
 
 class ProductDetailState extends Equatable {
-  final Product? product;
+  final Productt? product;
   final bool isLoading;
   final bool viewProductDetails;
   final bool showHighlights;
@@ -18,7 +18,7 @@ class ProductDetailState extends Equatable {
   });
 
   ProductDetailState copyWith({
-    Product? product,
+    Productt? product,
     bool? isLoading,
     String? error,
     bool? viewProductDetails,

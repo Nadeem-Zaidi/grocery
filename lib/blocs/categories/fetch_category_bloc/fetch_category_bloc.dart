@@ -1,8 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+import 'package:grocery_app/models/product/productt.dart';
 import 'package:meta/meta.dart';
 
+import '../../../database_service.dart/IDBService.dart';
 import '../../../database_service.dart/idatabase_service.dart';
 import '../../../models/category.dart';
 import '../../../models/product/product.dart';
@@ -12,7 +14,7 @@ part 'fetch_category_state.dart';
 
 class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
   final IdatabaseService dbService;
-  final IdatabaseService productService;
+  final IDBService<Productt> productService;
 
   FetchCategoryBloc(this.dbService, this.productService)
       : super(FetchCategoryState.initial()) {
@@ -61,7 +63,6 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
   Future<void> _fetchCategoriesWithProduct(
       Emitter<FetchCategoryState> emit) async {
     // Don't fetch if already loading
-    if (state.isFetching) return;
 
     try {
       emit(state.copyWith(
@@ -71,17 +72,18 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
         lastProductDocument: null,
         hasReachedProductMax: false,
       ));
+      print("here");
 
       var (products, lastDocument, hasReachedMax) =
           await productService.whereClause(
         (collection) => collection
-            .where("tags", arrayContains: state.currentChildCat)
+            .where("categoryname", isEqualTo: state.currentChildCat)
             .orderBy("name")
-            .limit(4),
+            .limit(10),
       );
 
       emit(state.copyWith(
-        products: products as List<Product>,
+        products: products,
         lastProductDocument: lastDocument,
         isFetching: false,
         hasReachedProductMax: hasReachedMax,
@@ -108,15 +110,15 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
       var (newProducts, lastDocument, hasReachedMax) =
           await productService.whereClause(
         (collection) => collection
-            .where("tags", arrayContains: state.currentChildCat)
+            .where("categoryname", isEqualTo: state.currentChildCat)
             .orderBy("name")
             .startAfterDocument(state.lastProductDocument!)
-            .limit(4),
+            .limit(10),
         state.lastProductDocument, // Pass the last document
       );
 
       emit(state.copyWith(
-        products: [...state.products, ...newProducts as List<Product>],
+        products: [...state.products, ...newProducts],
         lastProductDocument: lastDocument,
         isFetching: false,
         hasReachedProductMax: hasReachedMax,

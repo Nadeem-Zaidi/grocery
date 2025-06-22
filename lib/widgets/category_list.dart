@@ -6,6 +6,7 @@ import '../models/category.dart';
 
 class CategoryList extends StatefulWidget {
   final List<Category> categories;
+
   const CategoryList({super.key, required this.categories});
 
   @override
@@ -15,6 +16,7 @@ class CategoryList extends StatefulWidget {
 class _CategoryListState extends State<CategoryList> {
   @override
   Widget build(BuildContext context) {
+    print("running category list");
     List<Category> childrenCat = widget.categories;
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -22,6 +24,7 @@ class _CategoryListState extends State<CategoryList> {
       itemBuilder: (context, index) {
         return InkWell(
           onTap: () {
+            print(childrenCat[index].name!);
             context
                 .read<FetchCategoryBloc>()
                 .add(SetCurrentChild(childrenCat[index].name!));

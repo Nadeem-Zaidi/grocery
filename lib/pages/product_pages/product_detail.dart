@@ -5,6 +5,7 @@ import 'package:grocery_app/blocs/products/product_detail/product_detail_bloc.da
 import 'package:grocery_app/widgets/error_widget.dart';
 import 'package:grocery_app/widgets/image_slider.dart';
 import '../../models/product/product.dart';
+import '../../models/product/productt.dart';
 import '../../widgets/add_to_cart_button.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -91,10 +92,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> imageTest = [
-      "https://firebasestorage.googleapis.com/v0/b/grocerybynadeem.firebasestorage.app/o/images%2F1743949693165971.jpg?alt=media&token=ae140e73-1b1e-4df4-bb08-f04319990952",
-      "https://firebasestorage.googleapis.com/v0/b/grocerybynadeem.firebasestorage.app/o/images%2F1745911917021505.jpg?alt=media&token=3835ad95-5a19-411b-bcf8-b1adb07628b1"
-    ];
     final double appBarOpacity =
         (_scrollOffset / (_imageHeight - _appBarHeight)).clamp(0.0, 1.0);
     final double imageTop = -_scrollOffset * 0.5;
@@ -112,7 +109,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         if (state.product == null) {
           return AppErrorWidget(message: "No product found", onRetry: () {});
         }
-        Product product = state.product!;
+        Productt product = state.product!;
         return Scaffold(
           extendBodyBehindAppBar: true,
           appBar: AppBar(
@@ -123,7 +120,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             title: Opacity(
               opacity: appBarOpacity,
               child: Text(
-                product.name ?? "",
+                product.attributes["name"] ?? "",
                 style: TextStyle(
                     color: appBarOpacity > 0.7 ? Colors.white : Colors.black),
               ),
@@ -159,7 +156,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         stretchModes: const [StretchMode.zoomBackground],
                         background: Transform.translate(
                           offset: Offset(0, imageTop),
-                          child: ImageSlider(imageUrls: imageTest),
+                          child: ImageSlider(
+                              imageUrls: (product.attributes["images"] as List)
+                                  .cast<String>()),
                           // child: Transform.scale(
                           //     scale: imageScale,
                           //     child: ImageSlider(imageUrls: imageTest)),
@@ -175,12 +174,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           children: [
                             // Product title and details
                             Text(
-                              product.name ?? "",
+                              product.attributes["name"] ?? "",
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '${product.quantityInBox} ${product.unit}',
+                              '${product.attributes["quantityunit"]} ${product.attributes["unit"]}',
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const SizedBox(height: 16),
@@ -189,7 +188,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             Row(
                               children: [
                                 Text(
-                                  '₹${product.sellingPrice}',
+                                  '₹${product.attributes["sellingprice"]}',
                                   style: Theme.of(context)
                                       .textTheme
                                       .headlineMedium
@@ -198,9 +197,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                       ),
                                 ),
                                 const SizedBox(width: 8),
-                                if (product.discount! > 0)
+                                if (product.attributes["discount"]! > 0)
                                   Text(
-                                    '${product.discount}% OFF',
+                                    '${product.attributes["discount"]}% OFF',
                                     style: TextStyle(
                                       color: Colors.green,
                                       fontWeight: FontWeight.bold,
@@ -210,12 +209,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'MRP ₹${product.mrp} (inclusive of all taxes)',
+                              'MRP ₹${product.attributes["mrp"]} (inclusive of all taxes)',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '₹${(product.sellingPrice! / (product.quantityInBox! * 100)).toStringAsFixed(1)}/100 g',
+                              '₹${(product.attributes["mrp"]! / (product.attributes["quantityunit"]! * 100)).toStringAsFixed(1)}/100 g',
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                             const SizedBox(height: 24),
@@ -255,8 +254,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             ),
                             if (state.viewProductDetails) ...[
                               const SizedBox(height: 16),
-                              if (product.summary != null &&
-                                  product.summary!.isNotEmpty)
+                              if (product.attributes["summary"] != null &&
+                                  product.attributes["summary"]!.isNotEmpty)
                                 _buildDetailSection(product),
                               // if (widget.product.keyFeatures != null &&
                               //     widget.product.keyFeatures!.isNotEmpty)
@@ -277,7 +276,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 children: [
                                   Container(
                                     decoration: BoxDecoration(),
-                                    child: Image.network(product.images[0]),
+                                    child: Image.network(
+                                        product.attributes["images"][0]),
                                   ),
                                   SizedBox(width: 10),
                                   Column(
@@ -286,7 +286,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        product.brand!,
+                                        product.attributes["brand"]!,
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 18),
@@ -347,7 +347,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 right: 0,
                 child: BlocBuilder<CartBloc, CartState>(
                   builder: (context, state) {
-                    final productInCart = state.items[product.id!];
+                    final productInCart = state.items[product.attributes["id"]];
                     return addToCartButton(product, productInCart, context);
                   },
                 ),
@@ -359,7 +359,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
   }
 
-  Widget _buildDetailSection(Product product) {
+  Widget _buildDetailSection(Productt product) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -468,7 +468,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 8.0),
                                 child: Text(
-                                  product.summary!,
+                                  product.attributes["summary"]!,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey[600],
@@ -496,7 +496,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 8.0),
                                 child: Text(
-                                  product.summary!,
+                                  product.attributes["summary"]!,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey[600],
@@ -524,7 +524,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 8.0),
                                 child: Text(
-                                  product.unit!,
+                                  product.attributes["unit"]!,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey[600],
@@ -656,7 +656,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 8.0),
                                 child: Text(
-                                  product.unit!,
+                                  product.attributes["unit"]!,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey[600],

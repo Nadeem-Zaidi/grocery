@@ -5,6 +5,7 @@ import 'package:grocery_app/blocs/bloc/new_product/bloc/new_product_bloc.dart';
 import 'package:grocery_app/database_service.dart/db_service.dart';
 import 'package:grocery_app/forms/cosmetic.dart';
 import 'package:grocery_app/models/form_config/form_config.dart';
+import 'package:grocery_app/models/product/productt.dart';
 import 'package:grocery_app/service_locator/service_locator.dart';
 
 import '../../service_locator/service_locator_func.dart';
@@ -96,14 +97,19 @@ class _NewProductState extends State<NewProduct> {
                                             .getWithParam<DBService<FormConfig>,
                                                     String>(
                                                 "categories/${state.category?.id}/attributes");
+                                        final productService = ServiceLocator()
+                                            .getWithParam<DBService<Productt>,
+                                                String>("products");
                                         Navigator.of(context).push(
                                           MaterialPageRoute(
                                             builder: (newContext) =>
                                                 BlocProvider(
                                               create: (context) => FormBloc(
-                                                dbService: dbService,
-                                              )..add(SetFormCategory(
-                                                  category: state.category!)),
+                                                  dbService: dbService,
+                                                  productService:
+                                                      productService)
+                                                ..add(SetFormCategory(
+                                                    category: state.category!)),
                                               child: CosmeticForm(),
                                             ),
                                           ),

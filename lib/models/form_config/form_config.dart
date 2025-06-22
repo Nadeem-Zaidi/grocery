@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:grocery_app/database_service.dart/ientity.dart';
 
-class FormConfig extends Equatable {
+class FormConfig extends Equatable implements IEntity {
   final String? fieldname;
   final String? label;
   final String? hint;
@@ -25,24 +26,9 @@ class FormConfig extends Equatable {
     this.reevaluate = const [],
   });
 
-  bool containsField(String fieldName) {
-    if (fieldName == fieldname) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  bool containsValue(String value) {
-    if (value == defaultValue) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   dynamic getAttribute(String name) {}
 
+  @override
   FormConfig copyWith({
     String? fieldname,
     String? label,
@@ -98,4 +84,10 @@ class FormConfig extends Equatable {
         rules,
         reevaluate
       ];
+
+  @override
+  Map<String, dynamic> toMap() {
+    // TODO: implement toMap
+    throw UnimplementedError();
+  }
 }

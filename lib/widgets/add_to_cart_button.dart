@@ -5,9 +5,10 @@ import 'package:grocery_app/widgets/cart_increment_decrement.dart';
 import '../blocs/products/cart/cart_bloc.dart';
 import '../models/cart/cart_model.dart';
 import '../models/product/product.dart';
+import '../models/product/productt.dart';
 
 Widget addToCartButton(
-    Product product, CartItem? cartItem, BuildContext context,
+    Productt product, CartItem? cartItem, BuildContext context,
     [Key? trackKey]) {
   return cartItem != null
       ? Container(
@@ -34,7 +35,7 @@ Widget addToCartButton(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "${product.quantityInBox} ${product.unit}",
+                    "${product.attributes["quantityunit"]} ${product.attributes["unit"]}",
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -51,7 +52,9 @@ Widget addToCartButton(
                             size: 18,
                           ),
                           Text(
-                            product.sellingPrice!.round().toString(),
+                            product.attributes["sellingprice"]!
+                                .round()
+                                .toString(),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
@@ -71,7 +74,7 @@ Widget addToCartButton(
                             ),
                           ),
                           Text(
-                            product.mrp.toString(),
+                            product.attributes["mrp"].toString(),
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey.shade600,
@@ -96,7 +99,7 @@ Widget addToCartButton(
                         children: [
                           SizedBox(
                             child: CartIncrementDecrement(
-                              productId: product.id!,
+                              productId: product.attributes["id"],
                               quantity: cartItem.quantity,
                               height: 50,
                               width: 150,
@@ -108,7 +111,7 @@ Widget addToCartButton(
                         onPressed: () {
                           context
                               .read<CartBloc>()
-                              .add(CartItemAdded(product.id!));
+                              .add(CartItemAdded(product.attributes["id"]!));
                         },
                         child: Text("Add To Cart"),
                       ),
@@ -119,7 +122,9 @@ Widget addToCartButton(
       : ElevatedButton(
           key: trackKey,
           onPressed: () {
-            context.read<CartBloc>().add(CartItemAdded(product.id!));
+            context
+                .read<CartBloc>()
+                .add(CartItemAdded(product.attributes["id"]!));
           },
           child: Text("Add To Cart"));
 }

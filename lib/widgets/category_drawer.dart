@@ -14,6 +14,7 @@ import 'package:grocery_app/pages/product_pages/new_product.dart';
 import 'package:grocery_app/service_locator/service_locator.dart';
 import '../database_service.dart/category/firestore_category_service.dart';
 import '../models/category.dart' as cat;
+import '../models/product/productt.dart';
 
 class CategoryDrawer extends StatefulWidget {
   const CategoryDrawer({super.key});
@@ -56,9 +57,9 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                             FirestoreCategoryService(
                                 firestore: FirebaseFirestore.instance,
                                 collectionName: "categories"),
-                            FirestoreProductService(
-                                fireStore: FirebaseFirestore.instance,
-                                collectionName: "products"))
+                            ServiceLocator()
+                                .getWithParam<DBService<Productt>, String>(
+                                    "products"))
                           ..add(FetchCategories()),
                       ),
                       BlocProvider(

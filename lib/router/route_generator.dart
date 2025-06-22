@@ -50,8 +50,8 @@ class RouteGenerator {
       case '/categories':
         return MaterialPageRoute(builder: (_) => const CategoriesPage());
 
-      case '/productlist':
-        return MaterialPageRoute(builder: (_) => const ProductList());
+      // case '/productlist':
+      //   return MaterialPageRoute(builder: (_) => const ProductList());
 
       // case '/category_update':
       //   return MaterialPageRoute(builder: (_) => const CategoryUpdatePage());

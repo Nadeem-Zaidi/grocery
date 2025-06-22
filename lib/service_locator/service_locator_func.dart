@@ -3,10 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:grocery_app/database_service.dart/db_service.dart';
 import 'package:grocery_app/models/form_config/form_config.dart';
 import 'package:grocery_app/service_locator/service_locator.dart';
+import '../database_service.dart/ientity.dart';
 import '../models/category.dart' as cat;
+import '../models/product/productt.dart';
 
 // Create a typedef for a generic DBService factory
-typedef DBServiceFactory<T> = DBService<T> Function(String collectionPath);
+typedef DBServiceFactory<T> = DBService<IEntity> Function(
+    String collectionPath);
 
 void registerServices() {
   var serviceLocator = ServiceLocator();
@@ -26,6 +29,13 @@ void registerServices() {
   serviceLocator
       .registerParamFactory<DBService<FormConfig>, String>((collectionPath) {
     return DBService<FormConfig>(
+        fireStore: serviceLocator.get<FirebaseFirestore>(),
+        collectionPath: collectionPath);
+  });
+
+  serviceLocator
+      .registerParamFactory<DBService<Productt>, String>((collectionPath) {
+    return DBService<Productt>(
         fireStore: serviceLocator.get<FirebaseFirestore>(),
         collectionPath: collectionPath);
   });

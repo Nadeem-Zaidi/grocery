@@ -11,18 +11,22 @@ import 'package:grocery_app/database_service.dart/IDBService.dart';
 import 'package:grocery_app/database_service.dart/db_service.dart';
 import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
 import 'package:grocery_app/models/form_config/form_config.dart';
+import 'package:grocery_app/models/product/product.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../models/category.dart';
+import '../../../models/product/productt.dart';
 
 part 'form_event.dart';
 part 'form_state.dart';
 
 class FormBloc extends Bloc<FormEvent, FormState> {
   final IDBService<FormConfig> dbService;
+  final IDBService<dynamic> productService;
   final ImagePicker _imagePicker = ImagePicker();
 
-  FormBloc({required this.dbService}) : super(FormState.initial()) {
+  FormBloc({required this.dbService, required this.productService})
+      : super(FormState.initial()) {
     on<SetFormCategory>(_setFormCategory);
     on<FieldChanged>(_onFieldChanged);
     on<FormInitialized>(_initialize);
@@ -95,11 +99,12 @@ class FormBloc extends Bloc<FormEvent, FormState> {
         ),
       );
 
-      if (formConfigMap.containsKey("category")) {
-        formConfigMap["category"]?.defaultValue = state.category?.path;
+      if (formConfigMap.containsKey("categorypath")) {
+        formConfigMap["categorypath"]?.defaultValue = state.category?.path;
       }
-
-      print(formConfigMap);
+      if (formConfigMap.containsKey("categoryname")) {
+        formConfigMap["categoryname"]?.defaultValue = state.category?.name;
+      }
 
       if (formConfigMap.containsKey("user")) {
         formConfigMap["user"]?.defaultValue =
@@ -346,8 +351,14 @@ class FormBloc extends Bloc<FormEvent, FormState> {
 
   Future<void> _onFormSave(FormSave event, Emitter<FormState> emit) async {
     try {
-      print("i am running");
       List<String> imageURLList = [];
+      Map<String, dynamic> formDataToSave = {};
+      String? categoryPath = state.formConfigMap["categorypath"]?.defaultValue;
+      String? categoryName = state.formConfigMap["categoryname"]?.defaultValue;
+      if (categoryPath == null || categoryName == null) {
+        emit(state.copyWith(error: "Category is empty"));
+        return;
+      }
       //check for empty value
       Map<String, dynamic> createFinalErrorMap = {};
       for (var entry in state.formConfigMap.entries) {
@@ -369,25 +380,41 @@ class FormBloc extends Bloc<FormEvent, FormState> {
           }
         }
       }
-      print(createFinalErrorMap.remove("images"));
-      print(createFinalErrorMap.values.toList());
 
-      // for (XFile file in state.productImages) {
-      //   File imageFile = File(file.path);
-      //   String fileName = "${categoryName}/${file.name}";
-      //   Reference storageRef =
-      //       FirebaseStorage.instance.ref().child("images/$fileName.jpg");
-      //   UploadTask uploadTask = storageRef.putFile(imageFile);
-      //   TaskSnapshot taskSnap = await uploadTask;
-      //   String imageURL = await taskSnap.ref.getDownloadURL();
-      //   if (imageURL.isEmpty) {
-      //     throw Exception("Error in image uploading");
-      //   }
-      //   imageURLList.add(imageURL.toString());
-      // }
-      // if (imageURLList.isEmpty) {
-      //   throw Exception("Error in image uploading");
-      // }
+      //image processing
+      for (XFile file in state.productImages) {
+        File imageFile = File(file.path);
+        String fileName = "$categoryName/${file.name}";
+        Reference storageRef =
+            FirebaseStorage.instance.ref().child("images/$fileName.jpg");
+        UploadTask uploadTask = storageRef.putFile(imageFile);
+        TaskSnapshot taskSnap = await uploadTask;
+        String imageURL = await taskSnap.ref.getDownloadURL();
+        if (imageURL.isEmpty) {
+          throw Exception("Error in image uploading");
+        }
+        imageURLList.add(imageURL.toString());
+      }
+      if (imageURLList.isEmpty) {
+        throw Exception("Error in image uploading");
+      }
+
+      createFinalErrorMap.remove("images");
+
+      if (createFinalErrorMap.values.isEmpty) {
+        emit(state.copyWith(error: "Error in saveving form"));
+      } else {
+        for (FormConfig config in state.formConfigMap.values) {
+          createFinalErrorMap[config.fieldname!] = config.defaultValue;
+        }
+      }
+      createFinalErrorMap = {...createFinalErrorMap, "images": imageURLList};
+
+      Productt product = Productt(attributes: createFinalErrorMap);
+      Productt uploaded = await productService.create(product);
+      print("hurray product uploaded");
+      print(uploaded.attributes);
+      print("hurray product uploaded");
     } catch (error) {
       print(error);
     }

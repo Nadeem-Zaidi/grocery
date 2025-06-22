@@ -8,7 +8,10 @@ import 'package:grocery_app/database_service.dart/product/firestore_product_serv
 import 'package:grocery_app/pages/select_category/select_category.dart';
 import 'package:grocery_app/widgets/image_picker.dart';
 import 'package:grocery_app/widgets/overlay.dart';
+import '../../database_service.dart/db_service.dart';
 import '../../models/category.dart';
+import '../../models/product/productt.dart';
+import '../../service_locator/service_locator.dart';
 import '../../widgets/category_path_string.dart';
 import '../../utils/screen_utils.dart';
 
@@ -138,7 +141,10 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
                                   providers: [
                                     BlocProvider(
                                       create: (context) => FetchCategoryBloc(
-                                          categoryService, productService)
+                                          categoryService,
+                                          ServiceLocator().getWithParam<
+                                              DBService<Productt>,
+                                              String>("products"))
                                         ..add(FetchCategories()),
                                     ),
                                     BlocProvider.value(

@@ -1,15 +1,29 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_app/database_service.dart/IDBService.dart';
+import 'package:grocery_app/database_service.dart/ientity.dart';
 import 'package:grocery_app/database_service.dart/model_registry.dart';
+import 'package:grocery_app/models/product/productt.dart';
 
-class DBService<T> implements IDBService<T> {
+class DBService<T extends IEntity> implements IDBService<T> {
   FirebaseFirestore fireStore;
   String collectionPath;
   DBService({required this.fireStore, required this.collectionPath});
   @override
-  Future<T?> create(T data) {
-    // TODO: implement create
-    throw UnimplementedError();
+  Future<T> create(T data) async {
+    try {
+      Map<String, dynamic> dataToMap = data.toMap();
+
+      if (dataToMap.isEmpty) {
+        throw Exception("No data to create product");
+      }
+      DocumentReference docRef = fireStore.collection(collectionPath).doc();
+      Map<String, dynamic> dataToMapWithId = {"id": docRef.id, ...dataToMap};
+      await docRef.set(dataToMap);
+      return ModelRegistry.fromMap<T>(dataToMapWithId);
+    } catch (error) {
+      print(error);
+      rethrow;
+    }
   }
 
   @override
@@ -42,6 +56,7 @@ class DBService<T> implements IDBService<T> {
         final data = doc.data() as Map<String, dynamic>;
         return ModelRegistry.fromMap<T>(data);
       }).toList();
+
       return (documents, querySnapshot.docs.last);
     } catch (e) {
       print('Error in getAll DBService: $e');
@@ -50,9 +65,19 @@ class DBService<T> implements IDBService<T> {
   }
 
   @override
-  Future<T?> getById(String id) {
-    // TODO: implement getById
-    throw UnimplementedError();
+  Future<T?> getById(String id) async {
+    try {
+      DocumentReference docRef = fireStore.collection(collectionPath).doc(id);
+      DocumentSnapshot docSnapShot = await docRef.get();
+      if (!docSnapShot.exists || docSnapShot.data() == null) {
+        return null;
+      }
+      final data = docSnapShot.data() as Map<String, dynamic>;
+      return ModelRegistry.fromMap<T>({"id": docSnapShot.id, ...data});
+    } catch (error) {
+      print("error in getById in productt=>$error");
+      rethrow;
+    }
   }
 
   @override
@@ -78,8 +103,29 @@ class DBService<T> implements IDBService<T> {
   @override
   Future<(List<T>, DocumentSnapshot<Object?>?, bool)> whereClause(
       Query<Object?> Function(CollectionReference<Object?> p1) queryBuilder,
-      [DocumentSnapshot<Object?>? lastDocument]) {
-    // TODO: implement whereClause
-    throw UnimplementedError();
+      [DocumentSnapshot<Object?>? lastDocument]) async {
+    List<T> items = [];
+    try {
+      Query query = queryBuilder(fireStore.collection(collectionPath));
+      if (lastDocument != null) {
+        query = query.startAfterDocument(lastDocument);
+      }
+      QuerySnapshot qs = await query.get().timeout(Duration(seconds: 5));
+      if (qs.docs.isEmpty) {
+        return (<T>[], lastDocument, true);
+      }
+      items = qs.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        print(data);
+        return ModelRegistry.fromMap<T>({"id": doc.id, ...data});
+      }).toList();
+
+      return (items, qs.docs.last, false);
+    } catch (error) {
+      print("error in db service");
+      print(error);
+      print("error in db service");
+      rethrow;
+    }
   }
 }

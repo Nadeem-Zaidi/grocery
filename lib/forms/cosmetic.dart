@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart';
-import 'package:grocery_app/extensions/capitalize_first.dart';
 import 'package:grocery_app/widgets/multi_image_picker.dart';
 import 'package:grocery_app/widgets/textfield.dart';
 import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart'
@@ -182,7 +181,7 @@ class _FieldRendererState extends State<_FieldRenderer> {
             context,
             label: config.label ?? "Unbinded",
             hint: config.hint ?? "",
-            maxLength: 20,
+            maxLength: 250,
             errorText: errorText,
           );
         }
@@ -192,7 +191,7 @@ class _FieldRendererState extends State<_FieldRenderer> {
           keyboardType: TextInputType.text,
           label: config.label ?? "Unbinded",
           hint: config.hint ?? "",
-          maxLength: 20,
+          maxLength: 250,
           onChanged: onChange,
           errorText: errorText,
         );

@@ -7,13 +7,16 @@ import 'package:grocery_app/utils/screen_utils.dart';
 
 import '../blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import '../blocs/products/cart/cart_bloc.dart';
+import '../database_service.dart/db_service.dart';
 import '../models/product/product.dart';
+import '../models/product/productt.dart';
 import '../pages/product_pages/product_detail.dart';
+import '../service_locator/service_locator.dart';
 import 'add_button.dart';
 import 'cart_increment_decrement.dart';
 
 class BuildProductGrid extends StatefulWidget {
-  final List<Product> products;
+  final List<Productt> products;
   const BuildProductGrid({super.key, required this.products});
 
   @override
@@ -40,11 +43,12 @@ class _BuildProductGridState extends State<BuildProductGrid> {
 
   @override
   Widget build(BuildContext context) {
+    print("running product builder");
     final screenWidth = ScreenUtils.getScreenWidth(context);
     final screenHeight = ScreenUtils.getScreenHeight(context);
     final isSmallDevice = screenWidth < 360;
     final isTablet = screenWidth > 600;
-    List<Product> products = widget.products;
+    List<Productt> products = widget.products;
     return GridView.builder(
       controller: _scrollController,
       itemCount: products.length,
@@ -57,10 +61,9 @@ class _BuildProductGridState extends State<BuildProductGrid> {
               MaterialPageRoute(
                 builder: (context) => BlocProvider(
                   create: (context) => ProductDetailBloc(
-                    dbService: FirestoreProductService(
-                        fireStore: FirebaseFirestore.instance,
-                        collectionName: "products"),
-                  )..add(FetchDetails(products[index].id!)),
+                    dbService: ServiceLocator()
+                        .getWithParam<DBService<Productt>, String>("products"),
+                  )..add(FetchDetails(products[index].attributes["id"])),
                   child: ProductDetailPage(),
                 ),
               ),
@@ -79,9 +82,9 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                       flex: 9,
                       child: Stack(
                         children: [
-                          products[index].images[0] != null
+                          products[index].attributes["images"][0] != null
                               ? Image.network(
-                                  products[index].images[0],
+                                  products[index].attributes["images"][0],
                                   fit: BoxFit.fitHeight,
                                   width: double.infinity,
                                   height: screenHeight * 0.17,
@@ -92,10 +95,11 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                           BlocBuilder<CartBloc, CartState>(
                             builder: (context, state) {
                               final productInCart =
-                                  state.items[products[index].id];
+                                  state.items[products[index].attributes["id"]];
                               final quantity = productInCart?.quantity ?? 0;
                               if (quantity > 0) {
-                                String productId = products[index].id!;
+                                String productId =
+                                    products[index].attributes["id"]!;
                                 return Positioned(
                                   bottom: screenHeight * 0.005,
                                   right: screenWidth * 0.009,
@@ -112,8 +116,8 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                                 right: 0,
                                 child: InkWell(
                                   onTap: () {
-                                    context.read<CartBloc>().add(
-                                        CartItemAdded(products[index].id!));
+                                    context.read<CartBloc>().add(CartItemAdded(
+                                        products[index].attributes["id"]));
                                   },
                                   child: AddToCartButton(
                                       height: screenHeight * 0.035,
@@ -151,7 +155,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                                 child: Text(
-                                  "${products[index].quantityInBox}${products[index].unit}",
+                                  "${products[index].attributes["quantityunit"]}${products[index].attributes["unit"]}",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold, fontSize: 8),
@@ -188,7 +192,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          products[index].name ?? "",
+                          products[index].attributes["name"] ?? "",
                           style: const TextStyle(
                               fontSize: 11, fontWeight: FontWeight.bold),
                           maxLines: 2,
@@ -228,7 +232,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                       child: Row(
                         children: [
                           Text(
-                            products[index].discount.toString(),
+                            products[index].attributes["discount"].toString(),
                             style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
@@ -254,7 +258,10 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                         children: [
                           Icon(Icons.currency_rupee),
                           Text(
-                            products[index].sellingPrice!.round().toString(),
+                            products[index]
+                                .attributes["sellingprice"]
+                                .round()
+                                .toString(),
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 12),
                           ),
@@ -267,7 +274,10 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                               ),
                               SizedBox(width: 3),
                               Text(
-                                products[index].mrp!.round().toString(),
+                                products[index]
+                                    .attributes["mrp"]
+                                    .round()
+                                    .toString(),
                                 style: TextStyle(
                                   fontSize: 9,
                                   decoration: TextDecoration.lineThrough,
