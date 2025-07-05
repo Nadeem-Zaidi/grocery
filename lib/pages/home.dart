@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import 'package:grocery_app/blocs/dashboard_builder/cubit/dashboard_builder_cubit.dart';
-
 import 'package:grocery_app/blocs/products/fetch_product/fetch_product_bloc.dart';
 import 'package:grocery_app/database_service.dart/category/firestore_category_service.dart';
 import 'package:grocery_app/database_service.dart/dashboard/firebase_dashboard_service.dart';
@@ -13,18 +12,17 @@ import 'package:grocery_app/database_service.dart/inventory/firebase_inventory_s
 import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
 import 'package:grocery_app/models/category.dart';
 import 'package:grocery_app/models/sections/section.dart';
-
 import 'package:grocery_app/pages/product_pages/product_list_builder.dart';
-import 'package:grocery_app/widgets/build_product_grid.dart';
 import 'package:grocery_app/widgets/category_drawer.dart';
 import 'package:grocery_app/widgets/category_list.dart';
 import 'package:grocery_app/widgets/shop_by_store.dart';
 import 'package:grocery_app/widgets/sliver_category.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import '../database_service.dart/db_service.dart';
 import '../models/product/productt.dart';
 import '../service_locator/service_locator.dart';
+import '../widgets/cart/cart_action_button.dart';
+import '../widgets/products/build_product_grid.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -79,7 +77,7 @@ class _HomeState extends State<Home> {
     // 3. Only call native code AFTER permission is confirmed
     try {
       Map<String, dynamic> location = await LocationService.getLocation();
-      print(location);
+
       return {
         'latitude': location['latitude'],
         'longitude': location['longitude'],
@@ -275,7 +273,13 @@ class _HomeState extends State<Home> {
                                                     categories: categories),
                                             productListWidget: (products) =>
                                                 BuildProductGrid(
-                                                    products: products)),
+                                                  products: products,
+                                                  buildCartAction:
+                                                      (context, product) {
+                                                    return CartActionButton(
+                                                        product: product);
+                                                  },
+                                                )),
                                       ),
                                     ),
                                   );

@@ -49,7 +49,7 @@ class _SelectCategoryState extends State<SelectCategory> {
     return Scaffold(
       body: BlocBuilder<FetchCategoryBloc, FetchCategoryState>(
         builder: (context, state) {
-          if (state.isFetching && state.categories.isEmpty) {
+          if (state.categoryLoading && state.categories.isEmpty) {
             return _buildShimmerLoading();
           }
 

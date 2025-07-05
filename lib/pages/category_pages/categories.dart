@@ -61,7 +61,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       ),
       body: BlocBuilder<FetchCategoryBloc, FetchCategoryState>(
         builder: (context, state) {
-          if (state.isFetching && state.categories.isEmpty) {
+          if (state.categoryLoading && state.categories.isEmpty) {
             return _buildShimmerLoader();
           }
 
@@ -114,8 +114,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
                           );
                         }
                       },
-                      childCount:
-                          state.categories.length + (state.isFetching ? 1 : 0),
+                      childCount: state.categories.length +
+                          (state.categoryLoading ? 1 : 0),
                     ),
                   ),
                 ),

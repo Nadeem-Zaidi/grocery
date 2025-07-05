@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:grocery_app/authentication/presentation/otp_screen.dart';
 import 'package:grocery_app/forms/cosmetic.dart';
 import 'package:grocery_app/pages/category_pages/create_category_page.dart';
+import 'package:grocery_app/pages/home2.dart';
 import 'package:grocery_app/pages/product_pages/new_product.dart';
 import 'package:grocery_app/pages/product_pages/product_list.dart';
 
@@ -17,6 +18,7 @@ class RouteGenerator {
         // return MaterialPageRoute(builder: (_) => const NewProduct());
         return MaterialPageRoute(builder: (_) => const LandingPage());
       case '/home':
+        // return MaterialPageRoute(builder: (_) => const HomeScreen());
         return MaterialPageRoute(builder: (_) => const Home());
       // return MaterialPageRoute(
       //     builder: (context) => MultiBlocProvider(

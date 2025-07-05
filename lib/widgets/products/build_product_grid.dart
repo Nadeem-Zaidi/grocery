@@ -1,23 +1,17 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/blocs/products/product_detail/product_detail_bloc.dart';
-import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
 import 'package:grocery_app/utils/screen_utils.dart';
-
-import '../blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
-import '../blocs/products/cart/cart_bloc.dart';
-import '../database_service.dart/db_service.dart';
-import '../models/product/product.dart';
-import '../models/product/productt.dart';
-import '../pages/product_pages/product_detail.dart';
-import '../service_locator/service_locator.dart';
-import 'add_button.dart';
-import 'cart_increment_decrement.dart';
+import '../../blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
+import '../../models/product/productt.dart';
+import '../../pages/product_pages/product_detail.dart';
 
 class BuildProductGrid extends StatefulWidget {
   final List<Productt> products;
-  const BuildProductGrid({super.key, required this.products});
+  final Widget Function(BuildContext context, Productt productId)?
+      buildCartAction;
+
+  const BuildProductGrid(
+      {super.key, required this.products, this.buildCartAction});
 
   @override
   State<BuildProductGrid> createState() => _BuildProductGridState();
@@ -43,7 +37,6 @@ class _BuildProductGridState extends State<BuildProductGrid> {
 
   @override
   Widget build(BuildContext context) {
-    print("running product builder");
     final screenWidth = ScreenUtils.getScreenWidth(context);
     final screenHeight = ScreenUtils.getScreenHeight(context);
     final isSmallDevice = screenWidth < 360;
@@ -59,12 +52,8 @@ class _BuildProductGridState extends State<BuildProductGrid> {
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => BlocProvider(
-                  create: (context) => ProductDetailBloc(
-                    dbService: ServiceLocator()
-                        .getWithParam<DBService<Productt>, String>("products"),
-                  )..add(FetchDetails(products[index].attributes["id"])),
-                  child: ProductDetailPage(),
+                builder: (context) => ProductDetailPage(
+                  product: products[index],
                 ),
               ),
             );
@@ -82,9 +71,9 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                       flex: 9,
                       child: Stack(
                         children: [
-                          products[index].attributes["images"][0] != null
+                          products[index].details["images"][0] != null
                               ? Image.network(
-                                  products[index].attributes["images"][0],
+                                  products[index].details["images"][0],
                                   fit: BoxFit.fitHeight,
                                   width: double.infinity,
                                   height: screenHeight * 0.17,
@@ -92,43 +81,18 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                                       const Icon(Icons.broken_image),
                                 )
                               : Container(color: Colors.grey),
-                          BlocBuilder<CartBloc, CartState>(
-                            builder: (context, state) {
-                              final productInCart =
-                                  state.items[products[index].attributes["id"]];
-                              final quantity = productInCart?.quantity ?? 0;
-                              if (quantity > 0) {
-                                String productId =
-                                    products[index].attributes["id"]!;
-                                return Positioned(
+                          widget.buildCartAction != null
+                              ? Positioned(
                                   bottom: screenHeight * 0.005,
                                   right: screenWidth * 0.009,
-                                  child: CartIncrementDecrement(
-                                    productId: productId,
-                                    width: screenHeight * 0.09,
-                                    height: screenHeight * 0.035,
-                                    quantity: quantity,
+                                  child: SizedBox(
+                                    height: screenHeight * 0.03,
+                                    width: screenWidth * 0.15,
+                                    child: widget.buildCartAction!(
+                                        context, products[index]),
                                   ),
-                                );
-                              }
-                              return Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: InkWell(
-                                  onTap: () {
-                                    context.read<CartBloc>().add(CartItemAdded(
-                                        products[index].attributes["id"]));
-                                  },
-                                  child: AddToCartButton(
-                                      height: screenHeight * 0.035,
-                                      width: screenHeight * 0.07,
-                                      backGroundColor: Colors.white,
-                                      fontSize: 12,
-                                      buttonText: "Add"),
-                                ),
-                              );
-                            },
-                          )
+                                )
+                              : SizedBox.shrink(),
                         ],
                       ),
                     ),
@@ -155,7 +119,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                                 child: Text(
-                                  "${products[index].attributes["quantityunit"]}${products[index].attributes["unit"]}",
+                                  "${products[index].details["quantityunit"]}${products[index].details["unit"]}",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold, fontSize: 8),
@@ -192,7 +156,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          products[index].attributes["name"] ?? "",
+                          products[index].details["name"] ?? "",
                           style: const TextStyle(
                               fontSize: 11, fontWeight: FontWeight.bold),
                           maxLines: 2,
@@ -232,7 +196,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                       child: Row(
                         children: [
                           Text(
-                            products[index].attributes["discount"].toString(),
+                            products[index].details["discount"].toString(),
                             style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
@@ -259,7 +223,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                           Icon(Icons.currency_rupee),
                           Text(
                             products[index]
-                                .attributes["sellingprice"]
+                                .details["sellingprice"]
                                 .round()
                                 .toString(),
                             style: TextStyle(
@@ -274,8 +238,9 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                               ),
                               SizedBox(width: 3),
                               Text(
-                                products[index]
-                                    .attributes["mrp"]
+                                double.parse(products[index]
+                                        .details["mrp"]
+                                        .toString())
                                     .round()
                                     .toString(),
                                 style: TextStyle(

@@ -16,7 +16,6 @@ class CategoryList extends StatefulWidget {
 class _CategoryListState extends State<CategoryList> {
   @override
   Widget build(BuildContext context) {
-    print("running category list");
     List<Category> childrenCat = widget.categories;
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -24,26 +23,13 @@ class _CategoryListState extends State<CategoryList> {
       itemBuilder: (context, index) {
         return InkWell(
           onTap: () {
-            print(childrenCat[index].name!);
             context
                 .read<FetchCategoryBloc>()
                 .add(SetCurrentChild(childrenCat[index].name!));
           },
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-            decoration: BoxDecoration(
-                // color: isSelected
-                //     ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                //     : Colors.transparent,
-                // border: isSelected
-                //     ? Border(
-                //         left: BorderSide(
-                //           color: Theme.of(context).colorScheme.primary,
-                //           width: 3,
-                //         ),
-                //       )
-                //     : null,
-                ),
+            decoration: BoxDecoration(),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -53,9 +39,6 @@ class _CategoryListState extends State<CategoryList> {
                   height: 56,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    // color: isSelected
-                    //     ? Theme.of(context).colorScheme.primaryContainer
-                    //     : Theme.of(context).colorScheme.surfaceContainerHighest,
                   ),
                   child: childrenCat[index].url != null
                       ? ClipRRect(

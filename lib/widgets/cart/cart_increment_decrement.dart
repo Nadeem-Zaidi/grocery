@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../blocs/products/cart/cart_bloc.dart';
 
 class CartIncrementDecrement extends StatefulWidget {
   final String productId;
   final int quantity;
   final double? height;
   final double? width;
+  final Function onAdd;
+  final Function onRemove;
 
-  const CartIncrementDecrement(
-      {super.key,
-      required this.productId,
-      required this.quantity,
-      this.height,
-      this.width});
+  const CartIncrementDecrement({
+    super.key,
+    required this.productId,
+    required this.quantity,
+    this.height,
+    this.width,
+    required this.onAdd,
+    required this.onRemove,
+  });
 
   @override
   State<CartIncrementDecrement> createState() => _CartIncrementDecrementState();
@@ -65,10 +67,10 @@ class _CartIncrementDecrementState extends State<CartIncrementDecrement> {
   }
 
   void _addItem(BuildContext context) {
-    context.read<CartBloc>().add(CartItemAdded(widget.productId));
+    widget.onAdd();
   }
 
   void _removeItem(BuildContext context) {
-    context.read<CartBloc>().add(CartItemRemoved(widget.productId));
+    widget.onRemove();
   }
 }

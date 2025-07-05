@@ -42,7 +42,7 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
   Future<void> _fetchCategoryChildren(
       Emitter<FetchCategoryState> emit, String id, String name) async {
     try {
-      emit(state.copyWith(isFetching: true));
+      emit(state.copyWith(categoryLoading: true));
       var (childCategories, lastDoc, hasReachedMax) =
           await dbService.whereClause(
               (collection) => collection.where('parent', isEqualTo: id));
@@ -52,11 +52,11 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
           defaultChildCat: childCategories[0].name,
           currentChildCat: childCategories[0].name,
           categoryName: name,
-          isFetching: false));
+          categoryLoading: false));
       add(FetchProductWithChildren());
     } catch (e) {
       print("Can not fetch the child category due to error ==> $e");
-      emit(state.copyWith(isFetching: false, error: e.toString()));
+      emit(state.copyWith(categoryLoading: false, error: e.toString()));
     }
   }
 
@@ -66,13 +66,12 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
 
     try {
       emit(state.copyWith(
-        isFetching: true,
+        productLoading: true,
         // Reset these for new category
         products: [],
         lastProductDocument: null,
         hasReachedProductMax: false,
       ));
-      print("here");
 
       var (products, lastDocument, hasReachedMax) =
           await productService.whereClause(
@@ -85,27 +84,27 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
       emit(state.copyWith(
         products: products,
         lastProductDocument: lastDocument,
-        isFetching: false,
+        productLoading: false,
         hasReachedProductMax: hasReachedMax,
       ));
     } catch (e) {
       emit(state.copyWith(
         error: e.toString(),
-        isFetching: false,
+        productLoading: false,
       ));
     }
   }
 
   Future<void> fetchNext(Emitter<FetchCategoryState> emit) async {
     // Don't fetch if already loading, no more products, or no last document
-    if (state.isFetching ||
+    if (state.productLoading ||
         state.hasReachedProductMax ||
         state.lastProductDocument == null) {
       return;
     }
 
     try {
-      emit(state.copyWith(isFetching: true));
+      emit(state.copyWith(productLoading: true));
 
       var (newProducts, lastDocument, hasReachedMax) =
           await productService.whereClause(
@@ -120,30 +119,32 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
       emit(state.copyWith(
         products: [...state.products, ...newProducts],
         lastProductDocument: lastDocument,
-        isFetching: false,
+        productLoading: false,
         hasReachedProductMax: hasReachedMax,
       ));
     } catch (e) {
       emit(state.copyWith(
         error: e.toString(),
-        isFetching: false,
+        productLoading: false,
       ));
     }
   }
 
   Future<void> seCurrentChildCat(
       Emitter<FetchCategoryState> emit, String? name) async {
-    emit(state.copyWith(currentChildCat: name));
-    add(FetchProductWithChildren());
+    if (state.currentChildCat != name) {
+      emit(state.copyWith(currentChildCat: name));
+      add(FetchProductWithChildren());
+    }
   }
 
   Future<void> _onFetchCategories(
     Emitter<FetchCategoryState> emit,
   ) async {
     // Don't fetch if we're already loading or have reached max
-    if (state.isFetching || state.hasReachedMax) return;
+    if (state.categoryLoading || state.hasReachedMax) return;
 
-    emit(state.copyWith(isFetching: true));
+    emit(state.copyWith(categoryLoading: true));
 
     try {
       final (newCategories, newLastDocument) = await dbService.getAll(
@@ -162,7 +163,7 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
     } finally {
-      emit(state.copyWith(isFetching: false));
+      emit(state.copyWith(categoryLoading: false));
     }
   }
 }

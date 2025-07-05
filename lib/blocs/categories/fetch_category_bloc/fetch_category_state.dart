@@ -5,7 +5,8 @@ class FetchCategoryState extends Equatable {
   final List<Category> categories;
   final List<Category> childrenCategories;
   final List<Productt> products;
-  final bool isFetching;
+  final bool categoryLoading;
+  final bool productLoading;
   final bool hasReachedMax;
   final bool hasReachedProductMax;
   final DocumentSnapshot? lastDocument;
@@ -20,7 +21,8 @@ class FetchCategoryState extends Equatable {
     this.categories = const [],
     this.childrenCategories = const [],
     this.products = const [],
-    this.isFetching = false,
+    this.categoryLoading = false,
+    this.productLoading = false,
     this.hasReachedMax = false,
     this.hasReachedProductMax = false,
     this.lastDocument,
@@ -35,7 +37,7 @@ class FetchCategoryState extends Equatable {
   const FetchCategoryState.initial() : this();
 
   /// Loading state
-  const FetchCategoryState.loading() : this(isFetching: true);
+  const FetchCategoryState.loading() : this(categoryLoading: true);
 
   /// Success state after data is fetched
   const FetchCategoryState.success({
@@ -48,20 +50,20 @@ class FetchCategoryState extends Equatable {
           childrenCategories: childrenCategories,
           hasReachedMax: hasReachedMax,
           lastDocument: lastDocument,
-          isFetching: false,
+          categoryLoading: false,
           error: null,
         );
 
   /// Failure state with error message
   const FetchCategoryState.failure(String error)
-      : this(error: error, isFetching: false);
+      : this(error: error, categoryLoading: false);
 
   @override
   List<Object?> get props => [
         categories,
         childrenCategories,
         products,
-        isFetching,
+        categoryLoading,
         hasReachedMax,
         hasReachedProductMax,
         lastDocument,
@@ -77,7 +79,8 @@ class FetchCategoryState extends Equatable {
     List<Category>? categories,
     List<Category>? childrenCategories,
     List<Productt>? products,
-    bool? isFetching,
+    bool? categoryLoading,
+    bool? productLoading,
     bool? hasReachedMax,
     bool? hasReachedProductMax,
     DocumentSnapshot? lastDocument,
@@ -91,7 +94,8 @@ class FetchCategoryState extends Equatable {
       categories: categories ?? this.categories,
       childrenCategories: childrenCategories ?? this.childrenCategories,
       products: products ?? this.products,
-      isFetching: isFetching ?? this.isFetching,
+      categoryLoading: categoryLoading ?? this.categoryLoading,
+      productLoading: productLoading ?? this.productLoading,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       hasReachedProductMax: hasReachedProductMax ?? this.hasReachedProductMax,
       lastDocument: lastDocument ?? this.lastDocument,
@@ -109,7 +113,8 @@ FetchCategoryState {
   categories: ${categories.length},
   childrenCategories: ${childrenCategories.length},
   products:${products.length},
-  isFetching: $isFetching,
+  categoryLoading: $categoryLoading,
+  productLoading:$productLoading,
   hasReachedMax: $hasReachedMax,
   hasReachedProductMax:$hasReachedProductMax,
   lastDocument: $lastDocument,

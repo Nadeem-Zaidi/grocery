@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 Widget buildTextField(
   BuildContext context, {
@@ -20,6 +21,7 @@ Widget buildTextField(
   EdgeInsetsGeometry? contentPadding,
   InputBorder? focusedBorder,
   InputBorder? errorBorder,
+  List<TextInputFormatter> inputFormatter = const [],
   String? errorText,
 }) {
   final theme = Theme.of(context);
@@ -55,7 +57,8 @@ Widget buildTextField(
             keyboardType: keyboardType,
             focusNode: focusNode,
             validator: validator,
-            onChanged: onChanged, // Added onChanged parameter
+            onChanged: onChanged,
+            inputFormatters: inputFormatter, // Added onChanged parameter
             decoration: InputDecoration(
               hintText: hint,
               border: InputBorder.none,

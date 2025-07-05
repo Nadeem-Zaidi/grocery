@@ -26,6 +26,12 @@ void registerServices() {
     );
   });
 
+  serviceLocator.registerFactory<DBService<Productt>>(() {
+    return DBService<Productt>(
+        fireStore: serviceLocator.get<FirebaseFirestore>(),
+        collectionPath: 'products');
+  });
+
   serviceLocator
       .registerParamFactory<DBService<FormConfig>, String>((collectionPath) {
     return DBService<FormConfig>(

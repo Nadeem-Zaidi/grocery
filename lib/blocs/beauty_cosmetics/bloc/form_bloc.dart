@@ -13,7 +13,7 @@ import 'package:grocery_app/database_service.dart/product/firestore_product_serv
 import 'package:grocery_app/models/form_config/form_config.dart';
 import 'package:grocery_app/models/product/product.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:math_expressions/math_expressions.dart';
 import '../../../models/category.dart';
 import '../../../models/product/productt.dart';
 
@@ -33,6 +33,7 @@ class FormBloc extends Bloc<FormEvent, FormState> {
     on<FormSave>(_onFormSave);
     on<FormPickImages>(_pickImages);
     on<FormRemovePickedImages>(_removePickedImages);
+    on<ItemCreated>(_itemCreated);
   }
 
   Future<void> _setFormCategory(
@@ -161,78 +162,205 @@ class FormBloc extends Bloc<FormEvent, FormState> {
   }
 
   void _onFieldChanged(FieldChanged event, Emitter<FormState> emit) {
-    final fieldName = event.fieldKey;
-    final value = event.value;
-    final config = state.formConfigMap[fieldName];
+    try {
+      final fieldName = event.fieldKey; //incoming field value
+      final value = event.value; //incoming value
+      final config = state.formConfigMap[fieldName]; //config for incoming field
+      final errorState = Map<String, dynamic>.from(state.errors);
 
-    if (config == null) return;
+      if (config == null) return;
 
-    Map<String, FormConfig> updatedMap =
-        Map<String, FormConfig>.from(state.formConfigMap);
-    final errorState = Map<String, dynamic>.from(state.errors);
+      Map<String, FormConfig> updatedMap = Map<String, FormConfig>.from(
+          state.formConfigMap); //take a copy of current formConfigMap
+      // final updatedField = config.copyWith(defaultValue: value);
+      // updatedMap[fieldName] = updatedField;
 
-    final typedValue = _getDataTypeForAttribute(config.datatype, value);
+      if (config.required) {
+        final valueString = value?.toString() ?? "";
+        if (valueString.trim().isEmpty) {
+          errorState[fieldName] = "This field is required";
+        } else {
+          errorState[fieldName] = null;
+        }
+      }
 
-    bool isEmpty = value.toString().trim().isEmpty;
-    bool hasError = typedValue.error != null;
+      if (config.datatype == "number" ||
+          config.datatype == "double" ||
+          config.datatype == "int") {
+        final resultNum = num.tryParse(value?.toString() ?? '');
+        print("I am resultnum===>$resultNum and fieldName=$fieldName");
 
-    if (config.required && isEmpty) {
-      errorState[fieldName] = "This is a required field";
-    } else if (hasError && !isEmpty) {
-      errorState[fieldName] = typedValue.error;
-    } else {
-      errorState[fieldName] = null;
-      final updatedField = config.copyWith(defaultValue: typedValue.result);
+        if (resultNum == null) {
+          errorState[fieldName] = "Not a valid number";
+          print(errorState[fieldName]);
+        } else {
+          errorState[fieldName] = null;
+        }
+      }
+      final updatedField = config.copyWith(defaultValue: value);
       updatedMap[fieldName] = updatedField;
-    }
+      if (config.rules != null &&
+          config.rules is List &&
+          config.rules.length > 0) {
+        for (var rule in config.rules) {
+          if (rule["type"] == "calculate") {
+            String? dumpsTo = rule["dumpsto"];
+            String? e = rule["expression"];
+            Map<String, dynamic> eb = rule["expressionbuilder"];
 
-    // Reevaluation rules (e.g. hide/show other fields)
-    if (config.reevaluate != null &&
-        config.reevaluate is List &&
-        config.reevaluate.length > 0) {
-      for (var rev in config.reevaluate) {
-        if (rev["type"] == "hide") {
-          //target field
-          String? forField = rev["forfield"];
-          //check if targret field contains in the updatedMap or not
-          if (updatedMap.containsKey(forField)) {
-            FormConfig? reevaluatedConfig = updatedMap[forField];
-            if (reevaluatedConfig != null &&
-                reevaluatedConfig.rules != null &&
-                reevaluatedConfig.rules.isNotEmpty) {
-              for (var rule in reevaluatedConfig.rules) {
-                if (rule["type"] == "hide") {
-                  String? fieldToWatch = rule["fieldtowatch"];
-                  String? operator = rule["operator"];
-                  String? val = rule["value"];
-                  if (updatedMap.containsKey(fieldToWatch)) {
-                    final watchedValue =
-                        updatedMap[fieldToWatch]?.defaultValue?.toString() ??
-                            '';
-
-                    if (operator == "isequalto") {
-                      final shouldHide = !(value.toString() == val.toString());
-
-                      print("📌 Hiding $forField? $shouldHide "
-                          "(because $val != $watchedValue)");
-
-                      // 💡 Always replace with copyWith to trigger state updates
-                      updatedMap["bundle"] =
-                          reevaluatedConfig.copyWith(hidden: shouldHide);
-                    }
-                  }
+            Map<String, double?> peb = eb.map((k, v) {
+              if (v == "value") {
+                return MapEntry(k, double.tryParse(value.toString()));
+              } else {
+                if (updatedMap.containsKey(v.toString()) &&
+                    updatedMap[v.toString()]?.defaultValue != null &&
+                    updatedMap[v.toString()]?.defaultValue != 0 &&
+                    updatedMap[v.toString()]?.defaultValue != "0") {
+                  return MapEntry(
+                      k,
+                      double.tryParse(
+                              updatedMap[v.toString()]?.defaultValue ?? '0') ??
+                          0.0);
+                } else {
+                  return MapEntry(k, null);
                 }
               }
+            });
+            print(peb);
+            Parser p = Parser();
+            final cm = ContextModel();
+            final exp = p.parse(e!);
+            for (var entry in peb.entries) {
+              cm.bindVariable(Variable(entry.key), Number(entry.value ?? 0));
             }
+            final result = exp.evaluate(EvaluationType.REAL, cm);
+
+            updatedMap[dumpsTo.toString()] =
+                updatedMap[dumpsTo.toString()]!.copyWith(defaultValue: result);
+          }
+          if (rule["type"] == "copyto") {
+            print("copyto");
+            String copyToField = rule["copytofield"];
+            updatedMap[copyToField.toString()] =
+                updatedMap[copyToField.toString()]!
+                    .copyWith(defaultValue: value);
           }
         }
       }
+
+      emit(state.copyWith(
+        formConfigMap: updatedMap,
+        errors: errorState,
+      ));
+    } catch (e) {
+      print(e);
     }
 
-    emit(state.copyWith(
-      formConfigMap: updatedMap,
-      errors: errorState,
-    ));
+    // }
+
+    // if (config.datatype == "string" || config.datatype == "text") {
+    //   if (value is! String) {
+    //     errorState[fieldName] = "not a valid string";
+    //   }
+    // }
+
+    // Only process the value if it's not null or empty
+    // if (value != null && value.toString().trim().isNotEmpty) {
+    //   final typedValue = _getDataTypeForAttribute(config.datatype, value);
+
+    //   bool hasError = typedValue.error != null;
+
+    //   if (hasError) {
+    //     errorState[fieldName] = typedValue.error;
+    //   } else {
+    //     errorState[fieldName] = null;
+    //     final updatedField = config.copyWith(defaultValue: typedValue.result);
+    //     updatedMap[fieldName] = updatedField;
+    //   }
+    // } else {
+    //   // Handle empty values differently - don't update the field value immediately
+    //   if (config.required) {
+    //     errorState[fieldName] = "This is a required field";
+    //   } else if (!config.required) {
+    //     errorState[fieldName] = null;
+    //     // Only clear the value if t  he field is not required
+    //     final updatedField = config.copyWith(
+    //         defaultValue: _getDefaultValueForType(config.datatype));
+    //     updatedMap[fieldName] = updatedField;
+    //   }
+    // }
+
+    // Reevaluation rules (e.g. hide/show other fields)
+    // if (config.reevaluate != null &&
+    //     config.reevaluate is List &&
+    //     config.reevaluate.length > 0) {
+    //   for (var rev in config.reevaluate) {
+    //     if (rev["type"] == "hide") {
+    //       String? forField = rev["forfield"];
+    //       if (updatedMap.containsKey(forField)) {
+    //         FormConfig? reevaluatedConfig = updatedMap[forField];
+    //         if (reevaluatedConfig != null &&
+    //             reevaluatedConfig.rules != null &&
+    //             reevaluatedConfig.rules.isNotEmpty) {
+    //           for (var rule in reevaluatedConfig.rules) {
+    //             if (rule["type"] == "hide") {
+    //               String? fieldToWatch = rule["fieldtowatch"];
+    //               String? operator = rule["operator"];
+    //               String? val = rule["value"];
+    //               if (updatedMap.containsKey(fieldToWatch)) {
+    //                 final watchedValue =
+    //                     updatedMap[fieldToWatch]?.defaultValue?.toString() ??
+    //                         '';
+
+    //                 if (operator == "isequalto") {
+    //                   final shouldHide = !(value.toString() == val.toString());
+    //                   updatedMap[forField!] =
+    //                       reevaluatedConfig.copyWith(hidden: shouldHide);
+    //                 }
+    //               }
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //     if (rev["type"] == "discount") {
+    //       String? forField = rev["forfield"];
+    //       if (updatedMap.containsKey(forField)) {
+    //         FormConfig? reevaluateConfig = updatedMap[forField];
+    //         if (reevaluateConfig != null &&
+    //             reevaluateConfig.rules != null &&
+    //             reevaluateConfig.rules.isNotEmpty) {
+    //           for (var rule in reevaluateConfig.rules) {
+    //             if (rule["type"] == "discount") {
+    //               String? fieldToWatch = rule["fieldtowatch"];
+    //               String? operator = rule["operator"];
+    //               String? discountfield = rule["discountfield"];
+
+    //               if (updatedMap.containsKey(fieldToWatch) &&
+    //                   updatedMap.containsKey(discountfield)) {
+    //                 final watchedValue = updatedMap[fieldToWatch]?.defaultValue;
+    //                 final discount = updatedMap[discountfield]?.defaultValue;
+    //                 if (operator == "discount-minus" &&
+    //                     watchedValue != null &&
+    //                     discount != null) {
+    //                   if (watchedValue != null && discount != null) {
+    //                     print("field to watch ===>${watchedValue}");
+    //                     double result = double.parse(watchedValue) -
+    //                         (double.parse(discount) /
+    //                             100 *
+    //                             double.parse(watchedValue));
+    //                     updatedMap[forField!] =
+    //                         reevaluateConfig.copyWith(defaultValue: result);
+    //                   }
+    //                 }
+    //               }
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
   }
 
   ({dynamic result, String? error}) _getDataTypeForAttribute(
@@ -351,6 +479,10 @@ class FormBloc extends Bloc<FormEvent, FormState> {
 
   Future<void> _onFormSave(FormSave event, Emitter<FormState> emit) async {
     try {
+      emit(state.copyWith(savingForm: true));
+      Map<String, dynamic> details = {};
+      Map<String, dynamic> highlights = {};
+      Map<String, dynamic> info = {};
       List<String> imageURLList = [];
       Map<String, dynamic> formDataToSave = {};
       String? categoryPath = state.formConfigMap["categorypath"]?.defaultValue;
@@ -381,7 +513,7 @@ class FormBloc extends Bloc<FormEvent, FormState> {
         }
       }
 
-      //image processing
+      // image processing
       for (XFile file in state.productImages) {
         File imageFile = File(file.path);
         String fileName = "$categoryName/${file.name}";
@@ -410,13 +542,33 @@ class FormBloc extends Bloc<FormEvent, FormState> {
       }
       createFinalErrorMap = {...createFinalErrorMap, "images": imageURLList};
 
-      Productt product = Productt(attributes: createFinalErrorMap);
+      for (var config in state.formConfigMap.entries) {
+        if (config.value.section == "details") {
+          details[config.key] = createFinalErrorMap[config.key];
+        } else if (config.value.section == "highlights") {
+          highlights[config.key] = createFinalErrorMap[config.key];
+        } else {
+          info[config.key] = createFinalErrorMap[config.key];
+        }
+      }
+
+      Productt product = Productt(
+          attributes: createFinalErrorMap,
+          highLightSection: highlights,
+          infoSection: info,
+          details: details);
       Productt uploaded = await productService.create(product);
-      print("hurray product uploaded");
-      print(uploaded.attributes);
-      print("hurray product uploaded");
+
+      emit(state.copyWith(savingForm: false, createdProduct: uploaded));
     } catch (error) {
       print(error);
+      emit(state.copyWith(savingForm: false, error: error.toString()));
+    } finally {
+      emit(state.copyWith(savingForm: false));
     }
+  }
+
+  Future<void> _itemCreated(ItemCreated event, Emitter<FormState> emit) async {
+    emit(state.copyWith(isLoading: true));
   }
 }

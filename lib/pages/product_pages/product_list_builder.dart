@@ -37,7 +37,7 @@ class _ProductListBuilderState extends State<ProductListBuilder> {
               if (state.error != null) {
                 return Container();
               }
-              if (state.isFetching) {
+              if (state.categoryLoading) {
                 return CircularProgressIndicator();
               }
               if (state.childrenCategories.isEmpty) {
@@ -61,7 +61,7 @@ class _ProductListBuilderState extends State<ProductListBuilder> {
                   if (state.error != null) {
                     return Center();
                   }
-                  if (state.isFetching) {
+                  if (state.productLoading) {
                     return Center(
                       child: CircularProgressIndicator(),
                     );

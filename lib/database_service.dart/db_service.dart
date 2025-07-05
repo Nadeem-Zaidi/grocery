@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:grocery_app/database_service.dart/IDBService.dart';
 import 'package:grocery_app/database_service.dart/ientity.dart';
 import 'package:grocery_app/database_service.dart/model_registry.dart';
-import 'package:grocery_app/models/product/productt.dart';
 
 class DBService<T extends IEntity> implements IDBService<T> {
   FirebaseFirestore fireStore;
@@ -38,6 +37,8 @@ class DBService<T extends IEntity> implements IDBService<T> {
       [DocumentSnapshot<Object?>? lastDocument,
       bool descending = false]) async {
     try {
+      List<T> documents = [];
+
       CollectionReference collectionReference =
           fireStore.collection(collectionPath);
       Query query = collectionReference
@@ -52,7 +53,7 @@ class DBService<T extends IEntity> implements IDBService<T> {
       if (querySnapshot.docs.isEmpty) {
         return (<T>[], null);
       }
-      final documents = querySnapshot.docs.map((doc) {
+      documents = querySnapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         return ModelRegistry.fromMap<T>(data);
       }).toList();
@@ -72,7 +73,9 @@ class DBService<T extends IEntity> implements IDBService<T> {
       if (!docSnapShot.exists || docSnapShot.data() == null) {
         return null;
       }
+
       final data = docSnapShot.data() as Map<String, dynamic>;
+
       return ModelRegistry.fromMap<T>({"id": docSnapShot.id, ...data});
     } catch (error) {
       print("error in getById in productt=>$error");
@@ -116,7 +119,7 @@ class DBService<T extends IEntity> implements IDBService<T> {
       }
       items = qs.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        print(data);
+
         return ModelRegistry.fromMap<T>({"id": doc.id, ...data});
       }).toList();
 

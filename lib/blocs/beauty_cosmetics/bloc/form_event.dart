@@ -43,10 +43,16 @@ class FormOnFieldSwitchChange extends FormEvent {
 
 @immutable
 class FormRemovePickedImages extends FormEvent {
-  int index;
-  FormRemovePickedImages({required this.index});
+  final int index;
+  const FormRemovePickedImages({required this.index});
 }
 
 class ReEvaluateVisibility extends FormEvent {
   const ReEvaluateVisibility();
+}
+
+@immutable
+class ItemCreated<T> extends FormEvent {
+  final T item;
+  const ItemCreated({required this.item});
 }
