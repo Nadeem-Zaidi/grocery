@@ -14,6 +14,9 @@ class FormState extends Equatable {
   final String? productCreatedId;
   final bool? savingForm;
   final Productt? createdProduct;
+  final Productt? selectedProduct;
+  final bool creatingProduct;
+  final bool creatingVariation;
 
   const FormState({
     required this.formConfigMap,
@@ -29,6 +32,9 @@ class FormState extends Equatable {
     this.productCreatedId,
     this.savingForm,
     this.createdProduct,
+    this.selectedProduct,
+    this.creatingProduct = false,
+    this.creatingVariation = false,
   });
 
   factory FormState.initial() {
@@ -38,21 +44,23 @@ class FormState extends Equatable {
     );
   }
 
-  FormState copyWith({
-    List<FormConfig>? formConfig,
-    Map<String, FormConfig>? formConfigMap,
-    Map<String, dynamic>? errors,
-    String? error,
-    bool? isValid,
-    bool? isLoading,
-    bool? hasReachedMax,
-    DocumentSnapshot? lastDocument,
-    List<XFile>? productImages,
-    Category? category,
-    String? productCreatedId,
-    bool? savingForm,
-    Productt? createdProduct,
-  }) {
+  FormState copyWith(
+      {List<FormConfig>? formConfig,
+      Map<String, FormConfig>? formConfigMap,
+      Map<String, dynamic>? errors,
+      String? error,
+      bool? isValid,
+      bool? isLoading,
+      bool? hasReachedMax,
+      DocumentSnapshot? lastDocument,
+      List<XFile>? productImages,
+      Category? category,
+      String? productCreatedId,
+      bool? savingForm,
+      Productt? createdProduct,
+      Productt? selectedProduct,
+      bool? creatingProduct,
+      bool? creatingVariation}) {
     return FormState(
         formConfig: formConfig ?? this.formConfig,
         formConfigMap: formConfigMap ?? this.formConfigMap,
@@ -66,7 +74,10 @@ class FormState extends Equatable {
         category: category ?? this.category,
         productCreatedId: productCreatedId ?? this.productCreatedId,
         savingForm: savingForm ?? this.savingForm,
-        createdProduct: createdProduct ?? this.createdProduct);
+        createdProduct: createdProduct ?? this.createdProduct,
+        selectedProduct: selectedProduct ?? this.selectedProduct,
+        creatingProduct: creatingProduct ?? this.creatingProduct,
+        creatingVariation: creatingVariation ?? this.creatingVariation);
   }
 
   @override
@@ -83,6 +94,9 @@ class FormState extends Equatable {
         category,
         productCreatedId,
         savingForm,
-        createdProduct
+        createdProduct,
+        selectedProduct,
+        creatingProduct,
+        creatingVariation,
       ];
 }

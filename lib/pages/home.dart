@@ -239,11 +239,8 @@ class _HomeState extends State<Home> {
                                           BlocProvider<FetchCategoryBloc>(
                                             create: (context) =>
                                                 FetchCategoryBloc(
-                                              FirestoreCategoryService(
-                                                firestore:
-                                                    FirebaseFirestore.instance,
-                                                collectionName: "categories",
-                                              ),
+                                              ServiceLocator()
+                                                  .get<DBService<Category>>(),
                                               ServiceLocator().getWithParam<
                                                   DBService<Productt>,
                                                   String>("products"),
@@ -253,33 +250,22 @@ class _HomeState extends State<Home> {
                                                         items[itemIndex].name),
                                                   ),
                                           ),
-                                          BlocProvider<FetchProductBloc>(
-                                            create: (context) =>
-                                                FetchProductBloc(productService,
-                                                    FirebaseFirestore.instance),
-                                          ),
-                                          // BlocProvider<FetchProductBloc>(
-                                          //   create: (context) =>
-                                          //       FetchProductBloc(productService,
-                                          //           FirebaseFirestore.instance)
-                                          //         ..add(
-                                          //           LoadProducts(),
-                                          //         ),
-                                          // ),
                                         ],
                                         child: ProductListBuilder(
-                                            categoryListWidget: (categories) =>
-                                                CategoryList(
-                                                    categories: categories),
-                                            productListWidget: (products) =>
-                                                BuildProductGrid(
-                                                  products: products,
-                                                  buildCartAction:
-                                                      (context, product) {
-                                                    return CartActionButton(
-                                                        product: product);
-                                                  },
-                                                )),
+                                          categoryListWidget: (categories) =>
+                                              CategoryList(
+                                                  categories: categories),
+                                          productListWidget: (products) =>
+                                              BuildProductGrid(
+                                            products: products,
+                                            buildCartAction:
+                                                (context, product) {
+                                              return CartActionButton(
+                                                  product:
+                                                      product.variations[0]);
+                                            },
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   );

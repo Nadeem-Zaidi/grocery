@@ -16,6 +16,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:math_expressions/math_expressions.dart';
 import '../../../models/category.dart';
 import '../../../models/product/productt.dart';
+import 'package:uuid/uuid.dart';
 
 part 'form_event.dart';
 part 'form_state.dart';
@@ -24,8 +25,10 @@ class FormBloc extends Bloc<FormEvent, FormState> {
   final IDBService<FormConfig> dbService;
   final IDBService<dynamic> productService;
   final ImagePicker _imagePicker = ImagePicker();
+  final String? forEntity;
 
-  FormBloc({required this.dbService, required this.productService})
+  FormBloc(
+      {required this.dbService, required this.productService, this.forEntity})
       : super(FormState.initial()) {
     on<SetFormCategory>(_setFormCategory);
     on<FieldChanged>(_onFieldChanged);
@@ -39,7 +42,8 @@ class FormBloc extends Bloc<FormEvent, FormState> {
   Future<void> _setFormCategory(
       SetFormCategory event, Emitter<FormState> emit) async {
     try {
-      emit(state.copyWith(category: event.category));
+      emit(state.copyWith(
+          category: event.category, selectedProduct: event.product));
     } catch (error) {
       emit(state.copyWith(error: "Can not set category"));
     }
@@ -86,7 +90,7 @@ class FormBloc extends Bloc<FormEvent, FormState> {
 
       emit(state.copyWith(isLoading: true, error: null));
       var (formConfig, lastDocument) =
-          await dbService.getAll(12, "sequence", state.lastDocument);
+          await dbService.getAll(15, "sequence", state.lastDocument);
 
       if (formConfig.isEmpty) {
         emit(state
@@ -112,21 +116,21 @@ class FormBloc extends Bloc<FormEvent, FormState> {
             FirebaseAuth.instance.currentUser?.phoneNumber;
       }
 
+      if (formConfigMap.containsKey("productid")) {
+        formConfigMap["productid"]?.defaultValue = state.selectedProduct?.id;
+      }
+
       Map<String, FormConfig> newFormConfigMap = {
         ...state.formConfigMap,
         ...formConfigMap
       };
 
       for (var entry in newFormConfigMap.values) {
-        print(entry.toString());
         FormConfig config = entry;
         if (config.rules != null &&
             config.rules is List &&
             config.rules.length > 0) {
-          print("hurray**************");
-          print(config.rules);
           for (var rule in config.rules) {
-            print(rule);
             switch (rule["type"]) {
               case "hide":
                 String? fieldToWatch = rule["fieldtowatch"];
@@ -479,96 +483,280 @@ class FormBloc extends Bloc<FormEvent, FormState> {
 
   Future<void> _onFormSave(FormSave event, Emitter<FormState> emit) async {
     try {
-      emit(state.copyWith(savingForm: true));
-      Map<String, dynamic> details = {};
+      emit(state.copyWith(creatingProduct: true));
       Map<String, dynamic> highlights = {};
       Map<String, dynamic> info = {};
+      Map<String, dynamic> productSection = {};
+      Map<String, dynamic> variationSection = {};
+      Map<String, dynamic> inventory = {};
+      List<Map<String, dynamic>> variationList = [];
+
       List<String> imageURLList = [];
       Map<String, dynamic> formDataToSave = {};
       String? categoryPath = state.formConfigMap["categorypath"]?.defaultValue;
       String? categoryName = state.formConfigMap["categoryname"]?.defaultValue;
-      if (categoryPath == null || categoryName == null) {
-        emit(state.copyWith(error: "Category is empty"));
-        return;
-      }
-      //check for empty value
-      Map<String, dynamic> createFinalErrorMap = {};
-      for (var entry in state.formConfigMap.entries) {
-        if (entry.value.required) {
-          if (entry.value.defaultValue.toString().isEmpty) {
-            createFinalErrorMap[entry.key] = "This is a required field";
-          } else {
-            final typeError = _getDataTypeForAttribute(
-                entry.value.datatype, entry.value.defaultValue.toString());
-            if (typeError.error != null) {
-              createFinalErrorMap[entry.key] = typeError.error;
-            }
-          }
-        } else {
-          final typeValueNRF = _getDataTypeForAttribute(
-              entry.value.datatype, entry.value.defaultValue.toString());
-          if (typeValueNRF.error != null) {
-            createFinalErrorMap[entry.key] = typeValueNRF.error;
-          }
+
+      if (forEntity == "newproduct") {
+        if (categoryPath == null || categoryName == null) {
+          emit(state.copyWith(error: "Category is empty"));
+          return;
         }
+      }
+
+      //check for empty value
+      // Map<String, dynamic> createFinalErrorMap = {};
+      // for (var entry in state.formConfigMap.entries) {
+      //   if (entry.value.required) {
+      //     if (entry.value.defaultValue.toString().isEmpty) {
+      //       createFinalErrorMap[entry.key] = "This is a required field";
+      //     } else {
+      //       final typeError = _getDataTypeForAttribute(
+      //           entry.value.datatype, entry.value.defaultValue.toString());
+      //       if (typeError.error != null) {
+      //         createFinalErrorMap[entry.key] = typeError.error;
+      //       }
+      //     }
+      //   } else {
+      //     final typeValueNRF = _getDataTypeForAttribute(
+      //         entry.value.datatype, entry.value.defaultValue.toString());
+      //     if (typeValueNRF.error != null) {
+      //       createFinalErrorMap[entry.key] = typeValueNRF.error;
+      //     }
+      //   }
+      // }
+
+      if (state.productImages.isNotEmpty) {
+        ImageUploader uploader = ImageUploader(
+            entityList: state.productImages, fileName: categoryName.toString());
+        imageURLList = await uploader.upload();
       }
 
       // image processing
-      for (XFile file in state.productImages) {
-        File imageFile = File(file.path);
-        String fileName = "$categoryName/${file.name}";
-        Reference storageRef =
-            FirebaseStorage.instance.ref().child("images/$fileName.jpg");
-        UploadTask uploadTask = storageRef.putFile(imageFile);
-        TaskSnapshot taskSnap = await uploadTask;
-        String imageURL = await taskSnap.ref.getDownloadURL();
-        if (imageURL.isEmpty) {
-          throw Exception("Error in image uploading");
-        }
-        imageURLList.add(imageURL.toString());
-      }
-      if (imageURLList.isEmpty) {
-        throw Exception("Error in image uploading");
-      }
+      // if (state.productImages.isNotEmpty) {
+      //   for (XFile file in state.productImages) {
+      //     File imageFile = File(file.path);
+      //     String fileName = "$categoryName/${file.name}";
+      //     Reference storageRef =
+      //         FirebaseStorage.instance.ref().child("images/$fileName.jpg");
+      //     UploadTask uploadTask = storageRef.putFile(imageFile);
+      //     TaskSnapshot taskSnap = await uploadTask;
+      //     String imageURL = await taskSnap.ref.getDownloadURL();
+      //     if (imageURL.isEmpty) {
+      //       throw Exception("Error in image uploading");
+      //     }
+      //     imageURLList.add(imageURL.toString());
+      //   }
+      //   if (imageURLList.isEmpty) {
+      //     throw Exception("Error in image uploading");
+      //   }
+      // }
 
-      createFinalErrorMap.remove("images");
+      // createFinalErrorMap.remove("images");
 
-      if (createFinalErrorMap.values.isEmpty) {
-        emit(state.copyWith(error: "Error in saveving form"));
-      } else {
-        for (FormConfig config in state.formConfigMap.values) {
-          createFinalErrorMap[config.fieldname!] = config.defaultValue;
-        }
-      }
-      createFinalErrorMap = {...createFinalErrorMap, "images": imageURLList};
+      // if (createFinalErrorMap.values.isNotEmpty) {
+      //   emit(state.copyWith(error: "Error in saveving form"));
+      // } else {
+      //   for (FormConfig config in state.formConfigMap.values) {
+      //     createFinalErrorMap[config.fieldname!] = config.defaultValue;
+      //   }
+      // }
+      // createFinalErrorMap = {...createFinalErrorMap, "images": imageURLList};
 
+      //***************************
       for (var config in state.formConfigMap.entries) {
-        if (config.value.section == "details") {
-          details[config.key] = createFinalErrorMap[config.key];
-        } else if (config.value.section == "highlights") {
-          highlights[config.key] = createFinalErrorMap[config.key];
-        } else {
-          info[config.key] = createFinalErrorMap[config.key];
+        if (config.value.section.contains("product")) {
+          productSection[config.key] = config.value.defaultValue;
+        }
+        if (config.value.section.contains("variation")) {
+          variationSection[config.key] = config.value.defaultValue;
+        }
+
+        if (config.value.section.contains("highlight")) {
+          highlights[config.key] = config.value.defaultValue;
+        }
+        if (config.value.section.contains("info")) {
+          info[config.key] = config.value.defaultValue;
+        }
+        if (config.value.section.contains("inventory")) {
+          inventory[config.key] = config.value.defaultValue;
         }
       }
 
-      Productt product = Productt(
-          attributes: createFinalErrorMap,
-          highLightSection: highlights,
-          infoSection: info,
-          details: details);
-      Productt uploaded = await productService.create(product);
+      if (imageURLList.isEmpty) {
+        throw Exception("No image selected");
+      }
 
-      emit(state.copyWith(savingForm: false, createdProduct: uploaded));
-    } catch (error) {
+      Map<String, dynamic> productWithExtrainformation = {
+        ...productSection,
+        "highlights": highlights,
+        "info": info
+      };
+
+      //variation // this will go in variation collection
+      Map<String, dynamic> v = {
+        ...variationSection,
+        "images": imageURLList,
+        "productid": state.selectedProduct?.id,
+      };
+
+      // Productt prod = Productt.fromMap(productWithExtrainformation);
+      Variation variation = Variation.fromMap(v);
+      Inventory inv = Inventory.fromMap(inventory);
+      FirebaseFirestore fireStore = dbService.getFireStore();
+
+      // if (forEntity == "newproduct") {
+      //   await transactionForNewProductCreation(fireStore, prod, variation, inv);
+      // }
+
+      print("*********selected productid*********************");
+      print(state.selectedProduct?.id);
+      print("*********selected product id********************");
+
+      if (forEntity == "newvariation") {
+        await transactionForVariationCreation(fireStore, variation, inv);
+      }
+
+      // await fireStore.runTransaction((transaction) async {
+      //   Map<String, dynamic> productMap = prod.toMap();
+      //   productMap.remove("id");
+      //   Map<String, dynamic> variationMap = variation.toMap();
+      //   variationMap.remove("id");
+      //   Map<String, dynamic> inventoryMap = inv.toMap();
+      //   inventoryMap.remove("id");
+      //   final productId = fireStore.collection("products").doc().id;
+      //   final productRef = fireStore
+      //       .collection('products')
+      //       .doc(productId); // get the product id
+      //   //setting product
+      //   transaction.set(productRef, productMap);
+      //   //set variations
+      //   final variationId = fireStore.collection("variations").doc().id;
+      //   final variationRef = fireStore
+      //       .collection("products")
+      //       .doc(productRef.id)
+      //       .collection("variations")
+      //       .doc(variationId);
+      //   transaction
+      //       .set(variationRef, {...variationMap, "productId": productRef.id});
+
+      //   //set variation globaly
+      //   final globalVariationRef =
+      //       fireStore.collection("variations").doc(variationId);
+      //   transaction.set(globalVariationRef, inventoryMap);
+      //   //set inventory
+      //   final inventoryRef = fireStore.collection("inventory").doc();
+      //   transaction
+      //       .set(inventoryRef, {"variationid": variationId, ...inv.toMap()});
+      // });
+
+      emit(state.copyWith(creatingProduct: false));
+    } catch (error, stk) {
       print(error);
-      emit(state.copyWith(savingForm: false, error: error.toString()));
+      print(stk);
+      emit(state.copyWith(creatingProduct: false, error: error.toString()));
     } finally {
-      emit(state.copyWith(savingForm: false));
+      emit(state.copyWith(creatingProduct: false));
     }
   }
 
   Future<void> _itemCreated(ItemCreated event, Emitter<FormState> emit) async {
     emit(state.copyWith(isLoading: true));
+  }
+}
+
+Future<void> transactionForVariationCreation(FirebaseFirestore fireStore,
+    Variation variation, Inventory inventory) async {
+  if (variation.productId == null || variation.productId == "") {
+    return;
+  }
+
+  final productId = variation.productId;
+  await fireStore.runTransaction((transaction) async {
+    Map<String, dynamic> variationMap = variation.toMap();
+    Map<String, dynamic> inventoryMap = inventory.toMap();
+    variationMap.remove("id");
+    inventoryMap.remove("id");
+    // variation creation
+    final variationId = fireStore.collection("variation").doc().id;
+    final variationRef = fireStore
+        .collection("products")
+        .doc(productId)
+        .collection("variations")
+        .doc(variationId);
+    transaction.set(variationRef, variationMap);
+    //**************************************************** */
+
+    //inventory creation
+    final inventoryRef = fireStore.collection("inventory").doc();
+    transaction
+        .set(inventoryRef, {"variationid": variationId, ...inventoryMap});
+
+    //************************************ */
+
+    // add variation to related product
+  });
+}
+
+Future<void> transactionForNewProductCreation(FirebaseFirestore fireStore,
+    Productt product, Variation variation, Inventory inventory) async {
+  await fireStore.runTransaction((transaction) async {
+    Map<String, dynamic> productMap = product.toMap();
+    Map<String, dynamic> variationMap = variation.toMap();
+    Map<String, dynamic> inventoryMap = inventory.toMap();
+    productMap.remove("id");
+    variationMap.remove("id");
+    inventoryMap.remove("id");
+    // product creation
+    final productId = fireStore.collection("products").doc().id;
+    final productRef = fireStore.collection("products").doc(productId);
+    transaction.set(productRef, productMap);
+    //****************************************** */
+
+    //variation creation
+    final variationId = fireStore.collection("variations").doc().id;
+    final variationRef = fireStore
+        .collection("products")
+        .doc(productRef.id)
+        .collection("variations")
+        .doc(variationId);
+    transaction
+        .set(variationRef, {...variationMap, "productId": productRef.id});
+    //************************************************ */
+
+    //Global variation creation
+    final globalVariationRef =
+        fireStore.collection("variations").doc(variationId);
+    transaction.set(globalVariationRef, inventoryMap);
+    /******************************************************************* */
+
+    //Inventory creation
+    final inventoryRef = fireStore.collection("inventory").doc();
+    transaction
+        .set(inventoryRef, {"variationid": variationId, ...inventoryMap});
+  });
+}
+
+class ImageUploader {
+  List<XFile> entityList;
+  String fileName;
+
+  ImageUploader({required this.entityList, required this.fileName});
+
+  Future<List<String>> upload() async {
+    List<String> imageUrlList = [];
+    for (XFile file in entityList) {
+      File imageFile = File(file.path);
+      Reference storageReference = FirebaseStorage.instance
+          .ref()
+          .child("images/${fileName}/${file.name}.jpg");
+      UploadTask uploadTask = storageReference.putFile(imageFile);
+      TaskSnapshot taskSnap = await uploadTask;
+      String uploadedImageUrl = await taskSnap.ref.getDownloadURL();
+      if (uploadedImageUrl.isEmpty) {
+        throw Exception("Error in image uploading");
+      }
+      imageUrlList.add(uploadedImageUrl);
+    }
+    return imageUrlList;
   }
 }

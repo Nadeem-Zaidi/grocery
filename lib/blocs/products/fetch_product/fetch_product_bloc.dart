@@ -67,9 +67,9 @@ class FetchProductBloc extends Bloc<FetchProductEvent, FetchProductState> {
     try {
       var (products, lastDoc, hasReachedmax) = await productDb.whereClause(
           (collection) => collection
-              .where("tags", arrayContains: categoryString)
+              .where("categorypath", isEqualTo: categoryString)
               .orderBy("name")
-              .limit(5),
+              .limit(15),
           state.lastDocument);
 
       if (products.isEmpty) {

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart';
 import 'package:grocery_app/blocs/bloc/new_product/bloc/new_product_bloc.dart';
 import 'package:grocery_app/database_service.dart/db_service.dart';
-import 'package:grocery_app/forms/cosmetic.dart';
+import 'package:grocery_app/forms/form.dart';
 import 'package:grocery_app/models/form_config/form_config.dart';
 import 'package:grocery_app/models/product/productt.dart';
 import 'package:grocery_app/service_locator/service_locator.dart';
@@ -105,6 +105,7 @@ class _NewProductState extends State<NewProduct> {
                                             builder: (newContext) =>
                                                 BlocProvider(
                                               create: (context) => FormBloc(
+                                                  forEntity: "newproduct",
                                                   dbService: dbService,
                                                   productService:
                                                       productService)

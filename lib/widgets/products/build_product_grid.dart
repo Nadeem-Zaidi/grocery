@@ -54,6 +54,8 @@ class _BuildProductGridState extends State<BuildProductGrid> {
               MaterialPageRoute(
                 builder: (context) => ProductDetailPage(
                   product: products[index],
+                  variation: products[index]
+                      .getVariation(products[0].variations[0].id!),
                 ),
               ),
             );
@@ -71,9 +73,9 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                       flex: 9,
                       child: Stack(
                         children: [
-                          products[index].details["images"][0] != null
+                          products[index].variations[0].images.isNotEmpty
                               ? Image.network(
-                                  products[index].details["images"][0],
+                                  products[index].variations[0].images[0],
                                   fit: BoxFit.fitHeight,
                                   width: double.infinity,
                                   height: screenHeight * 0.17,
@@ -119,7 +121,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                                   borderRadius: BorderRadius.circular(5),
                                 ),
                                 child: Text(
-                                  "${products[index].details["quantityunit"]}${products[index].details["unit"]}",
+                                  "${products[index].variations[0].unitSize}${products[index].variations[0].unitOfMeasure}",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold, fontSize: 8),
@@ -156,7 +158,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          products[index].details["name"] ?? "",
+                          products[index].variations[0].name,
                           style: const TextStyle(
                               fontSize: 11, fontWeight: FontWeight.bold),
                           maxLines: 2,
@@ -196,7 +198,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                       child: Row(
                         children: [
                           Text(
-                            products[index].details["discount"].toString(),
+                            products[index].variations[0].discount.toString(),
                             style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
@@ -223,7 +225,8 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                           Icon(Icons.currency_rupee),
                           Text(
                             products[index]
-                                .details["sellingprice"]
+                                .variations[0]
+                                .sellingPrice
                                 .round()
                                 .toString(),
                             style: TextStyle(
@@ -238,11 +241,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
                               ),
                               SizedBox(width: 3),
                               Text(
-                                double.parse(products[index]
-                                        .details["mrp"]
-                                        .toString())
-                                    .round()
-                                    .toString(),
+                                products[index].variations[0].mrp.toString(),
                                 style: TextStyle(
                                   fontSize: 9,
                                   decoration: TextDecoration.lineThrough,

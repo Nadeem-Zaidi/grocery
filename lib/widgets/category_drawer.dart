@@ -10,6 +10,7 @@ import 'package:grocery_app/database_service.dart/db_service.dart';
 import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
 import 'package:grocery_app/models/form_config/form_config.dart';
 import 'package:grocery_app/pages/category_pages/categories.dart';
+import 'package:grocery_app/pages/created_products/product_list.dart';
 import 'package:grocery_app/pages/product_pages/new_product.dart';
 import 'package:grocery_app/service_locator/service_locator.dart';
 import '../database_service.dart/category/firestore_category_service.dart';
@@ -54,9 +55,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                     providers: [
                       BlocProvider(
                         create: (context) => FetchCategoryBloc(
-                            FirestoreCategoryService(
-                                firestore: FirebaseFirestore.instance,
-                                collectionName: "categories"),
+                            ServiceLocator().get<DBService<cat.Category>>(),
                             ServiceLocator()
                                 .getWithParam<DBService<Productt>, String>(
                                     "products"))
@@ -104,6 +103,32 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
             child: const ListTile(
               leading: Icon(Icons.category),
               title: Text("Create Product"),
+            ),
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                        create: (context) => FetchCategoryBloc(
+                            ServiceLocator().get<DBService<cat.Category>>(),
+                            ServiceLocator().get<DBService<Productt>>())
+                          ..add(FetchCategories()),
+                      )
+                    ],
+                    child: CreatedProductList(),
+                  ),
+                ),
+              );
+            },
+            child: const ListTile(
+              leading: Icon(Icons.category),
+              title: Text("Product List"),
             ),
           ),
         ],

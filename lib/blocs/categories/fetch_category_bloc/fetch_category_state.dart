@@ -15,6 +15,7 @@ class FetchCategoryState extends Equatable {
   final String? defaultChildCat;
   final String? categoryName;
   final String? error;
+  final Category? selectedCategory;
 
   /// Default constructor
   const FetchCategoryState({
@@ -31,6 +32,7 @@ class FetchCategoryState extends Equatable {
     this.error,
     this.defaultChildCat,
     this.currentChildCat,
+    this.selectedCategory,
   });
 
   /// Initial state
@@ -72,6 +74,7 @@ class FetchCategoryState extends Equatable {
         defaultChildCat,
         currentChildCat,
         error,
+        selectedCategory
       ];
 
   /// Create a copy with modified values
@@ -89,22 +92,23 @@ class FetchCategoryState extends Equatable {
     String? defaultChildCat,
     String? currentChildCat,
     String? error,
+    Category? selectedCategory,
   }) {
     return FetchCategoryState(
-      categories: categories ?? this.categories,
-      childrenCategories: childrenCategories ?? this.childrenCategories,
-      products: products ?? this.products,
-      categoryLoading: categoryLoading ?? this.categoryLoading,
-      productLoading: productLoading ?? this.productLoading,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-      hasReachedProductMax: hasReachedProductMax ?? this.hasReachedProductMax,
-      lastDocument: lastDocument ?? this.lastDocument,
-      lastProductDocument: lastProductDocument ?? this.lastProductDocument,
-      defaultChildCat: defaultChildCat ?? this.defaultChildCat,
-      currentChildCat: currentChildCat ?? this.currentChildCat,
-      categoryName: categoryName ?? this.categoryName,
-      error: error ?? this.error,
-    );
+        categories: categories ?? this.categories,
+        childrenCategories: childrenCategories ?? this.childrenCategories,
+        products: products ?? this.products,
+        categoryLoading: categoryLoading ?? this.categoryLoading,
+        productLoading: productLoading ?? this.productLoading,
+        hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+        hasReachedProductMax: hasReachedProductMax ?? this.hasReachedProductMax,
+        lastDocument: lastDocument ?? this.lastDocument,
+        lastProductDocument: lastProductDocument ?? this.lastProductDocument,
+        defaultChildCat: defaultChildCat ?? this.defaultChildCat,
+        currentChildCat: currentChildCat ?? this.currentChildCat,
+        categoryName: categoryName ?? this.categoryName,
+        error: error ?? this.error,
+        selectedCategory: selectedCategory ?? this.selectedCategory);
   }
 
   @override
@@ -123,6 +127,7 @@ FetchCategoryState {
   currentChildCat:$currentChildCat
   categoryName:$categoryName
   error: $error
+  selectedCategory:$selectedCategory
 }
 ''';
 }

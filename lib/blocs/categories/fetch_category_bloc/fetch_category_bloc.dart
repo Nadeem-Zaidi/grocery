@@ -13,7 +13,7 @@ part 'fetch_category_event.dart';
 part 'fetch_category_state.dart';
 
 class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
-  final IdatabaseService dbService;
+  final IDBService<Category> dbService;
   final IDBService<Productt> productService;
 
   FetchCategoryBloc(this.dbService, this.productService)
@@ -35,6 +35,10 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
 
         case FetchNext():
           await fetchNext(emit);
+        case SelectProductCategory(category: Category c):
+          await _selectCategory(emit, c);
+        case ProductWithCategory(name: String categoryString):
+          await _fetchProductWithCategory(emit, categoryString);
       }
     });
   }
@@ -61,13 +65,12 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
   }
 
   Future<void> _fetchCategoriesWithProduct(
-      Emitter<FetchCategoryState> emit) async {
-    // Don't fetch if already loading
-
+    Emitter<FetchCategoryState> emit,
+  ) async {
+    List<Productt> productResult = [];
     try {
       emit(state.copyWith(
         productLoading: true,
-        // Reset these for new category
         products: [],
         lastProductDocument: null,
         hasReachedProductMax: false,
@@ -81,13 +84,35 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
             .limit(10),
       );
 
+      final firestore = productService.getFireStore();
+
+      for (var p in products) {
+        p.variations ??= [];
+
+        final collRef =
+            firestore.collection("products").doc(p.id).collection("variations");
+        final qs = await collRef.get();
+
+        if (qs.docs.isNotEmpty) {
+          for (var doc in qs.docs) {
+            p.variations.add(
+              Variation.fromMap({"id": doc.id, ...doc.data()}),
+            );
+          }
+        }
+
+        productResult = [...productResult, p];
+      }
+
       emit(state.copyWith(
-        products: products,
+        products: productResult,
         lastProductDocument: lastDocument,
         productLoading: false,
         hasReachedProductMax: hasReachedMax,
       ));
-    } catch (e) {
+    } catch (e, stk) {
+      print(e);
+      print(stk);
       emit(state.copyWith(
         error: e.toString(),
         productLoading: false,
@@ -148,8 +173,9 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
 
     try {
       final (newCategories, newLastDocument) = await dbService.getAll(
-        10, // Your page size
-        state.lastDocument, // Pass the last document for pagination
+        10,
+        "name",
+        state.lastDocument,
       );
 
       if (newCategories.isEmpty) {
@@ -164,6 +190,75 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
       emit(state.copyWith(error: e.toString()));
     } finally {
       emit(state.copyWith(categoryLoading: false));
+    }
+  }
+
+  Future<void> _selectCategory(
+      Emitter<FetchCategoryState> emit, Category category) async {
+    try {
+      print("from inside selected category");
+      print(category.id);
+      print("from inside selected category");
+      emit(state.copyWith(selectedCategory: category));
+      add(ProductWithCategory(category.name!));
+    } catch (e, s) {
+      print(e);
+      print(s);
+    }
+  }
+
+  Future<void> _fetchProductWithCategory(
+      Emitter<FetchCategoryState> emit, String categoryString) async {
+    List<Productt> productResult = [];
+    try {
+      emit(state.copyWith(
+        productLoading: true,
+        products: [],
+        lastProductDocument: null,
+        hasReachedProductMax: false,
+      ));
+
+      var (products, lastDocument, hasReachedMax) =
+          await productService.whereClause(
+        (collection) => collection
+            .where("categoryname", isEqualTo: state.currentChildCat)
+            .orderBy("name")
+            .limit(10),
+      );
+
+      final firestore = productService.getFireStore();
+
+      for (var p in products) {
+        p.variations ??= [];
+
+        final collRef =
+            firestore.collection("products").doc(p.id).collection("variations");
+        final qs = await collRef.get();
+
+        if (qs.docs.isNotEmpty) {
+          for (var doc in qs.docs) {
+            p.variations.add(
+              Variation.fromMap({"id": doc.id, ...doc.data()}),
+            );
+          }
+        }
+
+        productResult = [...productResult, p];
+      }
+
+      emit(state.copyWith(
+        products: productResult,
+        lastProductDocument: lastDocument,
+        productLoading: false,
+        hasReachedProductMax: hasReachedMax,
+      ));
+    } catch (e, stk) {
+      print(e);
+      print(stk);
+      emit(state.copyWith(
+        error: e.toString(),
+        productLoading: false,
+      ));
     }
   }
 }

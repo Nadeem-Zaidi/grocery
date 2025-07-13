@@ -10,7 +10,8 @@ sealed class FormEvent extends Equatable {
 @immutable
 class SetFormCategory extends FormEvent {
   final Category category;
-  const SetFormCategory({required this.category});
+  final Productt? product;
+  const SetFormCategory({required this.category, this.product});
 }
 
 @immutable

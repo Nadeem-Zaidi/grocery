@@ -10,7 +10,7 @@ import '../../models/product/product.dart';
 import '../../models/product/productt.dart';
 
 class AddToCartInProductDescription extends StatefulWidget {
-  final Productt product;
+  final Variation product;
   final CartItem? cartItem;
   final CartActionContent cartAction;
 
@@ -50,7 +50,7 @@ class _AddToCartInProductDescriptionState
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "${widget.product.details["quantityunit"]} ${widget.product.highLightSection["unit"]}",
+                      "${widget.product.unitSize} ${widget.product.unitOfMeasure}",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -64,9 +64,7 @@ class _AddToCartInProductDescriptionState
                           size: 18,
                         ),
                         Text(
-                          widget.product.details["sellingprice"]!
-                              .round()
-                              .toString(),
+                          widget.product.sellingPrice!.round().toString(),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
@@ -84,7 +82,7 @@ class _AddToCartInProductDescriptionState
                               ),
                             ),
                             Text(
-                              widget.product.details["mrp"].toString(),
+                              widget.product.mrp.toString(),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey.shade600,

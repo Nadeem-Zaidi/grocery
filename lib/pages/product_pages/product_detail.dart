@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import 'package:grocery_app/blocs/products/cart/cart_bloc.dart';
@@ -9,10 +10,13 @@ import 'package:grocery_app/widgets/error_widget.dart';
 import 'package:grocery_app/widgets/image_slider.dart';
 import '../../models/product/productt.dart';
 import '../../widgets/cart/add_to_cart_button.dart';
+import '../../widgets/products/variation_discount_box.dart';
 
 class ProductDetailPage extends StatefulWidget {
   Productt product;
-  ProductDetailPage({super.key, required this.product});
+  Variation variation;
+  ProductDetailPage(
+      {super.key, required this.product, required this.variation});
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -20,13 +24,14 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   final ScrollController _scrollController = ScrollController();
+
   double _scrollOffset = 0.0;
   final double _imageHeight = 300.0;
   final double _appBarHeight = kToolbarHeight;
   final GlobalKey _cartButtonKey = GlobalKey();
-  bool _isCartButtonVisible = false;
-  bool _wasCartButtonVisible = false;
-  bool _stickButton = true;
+  // bool _isCartButtonVisible = false;
+  // bool _wasCartButtonVisible = false;
+  // bool _stickButton = true;
 
   @override
   void initState() {
@@ -96,6 +101,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   @override
   Widget build(BuildContext context) {
     Productt product = widget.product;
+    Variation variation = widget.variation;
+
     final double appBarOpacity =
         (_scrollOffset / (_imageHeight - _appBarHeight)).clamp(0.0, 1.0);
     final double imageTop = -_scrollOffset * 0.5;
@@ -111,7 +118,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         title: Opacity(
           opacity: appBarOpacity,
           child: Text(
-            product.details["name"] ?? "",
+            product.name ?? "",
             style: TextStyle(
                 color: appBarOpacity > 0.7 ? Colors.white : Colors.black),
           ),
@@ -147,9 +154,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     stretchModes: const [StretchMode.zoomBackground],
                     background: Transform.translate(
                       offset: Offset(0, imageTop),
-                      child: ImageSlider(
-                          imageUrls: (product.details["images"] as List)
-                              .cast<String>()),
+                      child: ImageSlider(imageUrls: variation.images),
                       // child: Transform.scale(
                       //     scale: imageScale,
                       //     child: ImageSlider(imageUrls: imageTest)),
@@ -165,12 +170,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       children: [
                         // Product title and details
                         Text(
-                          product.details["name"] ?? "",
+                          product.name ?? "",
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${product.details["quantityunit"]} ${product.details["unit"]}',
+                          '${variation.unitSize} ${variation.unitOfMeasure}',
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 16),
@@ -179,7 +184,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         Row(
                           children: [
                             Text(
-                              '₹${product.details["sellingprice"]}',
+                              '₹${variation.sellingPrice}',
                               style: Theme.of(context)
                                   .textTheme
                                   .headlineMedium
@@ -188,11 +193,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                   ),
                             ),
                             const SizedBox(width: 8),
-                            if (double.parse(
-                                    product.details["discount"].toString()) >
-                                0)
+                            if (variation.discount > 0)
                               Text(
-                                '${product.details["discount"]}% OFF',
+                                '${variation.discount}% OFF',
                                 style: TextStyle(
                                   color: Colors.green,
                                   fontWeight: FontWeight.bold,
@@ -202,14 +205,36 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'MRP ₹${product.details["mrp"]} (inclusive of all taxes)',
+                          'MRP ₹${variation.mrp} (inclusive of all taxes)',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'testing',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
+                        product.variations.length > 1
+                            ? SizedBox(
+                                height:
+                                    150, // constrain height for vertical list
+                                child: ListView.builder(
+                                  scrollDirection:
+                                      Axis.horizontal, // horizontal scroll
+                                  itemCount: product.variations.length,
+                                  itemBuilder: (context, index) {
+                                    return Container(
+                                      margin: const EdgeInsets.all(4),
+                                      child: DiscountBox(
+                                        sellingPrice: product
+                                            .variations[index].sellingPrice,
+                                        mrp: product.variations[index].mrp,
+                                        discount:
+                                            product.variations[index].discount,
+                                        unitSize:
+                                            "${product.variations[index].unitSize}${product.variations[index].unitOfMeasure}",
+                                      ),
+                                    );
+                                  },
+                                ),
+                              )
+                            : const SizedBox(),
+
                         const SizedBox(height: 24),
 
                         InkWell(
@@ -251,8 +276,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             children: [
                               Container(
                                 decoration: BoxDecoration(),
-                                child:
-                                    Image.network(product.details["images"][0]),
+                                child: Image.network(variation.images[0]),
                               ),
                               SizedBox(width: 10),
                               Column(
@@ -260,7 +284,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    product.details["brand"]!,
+                                    product.brand,
                                     style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 18),
@@ -320,7 +344,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             left: 0,
             right: 0,
             child: CartActionButton(
-              product: product,
+              product: variation,
               withDetail: true,
             ),
           )
@@ -409,7 +433,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   },
                   defaultVerticalAlignment: TableCellVerticalAlignment.top,
                   children: [
-                    for (var highlight in product.highLightSection.entries)
+                    for (var highlight in product.highLights.entries)
                       TableRow(
                         children: [
                           Padding(
@@ -478,7 +502,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   },
                   defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                   children: [
-                    for (var entry in product.infoSection.entries)
+                    for (var entry in product.info.entries)
                       TableRow(
                         decoration: BoxDecoration(
                           color: Colors.grey[100],

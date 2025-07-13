@@ -124,11 +124,17 @@ class DBService<T extends IEntity> implements IDBService<T> {
       }).toList();
 
       return (items, qs.docs.last, false);
-    } catch (error) {
+    } catch (error, stacktrace) {
       print("error in db service");
       print(error);
+      print(stacktrace);
       print("error in db service");
       rethrow;
     }
+  }
+
+  @override
+  FirebaseFirestore getFireStore() {
+    return fireStore;
   }
 }

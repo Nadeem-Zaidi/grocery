@@ -7,7 +7,7 @@ import 'add_to_cart_button.dart';
 import 'cart_action_content.dart';
 
 class CartActionButton extends StatelessWidget {
-  final Productt product;
+  final product;
   final bool withDetail;
 
   const CartActionButton(

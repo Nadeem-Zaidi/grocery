@@ -19,4 +19,6 @@ abstract class IDBService<T> {
 
   // Optional: For resource cleanup
   Future<void> dispose();
+
+  FirebaseFirestore getFireStore();
 }

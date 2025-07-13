@@ -8,4 +8,6 @@ void registerModels() {
   ModelRegistry.register<FormConfig>((map) => FormConfig.fromMap(map));
   ModelRegistry.register<Category>((map) => Category.fromMap(map));
   ModelRegistry.register<Productt>((map) => Productt.fromMap(map));
+  ModelRegistry.register<Variation>((map) => Variation.fromMap(map));
+  ModelRegistry.register<Inventory>((map) => Inventory.fromMap(map));
 }

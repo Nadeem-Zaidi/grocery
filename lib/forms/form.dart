@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart';
 import 'package:grocery_app/widgets/multi_image_picker.dart';
+import 'package:grocery_app/widgets/overlay.dart';
 import 'package:grocery_app/widgets/textfield.dart';
 import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart'
     as formState;
@@ -68,14 +69,26 @@ class _CosmeticFormState extends State<CosmeticForm> {
   Widget build(BuildContext context) {
     return BlocListener<FormBloc, formState.FormState>(
       listener: (context, state) {
+        if (state.error != null) {}
+        if (state.creatingProduct) {
+          OverlayHelper.showOverlay(context, "Creating Product");
+        } else {
+          OverlayHelper.removeOverlay();
+        }
+
+        if (state.creatingVariation) {
+          OverlayHelper.showOverlay(context, "Creating Variation");
+        } else {
+          OverlayHelper.removeOverlay();
+        }
         if (state.createdProduct != null) {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => ProductDetailPage(
-                product: state.createdProduct!,
-              ),
-            ),
-          );
+          // Navigator.of(context).push(
+          //   MaterialPageRoute(
+          //     builder: (context) => ProductDetailPage(
+          //       product: state.createdProduct!,
+          //     ),
+          //   ),
+          // );
         }
       },
       child: Scaffold(
@@ -95,7 +108,9 @@ class _CosmeticFormState extends State<CosmeticForm> {
               buildWhen: (previous, current) =>
                   previous.formConfigMap.length != current.formConfigMap.length,
               builder: (context, state) {
-                print(state);
+                print("hurray this is product");
+                print(state.formConfigMap);
+                print("hurray this is product");
                 return _RebuildAware(
                   state: state,
                   scrollController: _scrollController,

@@ -130,7 +130,6 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Select Parent Category"),
                         IconButton(
                           onPressed: () {
                             final createCategoryBloc =
@@ -141,7 +140,8 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
                                   providers: [
                                     BlocProvider(
                                       create: (context) => FetchCategoryBloc(
-                                          categoryService,
+                                          ServiceLocator()
+                                              .get<DBService<Category>>(),
                                           ServiceLocator().getWithParam<
                                               DBService<Productt>,
                                               String>("products"))
