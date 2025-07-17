@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../models/cart/cart_model.dart';
 import '../../../models/cart/cart_repository.dart';
+import '../../../models/product/productt.dart';
 
 part 'cart_event.dart';
 part 'cart_state.dart';
@@ -53,7 +54,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     try {
       emit(state.copyWith(isLoading: true));
       await _cartRepository.addToCart(
-        productId: event.productId,
+        variation: event.variation,
         quantity: event.quantity,
       );
       emit(state.copyWith(

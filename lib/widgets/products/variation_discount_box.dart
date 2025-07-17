@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
 
-class DiscountBox extends StatefulWidget {
-  String unitSize;
-  double discount;
-  double mrp;
-  double sellingPrice;
+import '../../models/product/productt.dart';
 
-  DiscountBox({
-    super.key,
-    required this.unitSize,
-    required this.discount,
-    required this.mrp,
-    required this.sellingPrice,
-  });
+class DiscountBox extends StatefulWidget {
+  Variation variation;
+  String selectedVariationId;
+
+  DiscountBox(
+      {super.key, required this.variation, required this.selectedVariationId});
 
   @override
   State<DiscountBox> createState() => _DiscountBoxState();
@@ -21,12 +16,16 @@ class DiscountBox extends StatefulWidget {
 class _DiscountBoxState extends State<DiscountBox> {
   @override
   Widget build(BuildContext context) {
+    Variation variation = widget.variation;
     return Center(
       child: Container(
         width: 125,
-        height: 125,
+        height: 100,
+        padding: EdgeInsets.all(2),
         decoration: BoxDecoration(
-          color: const Color(0xFFE8F5E9), // Light greenish background
+          color: variation.id == widget.selectedVariationId
+              ? const Color(0xFFE8F5E9)
+              : Colors.white, // Light greenish background
           border: Border.all(color: Colors.green),
           borderRadius: BorderRadius.circular(12),
         ),
@@ -38,7 +37,7 @@ class _DiscountBoxState extends State<DiscountBox> {
               children: [
                 // To push down content below the badge
                 Text(
-                  widget.unitSize,
+                  variation.unitSize,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -52,29 +51,51 @@ class _DiscountBoxState extends State<DiscountBox> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '₹${widget.sellingPrice.toStringAsFixed(2)}',
+                      '${variation.unitSize} ${variation.unitOfMeasure}',
                       style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      'MRP ₹${widget.mrp.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        decoration: TextDecoration.lineThrough,
-                        color: Colors.grey,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          '${variation.sellingPrice}',
+                          style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(
+                          width: 4,
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              'MRP',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 12,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 2,
+                            ),
+                            Text(
+                              '${variation.mrp}',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                decoration: TextDecoration.lineThrough,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '₹${(widget.sellingPrice / 100).toStringAsFixed(2)}/100 g',
-                  style: const TextStyle(
-                    color: Colors.grey,
-                  ),
-                ),
               ],
             ),
             // Discount Badge
@@ -97,7 +118,7 @@ class _DiscountBoxState extends State<DiscountBox> {
                   ),
                 ),
                 child: Text(
-                  '${widget.discount.toStringAsFixed(0)}% OFF',
+                  '${variation.discount.toStringAsFixed(0)}% OFF',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

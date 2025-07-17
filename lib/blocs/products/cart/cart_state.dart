@@ -37,6 +37,17 @@ class CartState extends Equatable {
     );
   }
 
+  Map<String, int> get quantityPerProductId {
+    final result = <String, int>{};
+    for (final item in items.values) {
+      final productId = item.variation.productId;
+      if (productId != null) {
+        result[productId] = (result[productId] ?? 0) + item.quantity;
+      }
+    }
+    return result;
+  }
+
   @override
   List<Object?> get props => [items, isLoading, error, lastUpdated];
 }

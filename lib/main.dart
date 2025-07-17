@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
 import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
 import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart';
+import 'package:grocery_app/blocs/change_variation/bloc/change_variation_bloc.dart';
 import 'package:grocery_app/blocs/dashboard_builder/cubit/dashboard_builder_cubit.dart';
 import 'package:grocery_app/blocs/products/cart/cart_bloc.dart';
 import 'package:grocery_app/database_service.dart/dashboard/firebase_dashboard_service.dart';
@@ -55,6 +56,8 @@ class MyApp extends StatelessWidget {
         providers: [
           BlocProvider<AuthCubit>(create: (context) => AuthCubit()),
           BlocProvider<SigninCubit>(create: (context) => SigninCubit()),
+          BlocProvider<ChangeVariationBloc>(
+              create: (_) => ChangeVariationBloc()),
           BlocProvider<CartBloc>(
             create: (context) => CartBloc(
               firestore: context.read<FirebaseFirestore>(),

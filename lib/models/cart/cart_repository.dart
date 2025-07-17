@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../product/productt.dart';
 import 'cart_model.dart';
 
 class CartRepository {
@@ -44,18 +45,15 @@ class CartRepository {
   }
 
   Future<void> addToCart({
-    required String productId,
+    required Variation variation,
     int quantity = 1,
   }) async {
     // ignore: unnecessary_string_interpolations
-    final itemKey = '$productId';
+    final itemKey = '${variation.id}';
     _localCart = _localCart.copyWith(
       items: {
         ..._localCart.items,
-        itemKey: (_localCart.items[itemKey] ??
-                CartItem(
-                  productId: productId,
-                ))
+        itemKey: (_localCart.items[itemKey] ?? CartItem(variation: variation))
             .copyWith(
           quantity: (_localCart.items[itemKey]?.quantity ?? 0) + quantity,
           updatedAt: DateTime.now(),
@@ -65,7 +63,7 @@ class CartRepository {
     );
     _cartController.add(_localCart);
     await _saveLocalCart();
-    _scheduleRemoteSync();
+    // _scheduleRemoteSync();
   }
 
   Future<void> removeFromCart(String productId) async {
@@ -79,7 +77,7 @@ class CartRepository {
     );
     _cartController.add(_localCart);
     await _saveLocalCart();
-    _scheduleRemoteSync();
+    // _scheduleRemoteSync();
   }
 
   Future<void> decreaseQuantity(String productId) async {
@@ -105,7 +103,7 @@ class CartRepository {
 
     _cartController.add(_localCart);
     await _saveLocalCart();
-    _scheduleRemoteSync();
+    // _scheduleRemoteSync();
   }
 
   Future<void> clearCart() async {
@@ -194,7 +192,9 @@ class CartRepository {
     try {
       return Cart(
         userId: data['userId'],
-        lastLocalUpdate: (data['updatedAt'] as Timestamp).toDate(),
+        lastLocalUpdate: data['updatedAt'] != null
+            ? (data['updatedAt'] as Timestamp).toDate()
+            : DateTime.now(),
         items: _parseCartItems(data['items']),
       );
     } catch (e, stack) {
@@ -204,11 +204,15 @@ class CartRepository {
   }
 
   Map<String, dynamic> _cartToFirestoreMap(Cart cart) {
-    return {
+    final map = {
       'userId': cart.userId,
       'updatedAt': FieldValue.serverTimestamp(),
-      'items': cart.items.map((key, value) => MapEntry(key, value.toMap())),
     };
+    if (cart.items.isNotEmpty) {
+      map['items'] =
+          cart.items.map((key, value) => MapEntry(key, value.toMap()));
+    }
+    return map;
   }
 
   Map<String, CartItem> _parseCartItems(dynamic itemsData) {

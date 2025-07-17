@@ -209,6 +209,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         const SizedBox(height: 8),
+                        const Text("Select Unit",
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey)),
                         product.variations.length > 1
                             ? SizedBox(
                                 height:
@@ -219,15 +224,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                                   itemCount: product.variations.length,
                                   itemBuilder: (context, index) {
                                     return Container(
-                                      margin: const EdgeInsets.all(4),
+                                      margin: const EdgeInsets.only(right: 10),
                                       child: DiscountBox(
-                                        sellingPrice: product
-                                            .variations[index].sellingPrice,
-                                        mrp: product.variations[index].mrp,
-                                        discount:
-                                            product.variations[index].discount,
-                                        unitSize:
-                                            "${product.variations[index].unitSize}${product.variations[index].unitOfMeasure}",
+                                        variation: product.variations[index],
+                                        selectedVariationId: variation.id!,
                                       ),
                                     );
                                   },
@@ -344,7 +344,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             left: 0,
             right: 0,
             child: CartActionButton(
-              product: variation,
+              variation: variation,
               withDetail: true,
             ),
           )

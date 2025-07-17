@@ -10,14 +10,16 @@ sealed class CartEvent extends Equatable {
 class CartInitRequested extends CartEvent {}
 
 class CartItemAdded extends CartEvent {
-  final String productId;
-
+  final Variation variation;
   final int quantity;
 
-  const CartItemAdded(this.productId, [this.quantity = 1]);
+  const CartItemAdded({
+    required this.variation,
+    this.quantity = 1,
+  });
 
   @override
-  List<Object> get props => [productId, quantity];
+  List<Object> get props => [variation, quantity];
 }
 
 class CartItemRemoved extends CartEvent {

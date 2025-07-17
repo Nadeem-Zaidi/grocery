@@ -1,24 +1,27 @@
+import '../product/productt.dart';
+
 class CartItem {
-  final String productId;
+  final Variation variation;
   final int quantity;
   final double? price;
+
   final DateTime updatedAt;
 
   CartItem({
-    required this.productId,
+    required this.variation,
     this.price,
     this.quantity = 1,
     DateTime? updatedAt,
   }) : updatedAt = updatedAt ?? DateTime.now();
 
   CartItem copyWith({
-    String? productId,
+    Variation? variation,
     int? quantity,
     double? price,
     DateTime? updatedAt,
   }) {
     return CartItem(
-      productId: productId ?? this.productId,
+      variation: variation ?? this.variation,
       quantity: quantity ?? this.quantity,
       price: price ?? this.price,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -26,16 +29,16 @@ class CartItem {
   }
 
   Map<String, dynamic> toMap() => {
-        'productId': productId,
+        'variation': variation.toMap(),
         'quantity': quantity,
         'price': price,
         'updatedAt': updatedAt.toIso8601String(),
       };
 
   factory CartItem.fromMap(Map<String, dynamic> map) => CartItem(
-        productId: map['productId'],
+        variation: Variation.fromMap(map['variation']),
         quantity: map['quantity'],
-        price: map['price']?.toDouble() ?? 0.0,
+        price: map['price']?.toDouble(),
         updatedAt: DateTime.parse(map['updatedAt']),
       );
 }
@@ -50,6 +53,23 @@ class Cart {
     DateTime? lastLocalUpdate,
   })  : items = items ?? const {},
         lastLocalUpdate = lastLocalUpdate ?? DateTime.now();
+
+  Map<String, int> get quantityPerProductId {
+    final Map<String, int> result = {};
+    for (final item in items.values) {
+      final productId = item.variation.productId;
+      if (productId == null) continue; // ✅ skip if null
+
+      result[productId] = (result[productId] ?? 0) + item.quantity;
+    }
+    return result;
+  }
+
+  /// ✅ Count of unique product IDs
+  int get uniqueProductIdsCount {
+    final productIds = items.values.map((e) => e.variation.productId).toSet();
+    return productIds.length;
+  }
 
   Cart copyWith({
     Map<String, CartItem>? items,

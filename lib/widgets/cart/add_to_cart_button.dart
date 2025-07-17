@@ -10,13 +10,13 @@ import '../../models/product/product.dart';
 import '../../models/product/productt.dart';
 
 class AddToCartInProductDescription extends StatefulWidget {
-  final Variation product;
+  final Variation variation;
   final CartItem? cartItem;
   final CartActionContent cartAction;
 
   const AddToCartInProductDescription(
       {super.key,
-      required this.product,
+      required this.variation,
       required this.cartItem,
       required this.cartAction});
 
@@ -50,7 +50,7 @@ class _AddToCartInProductDescriptionState
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "${widget.product.unitSize} ${widget.product.unitOfMeasure}",
+                      "${widget.variation.unitSize} ${widget.variation.unitOfMeasure}",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -64,7 +64,7 @@ class _AddToCartInProductDescriptionState
                           size: 18,
                         ),
                         Text(
-                          widget.product.sellingPrice!.round().toString(),
+                          widget.variation.sellingPrice!.round().toString(),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
@@ -82,7 +82,7 @@ class _AddToCartInProductDescriptionState
                               ),
                             ),
                             Text(
-                              widget.product.mrp.toString(),
+                              widget.variation.mrp.toString(),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey.shade600,
@@ -108,7 +108,9 @@ class _AddToCartInProductDescriptionState
           )
         : ElevatedButton(
             onPressed: () {
-              context.read<CartBloc>().add(CartItemAdded(widget.product.id!));
+              context.read<CartBloc>().add(
+                    CartItemAdded(variation: widget.variation),
+                  );
             },
             child: Text("Add To Cart"));
   }

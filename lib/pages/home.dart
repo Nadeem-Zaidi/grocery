@@ -259,10 +259,9 @@ class _HomeState extends State<Home> {
                                               BuildProductGrid(
                                             products: products,
                                             buildCartAction:
-                                                (context, product) {
+                                                (context, variation) {
                                               return CartActionButton(
-                                                  product:
-                                                      product.variations[0]);
+                                                  variation: variation);
                                             },
                                           ),
                                         ),
