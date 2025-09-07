@@ -15,6 +15,7 @@ class WImagePickerUpdate extends StatelessWidget {
           // Circular Avatar with Image Preview
           BlocBuilder<CategoryUpdateBloc, CategoryUpdateState>(
             builder: (context, state) {
+              print(state.imageFile);
               return Container(
                 width: 150,
                 height: 150,
@@ -58,7 +59,9 @@ class WImagePickerUpdate extends StatelessWidget {
             bottom: 0,
             right: 0,
             child: GestureDetector(
-              onTap: () {},
+              onTap: () {
+                context.read<CategoryUpdateBloc>().add(PickImage());
+              },
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(

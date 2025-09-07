@@ -7,7 +7,7 @@ class Category implements IEntity<Category> {
   String? path;
   String? url;
 
-  Category({this.id, this.path, this.url, required this.name, this.parent});
+  Category({this.id, this.path, this.url, this.name, this.parent});
 
   @override
   Category copyWith(
@@ -32,6 +32,6 @@ class Category implements IEntity<Category> {
 
   @override
   Map<String, dynamic> toMap() {
-    return {"name": name, "parent": parent, "path": path, "url": url};
+    return {"id": id, "name": name, "parent": parent, "path": path, "url": url};
   }
 }

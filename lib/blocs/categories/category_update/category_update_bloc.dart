@@ -1,7 +1,12 @@
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart';
+import 'package:grocery_app/database_service.dart/IDBService.dart';
+import 'package:grocery_app/utils/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
 
 import '../../../database_service.dart/idatabase_service.dart';
@@ -12,7 +17,8 @@ part 'category_update_state.dart';
 
 class CategoryUpdateBloc
     extends Bloc<CategoryUpdateEvent, CategoryUpdateState> {
-  IdatabaseService dbService;
+  IDBService<Category> dbService;
+  final ImagePicker _picker = ImagePicker();
 
   CategoryUpdateBloc({required this.dbService})
       : super(CategoryUpdateState.initial()) {
@@ -33,8 +39,30 @@ class CategoryUpdateBloc
           updateExistingName(emit, value);
         case UpdateCategory():
           await updateCategory(emit);
+        case PickImage():
+          await _pickImage(emit);
       }
     });
+  }
+
+  Future<void> _pickImage(Emitter<CategoryUpdateState> emit) async {
+    emit(state.copyWith(loadingImagePicker: true));
+    try {
+      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        emit(state.copyWith(
+            loadingImagePicker: false,
+            imageFile: File(pickedFile.path),
+            shouldChange: true));
+      } else {
+        throw Exception("Something went wrong in picking image");
+      }
+    } catch (e) {
+      emit(state.copyWith(
+        error: "Something went wrong in picking image",
+        loadingImagePicker: false,
+      ));
+    }
   }
 
   void initializeExisting(Emitter<CategoryUpdateState> emit, String id,
@@ -81,7 +109,7 @@ class CategoryUpdateBloc
   void checkForDifference(Emitter<CategoryUpdateState> emit, String? value) {
     bool newShouldChange;
 
-    if (value != state.existingName || state.existingPath != state.pathName) {
+    if (state.existingPath != state.pathName) {
       newShouldChange = true;
     } else {
       newShouldChange = false;
@@ -98,8 +126,8 @@ class CategoryUpdateBloc
     emit(state.copyWith(
         existingName: name, existingParent: parent, existingPath: path));
     try {
-      Category category = await dbService.getById(id);
-      if (category.id != null) {
+      Category? category = await dbService.getById(id);
+      if (category?.id != null) {
         emit(state.copyWith(category: category, isFetching: false));
       }
     } catch (e) {
@@ -108,65 +136,85 @@ class CategoryUpdateBloc
   }
 
   Future<void> updateCategory(Emitter<CategoryUpdateState> emit) async {
-    emit(state.copyWith(isFetching: true));
+    // Start loader
+    emit(state.copyWith(isFetching: true, error: null, done: false));
+
     String? categoryId = state.id;
     String? newName = state.dynamicPath;
+    String? newPath = newName;
+    File? image = state.imageFile;
+    String? updatedImageUrl;
 
     try {
       if (categoryId == null || categoryId.isEmpty) {
         throw ArgumentError("Category Id is required");
       }
 
-      if (newName == null || newName.isEmpty) {
-        throw ArgumentError("Valid name is required");
-      }
-      Category? category = await dbService.getById(categoryId);
-      if (category == null) {
-        throw Exception("Error at category");
-      }
-
-      String? oldPath = category.path;
-      String? parentId = category.parent;
-      String newPath = newName;
-
-      if (parentId != null && parentId != "") {
-        Category? parentDoc = await dbService.getById(parentId);
-        if (parentDoc != null) {
-          String? parentPath = parentDoc.path;
-          newPath = "$parentPath/$newName";
+      // Upload image (if present)
+      if (image != null) {
+        updatedImageUrl =
+            await uploadImage("category", image, state.existingName.toString());
+        if (updatedImageUrl == null || updatedImageUrl.isEmpty) {
+          throw Exception(
+              "Cannot update because updated image url is null or empty");
         }
       }
 
-      Category updatedDoc = await dbService.update({
-        "id": categoryId,
-        "name": newName,
-        "path": newPath,
-      });
+      if (newName != null && newName.isNotEmpty) {
+        // Get category
+        Category? category = await dbService.getById(categoryId);
+        if (category == null) {
+          throw Exception("Error in fetching category");
+        }
+        String? oldPath = category.path;
 
-      List<Category> childrenCategories = await dbService.whereClause(
-        (collection) => collection
-            .where('path', isGreaterThanOrEqualTo: oldPath)
-            .where('path', isLessThan: "$oldPath~"),
-      ) as List<Category>;
-
-      if (childrenCategories.isNotEmpty) {
-        for (Category child in childrenCategories) {
-          String? childId = child.id;
-          String? childPath = child.path;
-
-          if (childPath != null && oldPath != null) {
-            String updatedChildPath = childPath.replaceFirst(oldPath, newPath);
-
-            await dbService.update({
-              "id": childId,
-              "path": updatedChildPath,
-            });
+        // Get parentId and calculate new path
+        String? parentId = category.parent;
+        if (parentId != null && parentId.isNotEmpty) {
+          Category? parentDoc = await dbService.getById(parentId);
+          if (parentDoc != null) {
+            String? parentPath = parentDoc.path;
+            newPath = "$parentPath/$newName";
           }
         }
+
+        // Run batch update
+        await dbService.runInBatch((batch, c) async {
+          // Update current category
+          DocumentReference docRef = c.doc(categoryId);
+          batch.update(docRef, {
+            "name": newName,
+            "path": newPath,
+            if (updatedImageUrl != null && updatedImageUrl.isNotEmpty)
+              "image": updatedImageUrl
+          });
+
+          // Update children categories
+          List<Category> childrenCategories = await dbService.whereClause(
+            (collection) => collection
+                .where('path', isGreaterThanOrEqualTo: oldPath)
+                .where('path', isLessThan: "$oldPath~"),
+          ) as List<Category>;
+
+          for (Category child in childrenCategories) {
+            if (child.path != null && oldPath != null) {
+              String updatedChildPath =
+                  child.path!.replaceFirst(oldPath, newPath!);
+
+              DocumentReference childRef = c.doc(child.id);
+              batch.update(childRef, {"path": updatedChildPath});
+            }
+          }
+        });
+
+        // ✅ Success emit
+        emit(state.copyWith(isFetching: false, done: true));
+      } else {
+        await dbService.update(Category(id: categoryId, url: updatedImageUrl),
+            returnUpdatedDoc: false);
         emit(state.copyWith(isFetching: false, done: true));
       }
     } catch (e) {
-      print("Error in updating category error==>${e.toString()}");
       emit(state.copyWith(error: e.toString(), isFetching: false));
     }
   }

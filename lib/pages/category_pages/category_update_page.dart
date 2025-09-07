@@ -29,7 +29,7 @@ class _MyWidgetState extends State<CategoryUpdatePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Create Category",
+        title: Text("Update Category",
             style: Theme.of(context)
                 .textTheme
                 .headlineMedium
@@ -110,7 +110,8 @@ class _MyWidgetState extends State<CategoryUpdatePage> {
       floatingActionButton:
           BlocBuilder<CategoryUpdateBloc, CategoryUpdateState>(
         builder: (context, state) {
-          if (state.shouldChange == true && state.dynamicPath!.isNotEmpty) {
+          if (state.shouldChange == true) {
+            print(state.shouldChange);
             return FloatingActionButton(
               onPressed: () {
                 context.read<CategoryUpdateBloc>().add(UpdateCategory());

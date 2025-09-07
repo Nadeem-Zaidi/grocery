@@ -19,15 +19,17 @@ class InitializeExisting extends CategoryUpdateEvent {
 }
 
 class CheckForDifference extends CategoryUpdateEvent {
-  String? value;
+  final String? value;
   CheckForDifference({this.value});
 }
 
 class UpdateExistingName extends CategoryUpdateEvent {
-  String? value;
+  final String? value;
   UpdateExistingName({this.value});
 }
 
 class UpdateCategory extends CategoryUpdateEvent {
   UpdateCategory();
 }
+
+class PickImage extends CategoryUpdateEvent {}

@@ -5,7 +5,7 @@ abstract class IDBService<T> {
       [DocumentSnapshot? lastDocument, bool descending = false]);
   Future<T?> getById(String id);
   Future<T> create(T data);
-  Future<T?> update(Map<String, dynamic> data);
+  Future<(T?, String)> update(T data, {bool returnUpdatedDoc = false});
   Future<(List<T>, DocumentSnapshot?, bool)> whereClause(
       Query Function(CollectionReference) queryBuilder,
       [DocumentSnapshot? lastDocument]);
@@ -21,4 +21,9 @@ abstract class IDBService<T> {
   Future<void> dispose();
 
   FirebaseFirestore getFireStore();
+
+  DocumentReference getDocReference(String id);
+  Future<void> runInBatch(
+    Future<void> Function(WriteBatch batch, CollectionReference c) handler,
+  );
 }

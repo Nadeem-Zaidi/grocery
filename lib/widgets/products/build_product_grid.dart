@@ -42,7 +42,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
   Widget build(BuildContext context) {
     final screenWidth = ScreenUtils.getScreenWidth(context);
     final screenHeight = ScreenUtils.getScreenHeight(context);
-    print("there");
+    print("Running the Product Builder");
 
     // final isSmallDevice = screenWidth < 360;
     // final isTablet = screenWidth > 600;
@@ -52,7 +52,7 @@ class _BuildProductGridState extends State<BuildProductGrid> {
       itemCount: products.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: screenHeight * 0.0005,
+        childAspectRatio: screenHeight * 0.00055,
       ),
       itemBuilder: (context, index) {
         return InkWell(

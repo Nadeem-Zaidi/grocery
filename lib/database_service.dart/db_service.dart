@@ -98,9 +98,49 @@ class DBService<T extends IEntity> implements IDBService<T> {
   }
 
   @override
-  Future<T?> update(Map<String, dynamic> data) {
-    // TODO: implement update
-    throw UnimplementedError();
+  Future<(T?, String)> update(T data, {bool returnUpdatedDoc = false}) async {
+    try {
+      Map<String, dynamic> dataFromT = data.toMap();
+      String? categoryId = dataFromT["id"];
+      if (categoryId == null || categoryId.isEmpty) {
+        throw Exception("category id is null or ''");
+      }
+      Map<String, dynamic> dataToUpdate = Map.fromEntries(dataFromT.entries
+          .where((item) =>
+              item.value != null && item.value.toString().isNotEmpty));
+      DocumentReference docRef =
+          fireStore.collection(collectionPath).doc(categoryId);
+      await docRef.update(dataToUpdate);
+      if (returnUpdatedDoc == true) {
+        DocumentSnapshot snapshotAfterUpdate = await docRef.get();
+        Map<String, dynamic> dataAfterUpdate =
+            snapshotAfterUpdate.data() as Map<String, dynamic>;
+        final updated =
+            ModelRegistry.fromMap({"id": docRef.id, ...dataAfterUpdate}) as T;
+        return (updated, "success");
+      } else {
+        return (null, "Success");
+      }
+    } catch (e) {
+      print("error in update");
+      print(e.toString());
+      print("error in update");
+      rethrow;
+    }
+  }
+
+  @override
+  @override
+  Future<void> runInBatch(
+    Future<void> Function(WriteBatch batch, CollectionReference c) handler,
+  ) async {
+    final batch = fireStore.batch();
+    final collection = fireStore.collection(collectionPath);
+
+    await handler(batch, collection);
+
+    // commit once all updates are added
+    await batch.commit();
   }
 
   @override
@@ -136,5 +176,10 @@ class DBService<T extends IEntity> implements IDBService<T> {
   @override
   FirebaseFirestore getFireStore() {
     return fireStore;
+  }
+
+  @override
+  DocumentReference<Object?> getDocReference(String id) {
+    return fireStore.collection(collectionPath).doc(id);
   }
 }

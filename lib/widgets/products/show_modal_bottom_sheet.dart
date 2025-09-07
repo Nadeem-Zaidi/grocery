@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../blocs/change_variation/bloc/change_variation_bloc.dart';
 import '../../models/product/productt.dart';
 
 Future showModalBottom(
@@ -50,7 +52,8 @@ Future showModalBottom(
                   (index) {
                     return InkWell(
                       onTap: () {
-                        addEvent();
+                        context.read<ChangeVariationBloc>().add(ChangeVariation(
+                            variationId: product.variations[index].id!));
                       },
                       child: Container(
                         margin: EdgeInsets.only(bottom: 10),

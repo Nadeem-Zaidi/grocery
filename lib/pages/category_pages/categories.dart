@@ -9,7 +9,9 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../blocs/categories/create_category_bloc/category_create_bloc.dart';
 import '../../database_service.dart/category/firestore_category_service.dart';
+import '../../database_service.dart/db_service.dart';
 import '../../models/category.dart';
+import '../../service_locator/service_locator.dart';
 import '../../widgets/category_card.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/error_widget.dart';
@@ -43,7 +45,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Categories',
+          'Categories ',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.onPrimary,
@@ -165,6 +167,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
     );
   }
 
+  //this is the ipdate function for categories
   void _navigateToUpdatePage(BuildContext context, Category category) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -172,11 +175,8 @@ class _CategoriesPageState extends State<CategoriesPage> {
           providers: [
             BlocProvider(
               create: (context) => CategoryUpdateBloc(
-                dbService: FirestoreCategoryService(
-                  firestore: FirebaseFirestore.instance,
-                  collectionName: "categories",
-                ),
-              )..add(
+                  dbService: ServiceLocator().get<DBService<Category>>())
+                ..add(
                   InitializeExisting(
                     id: category.id!,
                     name: category.name!,

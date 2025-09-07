@@ -30,6 +30,7 @@ void main() async {
   );
 
   await FirebaseAppCheck.instance.activate(
+    webProvider: ReCaptchaV3Provider('site-key'),
     androidProvider: AndroidProvider.debug,
   );
 
