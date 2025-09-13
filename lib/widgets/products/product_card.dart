@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/change_variation/bloc/change_variation_bloc.dart';
 import 'package:grocery_app/service_locator/service_locator.dart';
-import 'package:grocery_app/widgets/cart/product_in_cart.dart';
 import '../../models/product/productt.dart';
 import '../../utils/screen_utils.dart';
-import 'show_modal_bottom_sheet.dart';
 import 'variation_in_product_Card.dart';
 
 class ProductCard extends StatefulWidget {

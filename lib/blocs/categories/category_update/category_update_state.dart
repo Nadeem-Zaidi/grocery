@@ -19,7 +19,7 @@ class CategoryUpdateState {
   final bool loadingImagePicker;
   final bool done;
 
-  CategoryUpdateState({
+  const CategoryUpdateState({
     this.id,
     this.category,
     this.isFetching = false,
@@ -84,7 +84,7 @@ class CategoryUpdateState {
       existingName: existingName ?? this.existingName,
       existingParent: existingParent ?? this.existingParent,
       existingPath: existingPath ?? this.existingPath,
-      nameToUpdate: nameToUpdate ?? this.nameToUpdate,
+      nameToUpdate: nameToUpdate ?? nameToUpdate,
       imageFile: imageFile ?? this.imageFile,
       uploadedImage: uploadedImage ?? this.uploadedImage,
       shouldChange: shouldChange ?? this.shouldChange,

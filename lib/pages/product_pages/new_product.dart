@@ -8,7 +8,6 @@ import 'package:grocery_app/models/form_config/form_config.dart';
 import 'package:grocery_app/models/product/productt.dart';
 import 'package:grocery_app/service_locator/service_locator.dart';
 
-import '../../service_locator/service_locator_func.dart';
 import 'select_category_for_new_product.dart';
 
 class NewProduct extends StatefulWidget {

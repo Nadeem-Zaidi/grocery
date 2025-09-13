@@ -3,13 +3,11 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart';
 import 'package:grocery_app/database_service.dart/IDBService.dart';
 import 'package:grocery_app/utils/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
 
-import '../../../database_service.dart/idatabase_service.dart';
 import '../../../models/category.dart';
 
 part 'category_update_event.dart';

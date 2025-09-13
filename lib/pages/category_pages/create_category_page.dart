@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
-import 'package:grocery_app/database_service.dart/category/firestore_category_service.dart';
 import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
 import 'package:grocery_app/pages/select_category/select_category.dart';
 import 'package:grocery_app/widgets/image_picker.dart';
@@ -29,8 +28,6 @@ class _CreateCategorypageState extends State<CreateCategorypage> {
   final TextEditingController _categoryPathController = TextEditingController();
   final fireStore = FirebaseFirestore.instance;
 
-  FirestoreCategoryService categoryService = FirestoreCategoryService(
-      firestore: FirebaseFirestore.instance, collectionName: "categories");
   FirestoreProductService productService = FirestoreProductService(
       fireStore: FirebaseFirestore.instance, collectionName: "products");
   String parentPath = "";

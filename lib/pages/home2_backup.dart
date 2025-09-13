@@ -95,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!_shouldStick)
-              Container(
+              SizedBox(
                 height: 100,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

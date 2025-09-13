@@ -4,7 +4,6 @@ import 'package:grocery_app/blocs/change_variation/bloc/change_variation_bloc.da
 import 'package:grocery_app/utils/screen_utils.dart';
 import 'package:grocery_app/widgets/products/product_card.dart';
 import '../../blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
-import '../../blocs/products/cart/cart_bloc.dart';
 import '../../models/product/productt.dart';
 import '../../pages/product_pages/product_detail.dart';
 

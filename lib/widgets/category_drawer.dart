@@ -1,19 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart';
 import 'package:grocery_app/blocs/bloc/new_product/bloc/new_product_bloc.dart';
 import 'package:grocery_app/blocs/categories/create_category_bloc/category_create_bloc.dart';
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
+import 'package:grocery_app/blocs/section/dashboard_bloc/dashboard_bloc.dart';
 import 'package:grocery_app/database_service.dart/db_service.dart';
-import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
-import 'package:grocery_app/models/form_config/form_config.dart';
 import 'package:grocery_app/pages/category_pages/categories.dart';
 import 'package:grocery_app/pages/created_products/product_list.dart';
+import 'package:grocery_app/pages/dashboard/page_builder.dart';
 import 'package:grocery_app/pages/product_pages/new_product.dart';
 import 'package:grocery_app/service_locator/service_locator.dart';
-import '../database_service.dart/category/firestore_category_service.dart';
 import '../models/category.dart' as cat;
 import '../models/product/productt.dart';
 
@@ -25,11 +21,6 @@ class CategoryDrawer extends StatefulWidget {
 }
 
 class _CategoryDrawerState extends State<CategoryDrawer> {
-  FirestoreCategoryService categoryService = FirestoreCategoryService(
-    firestore: FirebaseFirestore.instance,
-    collectionName: "categories",
-  );
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -63,9 +54,8 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                       ),
                       BlocProvider(
                         create: (context) => CreateCategoryBloc(
-                          dbService: FirestoreCategoryService(
-                              firestore: FirebaseFirestore.instance,
-                              collectionName: "categories"),
+                          dbService:
+                              ServiceLocator().get<DBService<cat.Category>>(),
                         ),
                       )
                     ],
@@ -122,6 +112,29 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
                       )
                     ],
                     child: CreatedProductList(),
+                  ),
+                ),
+              );
+            },
+            child: const ListTile(
+              leading: Icon(Icons.category),
+              title: Text("Product List"),
+            ),
+          ),
+          SizedBox(
+            height: 5,
+          ),
+          InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => MultiBlocProvider(
+                    providers: [
+                      BlocProvider(
+                        create: (context) => DashboardBloc(),
+                      ),
+                    ],
+                    child: PageBuilder(),
                   ),
                 ),
               );

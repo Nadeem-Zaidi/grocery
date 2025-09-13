@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/products/cart/cart_bloc.dart';
-import 'package:grocery_app/widgets/cart/cart_increment_decrement.dart';
-
-import 'add_button.dart';
 
 class ProductInCart extends StatefulWidget {
   final String productId;

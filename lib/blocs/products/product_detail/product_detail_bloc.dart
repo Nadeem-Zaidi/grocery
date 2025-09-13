@@ -2,9 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:grocery_app/database_service.dart/IDBService.dart';
-import 'package:grocery_app/database_service.dart/idatabase_service.dart';
 
-import '../../../models/product/product.dart';
 import '../../../models/product/productt.dart';
 
 part 'product_detail_event.dart';

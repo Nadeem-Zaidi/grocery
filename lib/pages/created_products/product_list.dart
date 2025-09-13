@@ -154,7 +154,7 @@ class _CreatedProductListState extends State<CreatedProductList> {
                           .add(SelectProductCategory(category));
                     },
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),

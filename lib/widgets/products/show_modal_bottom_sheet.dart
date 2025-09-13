@@ -40,7 +40,7 @@ Future showModalBottom(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "${product.name}",
+                  product.name,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 22,

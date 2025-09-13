@@ -6,11 +6,9 @@ import '../../blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import '../../models/category.dart';
 
 class SelectCategory extends StatefulWidget {
-  final Function(Category) onCategorySelect;
-  const SelectCategory({
-    super.key,
-    required this.onCategorySelect,
-  });
+  final Function(Category)? onCategorySelect;
+  final Function(List<Category>)? onMultiSelect;
+  const SelectCategory({super.key, this.onCategorySelect, this.onMultiSelect});
 
   @override
   State<SelectCategory> createState() => _SelectCategoryState();
@@ -115,6 +113,14 @@ class _SelectCategoryState extends State<SelectCategory> {
           );
         },
       ),
+      floatingActionButton: widget.onMultiSelect != null
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Icon(Icons.check),
+            )
+          : null,
     );
   }
 
@@ -202,8 +208,16 @@ class _SelectCategoryState extends State<SelectCategory> {
         title: Text(category.name!),
         subtitle: Text(category.path!),
         onTap: () {
-          widget.onCategorySelect(category);
-          Navigator.of(context).pop();
+          List<Category> categories = [];
+
+          if (widget.onMultiSelect != null) {
+            categories = [...categories, category];
+            widget.onMultiSelect!(categories);
+          }
+          if (widget.onCategorySelect != null) {
+            widget.onCategorySelect!(category);
+            Navigator.of(context).pop();
+          }
         },
       ),
     );

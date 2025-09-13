@@ -20,7 +20,7 @@ class CosmeticForm extends StatefulWidget {
 
 class _CosmeticFormState extends State<CosmeticForm> {
   final _scrollController = ScrollController();
-  Map<String, TextEditingController> _textControllers = {};
+  final Map<String, TextEditingController> _textControllers = {};
 
   @override
   void initState() {

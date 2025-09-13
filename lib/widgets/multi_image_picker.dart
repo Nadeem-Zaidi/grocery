@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart';
-import 'package:grocery_app/blocs/products/product_bloc/product_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart'
     as formState;

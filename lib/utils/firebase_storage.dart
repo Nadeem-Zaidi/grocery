@@ -12,7 +12,7 @@ Future<String?> uploadImage(String folderName, File image, String name) async {
     UploadTask uploadtask = storageRef.putFile(image);
     TaskSnapshot snapShot = await uploadtask;
     downloadUrl = await snapShot.ref.getDownloadURL();
-    if (downloadUrl.isEmpty || downloadUrl == null) {
+    if (downloadUrl.isEmpty) {
       throw Exception(
           "Seomething went wrong wile uploading image to folder $folderName with name $fileName");
     }

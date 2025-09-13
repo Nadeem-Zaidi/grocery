@@ -9,5 +9,5 @@ sealed class ProductCreationConfirmEvent extends Equatable {
 
 class ProductCreated extends ProductCreationConfirmEvent {
   final String id;
-  ProductCreated({required this.id});
+  const ProductCreated({required this.id});
 }

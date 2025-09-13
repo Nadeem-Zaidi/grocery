@@ -7,6 +7,7 @@ class CategoryCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const CategoryCard({
+    super.key,
     required this.category,
     required this.onTap,
   });

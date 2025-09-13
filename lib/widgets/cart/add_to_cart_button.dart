@@ -64,7 +64,7 @@ class _AddToCartInProductDescriptionState
                           size: 18,
                         ),
                         Text(
-                          widget.variation.sellingPrice!.round().toString(),
+                          widget.variation.sellingPrice.round().toString(),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 20,

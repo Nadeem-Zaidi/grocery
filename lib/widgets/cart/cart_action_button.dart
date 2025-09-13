@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/blocs/change_variation/bloc/change_variation_bloc.dart';
-import 'package:grocery_app/pages/created_products/variation_card.dart';
 
 import '../../blocs/products/cart/cart_bloc.dart';
 import '../../models/product/productt.dart';

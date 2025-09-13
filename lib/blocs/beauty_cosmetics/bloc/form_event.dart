@@ -32,7 +32,7 @@ class FieldChanged extends FormEvent {
 }
 
 class FormSave extends FormEvent {
-  FormSave();
+  const FormSave();
 }
 
 class FormPickImages extends FormEvent {}

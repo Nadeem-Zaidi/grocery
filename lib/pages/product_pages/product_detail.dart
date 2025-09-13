@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
-import 'package:grocery_app/blocs/products/cart/cart_bloc.dart';
 import 'package:grocery_app/blocs/products/product_detail/product_detail_bloc.dart';
 import 'package:grocery_app/extensions/capitalize_first.dart';
 import 'package:grocery_app/widgets/cart/cart_action_button.dart';
-import 'package:grocery_app/widgets/error_widget.dart';
 import 'package:grocery_app/widgets/image_slider.dart';
 import '../../models/product/productt.dart';
-import '../../widgets/cart/add_to_cart_button.dart';
 import '../../widgets/products/variation_discount_box.dart';
 
 class ProductDetailPage extends StatefulWidget {

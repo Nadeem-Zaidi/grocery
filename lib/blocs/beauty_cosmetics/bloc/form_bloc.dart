@@ -748,7 +748,7 @@ class ImageUploader {
       File imageFile = File(file.path);
       Reference storageReference = FirebaseStorage.instance
           .ref()
-          .child("images/${fileName}/${file.name}.jpg");
+          .child("images/$fileName/${file.name}.jpg");
       UploadTask uploadTask = storageReference.putFile(imageFile);
       TaskSnapshot taskSnap = await uploadTask;
       String uploadedImageUrl = await taskSnap.ref.getDownloadURL();

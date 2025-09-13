@@ -19,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   static const double _stickyThreshold = kToolbarHeight;
   Color? _dominantColor;
   final String _imageUrl =
-      'https://img.freepik.com/premium-vector/monsoon-sale_961071-9377.jpg';
+      'https://static.vecteezy.com/system/resources/previews/023/313/998/non_2x/monsoon-sale-poster-design-with-five-color-umbrella-water-drops-on-white-clouds-and-blue-background-vector.jpg';
 
   @override
   void initState() {
@@ -96,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!_shouldStick)
-              Container(
+              SizedBox(
                 height: 100,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) => ListTile(
-                    title: Text("Item \${index + 1}"),
+                    title: Text("Nadeem Testing"),
                     subtitle: const Text("Sample description"),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   ),

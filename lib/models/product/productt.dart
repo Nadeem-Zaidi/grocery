@@ -1,9 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:grocery_app/database_service.dart/ientity.dart';
 import 'package:grocery_app/database_service.dart/model_registry.dart';
-import 'dart:collection';
-
-import 'package:grocery_app/models/product/product.dart';
 
 class Inventory implements IEntity<Inventory> {
   final String? id;

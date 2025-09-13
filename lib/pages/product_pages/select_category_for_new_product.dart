@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/bloc/new_product/bloc/new_product_bloc.dart';
-import 'package:grocery_app/models/category.dart';
 import 'package:grocery_app/widgets/category_card.dart';
 import 'package:grocery_app/widgets/error_widget.dart';
 

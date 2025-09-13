@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:grocery_app/authentication/presentation/otp_screen.dart';
-import 'package:grocery_app/forms/form.dart';
 import 'package:grocery_app/pages/category_pages/create_category_page.dart';
+import 'package:grocery_app/pages/dashboard/page_builder.dart';
+import 'package:grocery_app/pages/dashboard/section_builder.dart';
 import 'package:grocery_app/pages/home2.dart';
-import 'package:grocery_app/pages/product_pages/new_product.dart';
-import 'package:grocery_app/pages/product_pages/product_list.dart';
 
 import '../authentication/presentation/app.dart';
 import '../pages/category_pages/categories.dart';

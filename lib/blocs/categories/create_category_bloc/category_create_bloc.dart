@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'package:grocery_app/database_service.dart/idatabase_service.dart';
+import 'package:grocery_app/database_service.dart/IDBService.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../models/category.dart' as category;
@@ -13,7 +13,7 @@ part 'category_create_state.dart';
 
 class CreateCategoryBloc
     extends Bloc<CreateCategoryEvent, CreateCategoryState> {
-  IdatabaseService dbService;
+  IDBService dbService;
   final ImagePicker _picker = ImagePicker();
   CreateCategoryBloc({required this.dbService})
       : super(CreateCategoryState.initial()) {

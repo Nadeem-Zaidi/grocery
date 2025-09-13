@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/models/category.dart';
 import 'package:grocery_app/models/product/productt.dart';
-import 'package:grocery_app/widgets/category_list.dart';
 
 import '../../blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
-import '../../models/product/product.dart';
 
 class ProductListBuilder extends StatefulWidget {
   Widget Function(List<Category>) categoryListWidget;

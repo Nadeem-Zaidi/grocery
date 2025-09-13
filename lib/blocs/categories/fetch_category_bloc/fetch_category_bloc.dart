@@ -52,7 +52,7 @@ class FetchCategoryBloc extends Bloc<FetchCategoryEvent, FetchCategoryState> {
               (collection) => collection.where('parent', isEqualTo: id));
 
       emit(state.copyWith(
-          childrenCategories: childCategories as List<Category>,
+          childrenCategories: childCategories,
           defaultChildCat: childCategories[0].name,
           currentChildCat: childCategories[0].name,
           categoryName: name,
