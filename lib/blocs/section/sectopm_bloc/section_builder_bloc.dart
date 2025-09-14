@@ -39,7 +39,7 @@ class SectionBuilderBloc<T>
       Emitter<SectionBuilderState> emit, String field, String value) {
     Map<String, String> updated = Map<String, String>.from(state.field);
     updated[field] = value;
-    emit(state.copyWith(field: updated));
+    emit(state.copyWith(section: state.section.copyWith(name: updated[field])));
   }
 
   void _addContent(AddContent event, Emitter<SectionBuilderState> emit) {
@@ -69,10 +69,21 @@ class SectionBuilderBloc<T>
 
   void _removeContent(RemoveContent event, Emitter<SectionBuilderState> emit) {
     try {
-      // var updatedList = List<dynamic>.from(state.content)
-      //   ..removeAt(event.index);
-      // emit(state.copyWith(content: updatedList));
-    } catch (e) {}
+      final updatedContent = List.of(state.section.content)
+        ..removeAt(event.index);
+
+      final newSection = switch (state.section) {
+        CategorySection s => s.copyWith(
+            content:
+                updatedContent.cast<cat.Category>() as List<cat.Category>?),
+        ProductSpotlightSection s =>
+          s.copyWith(content: updatedContent.cast<Productt>()),
+      };
+
+      emit(state.copyWith(section: newSection as Section));
+    } catch (e) {
+      print("Error in _removeContent: $e");
+    }
   }
 
   Future<void> _pickImages(

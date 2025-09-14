@@ -5,36 +5,27 @@ import '../../models/product/productt.dart';
 
 sealed class Section<T> {
   final String? id;
-  final String name;
   final String type;
+  final String name;
   final List<String> imageUrls;
   final List<T> content;
-  final String? heading;
-  final String? subheading;
-  final String? description;
   final int sequence;
 
   Section({
     this.id,
-    required this.name,
     required this.type,
     required this.sequence,
+    required this.name,
     this.imageUrls = const [],
     this.content = const [],
-    this.heading,
-    this.subheading,
-    this.description,
   });
 
   Map<String, dynamic> toBaseMap() => {
         'id': id,
-        'name': name,
         'type': type,
+        'name': name,
         'sequence': sequence,
         'imageurls': imageUrls,
-        'heading': heading,
-        'subheading': subheading,
-        'description': description,
       };
 
   Map<String, dynamic> toMap();
@@ -53,28 +44,23 @@ sealed class Section<T> {
   /// Generic copyWith at the base class (delegates to subclass copyWith)
   Section<T> copyWith({
     String? id,
-    String? name,
     String? type,
     int? sequence,
+    String? name,
     List<String>? imageUrls,
     List<T>? content,
-    String? heading,
-    String? subheading,
-    String? description,
   });
 }
 
 class CategorySection extends Section<Category> {
   CategorySection({
     required super.id,
-    required super.name,
     required super.type,
+    required super.name,
     required super.sequence,
     super.imageUrls,
     super.content,
-    super.heading,
-    super.subheading,
-    super.description,
+    required,
   });
 
   factory CategorySection.fromMap(Map<String, dynamic> map) {
@@ -84,9 +70,6 @@ class CategorySection extends Section<Category> {
       type: map['type'] as String,
       sequence: map['sequence'] as int,
       imageUrls: List<String>.from(map['imageurls'] ?? []),
-      heading: map['heading'] as String?,
-      subheading: map['subheading'] as String?,
-      description: map['description'] as String?,
       content: (map['content'] as List<dynamic>? ?? [])
           .map(
               (e) => ModelRegistry.fromMap<Category>(e as Map<String, dynamic>))
@@ -108,9 +91,6 @@ class CategorySection extends Section<Category> {
     int? sequence,
     List<String>? imageUrls,
     List<Category>? content,
-    String? heading,
-    String? subheading,
-    String? description,
   }) {
     return CategorySection(
       id: id ?? this.id,
@@ -119,14 +99,14 @@ class CategorySection extends Section<Category> {
       sequence: sequence ?? this.sequence,
       imageUrls: imageUrls ?? this.imageUrls,
       content: content ?? this.content,
-      heading: heading ?? this.heading,
-      subheading: subheading ?? this.subheading,
-      description: description ?? this.description,
     );
   }
 }
 
 class ProductSpotlightSection extends Section<Productt> {
+  String? heading;
+  String? subheading;
+  String? description;
   ProductSpotlightSection({
     required super.id,
     required super.name,
@@ -134,9 +114,9 @@ class ProductSpotlightSection extends Section<Productt> {
     required super.sequence,
     super.imageUrls,
     super.content,
-    super.heading,
-    super.subheading,
-    super.description,
+    this.heading,
+    this.subheading,
+    this.description,
   });
 
   factory ProductSpotlightSection.fromMap(Map<String, dynamic> map) {

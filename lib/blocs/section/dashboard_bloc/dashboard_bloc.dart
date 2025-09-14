@@ -21,13 +21,19 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   }
 
   void _addSectionToSave(AddSectionToSave event, Emitter<DashboardState> emit) {
-    emit(
-        state.copyWith(sectionToSave: [...state.sectionToSave, event.section]));
+    state.dashBoard.sections[event.section.id.toString()] = event.section;
+    emit(state.copyWith(
+        dashBoard:
+            state.dashBoard.copyWith(sections: {...state.dashBoard.sections})));
   }
 
   void _addSection(AddSection event, Emitter<DashboardState> emit) {
     try {
-      emit(state.copyWith(sections: [...state.sections, event.section]));
+      Map<String, Section> section = {};
+      section[event.section.id.toString()] = event.section;
+      emit(state.copyWith(
+          dashBoard: state.dashBoard
+              .copyWith(sections: {...state.dashBoard.sections, ...section})));
     } catch (error) {
       print(
           "Error in adding the section in _addSection due to error==>${error.toString()}");
@@ -38,13 +44,13 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
   void _removeSection(RemoveSection event, Emitter<DashboardState> emit) {
     try {
-      if (event.id != null && event.id.toString().isNotEmpty) {
-        //remove from the data base and then from the list
-      } else {
-        List<Section> sections = List<Section>.from(state.sections)
-          ..removeAt(event.index);
-        emit(state.copyWith(sections: sections));
-      }
+      // if (event.id != null && event.id.toString().isNotEmpty) {
+      //   //remove from the data base and then from the list
+      // } else {
+      //   List<Section> sections = List<Section>.from(state.sections)
+      //     ..removeAt(event.index);
+      //   emit(state.copyWith(sections: sections));
+      // }
     } catch (error) {
       print(
           "Error in adding the section in _removeSection due to error==>${error.toString()}");
@@ -54,6 +60,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   }
 
   Future<void> _savePage(SavePage event, Emitter<DashboardState> emit) async {
-    print(state.sectionToSave);
+    print(state.dashBoard.toMap());
   }
 }
