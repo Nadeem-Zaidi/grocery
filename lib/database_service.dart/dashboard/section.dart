@@ -36,12 +36,13 @@ sealed class Section<T> {
         return CategorySection.fromMap(map);
       case "product":
         return ProductSpotlightSection.fromMap(map);
+      case "promotion":
+        return PromotionSection.fromMap(map);
       default:
         throw Exception("Unknown Section type: ${map['type']}");
     }
   }
 
-  /// Generic copyWith at the base class (delegates to subclass copyWith)
   Section<T> copyWith({
     String? id,
     String? type,
@@ -52,6 +53,7 @@ sealed class Section<T> {
   });
 }
 
+/// CATEGORY
 class CategorySection extends Section<Category> {
   CategorySection({
     required super.id,
@@ -60,8 +62,17 @@ class CategorySection extends Section<Category> {
     required super.sequence,
     super.imageUrls,
     super.content,
-    required,
   });
+
+  /// 👇 factory initial
+  factory CategorySection.initial() => CategorySection(
+        id: null,
+        type: "category",
+        name: "",
+        sequence: 0,
+        imageUrls: [],
+        content: [],
+      );
 
   factory CategorySection.fromMap(Map<String, dynamic> map) {
     return CategorySection(
@@ -103,10 +114,12 @@ class CategorySection extends Section<Category> {
   }
 }
 
+/// PRODUCT SPOTLIGHT
 class ProductSpotlightSection extends Section<Productt> {
   String? heading;
   String? subheading;
   String? description;
+
   ProductSpotlightSection({
     required super.id,
     required super.name,
@@ -118,6 +131,19 @@ class ProductSpotlightSection extends Section<Productt> {
     this.subheading,
     this.description,
   });
+
+  /// 👇 factory initial
+  factory ProductSpotlightSection.initial() => ProductSpotlightSection(
+        id: null,
+        name: "",
+        type: "product",
+        sequence: 0,
+        imageUrls: [],
+        content: [],
+        heading: null,
+        subheading: null,
+        description: null,
+      );
 
   factory ProductSpotlightSection.fromMap(Map<String, dynamic> map) {
     return ProductSpotlightSection(
@@ -165,4 +191,71 @@ class ProductSpotlightSection extends Section<Productt> {
       description: description ?? this.description,
     );
   }
+}
+
+/// PROMOTION
+class PromotionSection extends Section {
+  Map<String, String> attributes;
+
+  PromotionSection({
+    required super.id,
+    required super.type,
+    required super.sequence,
+    required super.name,
+    required super.imageUrls,
+    required super.content,
+    this.attributes = const {},
+  });
+
+  /// 👇 factory initial
+  factory PromotionSection.initial() => PromotionSection(
+        id: null,
+        type: "promotion",
+        name: "",
+        sequence: 0,
+        imageUrls: [],
+        content: [],
+        attributes: {},
+      );
+
+  factory PromotionSection.fromMap(Map<String, dynamic> map) {
+    return PromotionSection(
+      id: map['id'] as String?,
+      type: map['type'] as String,
+      name: map['name'] as String,
+      sequence: map['sequence'] as int,
+      imageUrls: List<String>.from(map['imageurls'] ?? []),
+      content: map['content'] ?? [],
+      attributes: Map<String, String>.from(
+          map['attributes'] as Map? ?? <String, String>{}),
+    );
+  }
+
+  @override
+  PromotionSection copyWith({
+    String? id,
+    String? type,
+    int? sequence,
+    String? name,
+    List<String>? imageUrls,
+    List? content,
+    Map<String, String>? attributes,
+  }) {
+    return PromotionSection(
+      id: id ?? this.id,
+      type: type ?? this.type,
+      sequence: sequence ?? this.sequence,
+      name: name ?? this.name,
+      attributes: attributes ?? this.attributes,
+      imageUrls: imageUrls ?? this.imageUrls,
+      content: content ?? this.content,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toMap() => {
+        ...toBaseMap(),
+        'attributes': attributes,
+        'content': content,
+      };
 }

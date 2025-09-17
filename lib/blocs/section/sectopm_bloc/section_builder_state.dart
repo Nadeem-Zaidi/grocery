@@ -1,14 +1,14 @@
 part of 'section_builder_bloc.dart';
 
 @immutable
-class SectionBuilderState<T> extends Equatable {
+class SectionBuilderState extends Equatable {
   final Map<String, String> field;
   final List<XFile> images;
-  final Section section;
+  final Section? section;
   final bool loading;
   final String? error;
   final bool saveVisible;
-  final String type;
+  final String? type;
   const SectionBuilderState({
     this.field = const {},
     this.images = const [],
@@ -16,35 +16,18 @@ class SectionBuilderState<T> extends Equatable {
     this.loading = false,
     this.error,
     this.saveVisible = false,
-    this.type = 'category',
+    required this.type,
   });
 
   factory SectionBuilderState.initial() {
-    late final Section section;
-    String type = 'category';
-    if (T == CategorySection) {
-      section = CategorySection(
-        id: null,
-        name: '',
-        type: 'category',
-        sequence: 0,
-      );
-      type = 'category';
-    } else if (T == ProductSpotlightSection) {
-      section = ProductSpotlightSection(
-        id: null,
-        name: '',
-        type: 'product',
-        sequence: 0,
-      );
-      type = 'product';
-    } else {
-      throw UnimplementedError('Unknown section type: $T');
-    }
-    return SectionBuilderState<T>(
-      section: section,
-      type: type,
-    );
+    return SectionBuilderState(
+        field: const {},
+        images: const [],
+        section: null,
+        loading: false,
+        error: null,
+        saveVisible: false,
+        type: null);
   }
 
   SectionBuilderState copyWith(

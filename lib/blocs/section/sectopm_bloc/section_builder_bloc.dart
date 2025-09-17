@@ -3,9 +3,11 @@ import 'dart:math';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:grocery_app/database_service.dart/dashboard/section.dart';
+import 'package:grocery_app/widgets/card/custom_card.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../models/category.dart' as cat;
 import '../../../models/product/productt.dart';
@@ -13,10 +15,10 @@ import '../../../models/product/productt.dart';
 part 'section_builder_event.dart';
 part 'section_builder_state.dart';
 
-class SectionBuilderBloc<T>
+class SectionBuilderBloc
     extends Bloc<SectionBuilderEvent, SectionBuilderState> {
   final ImagePicker _imagePicker = ImagePicker();
-  SectionBuilderBloc() : super(SectionBuilderState<T>.initial()) {
+  SectionBuilderBloc() : super(SectionBuilderState.initial()) {
     on<FieldChange>((event, emit) {
       _fieldChange(emit, event.field, event.value);
     });
@@ -37,13 +39,21 @@ class SectionBuilderBloc<T>
 
   void _fieldChange(
       Emitter<SectionBuilderState> emit, String field, String value) {
+    if (state.section == null) {
+      throw Exception("Section is null");
+    }
     Map<String, String> updated = Map<String, String>.from(state.field);
     updated[field] = value;
-    emit(state.copyWith(section: state.section.copyWith(name: updated[field])));
+    emit(
+        state.copyWith(section: state.section!.copyWith(name: updated[field])));
   }
 
   void _addContent(AddContent event, Emitter<SectionBuilderState> emit) {
-    try {} catch (e) {
+    try {
+      if (state.section == null) {
+        throw Exception("Section is null");
+      }
+    } catch (e) {
       print("error in _addContent function==>${e.toString()}");
       emit(state.copyWith(error: "Cannot add content to this section"));
     }
@@ -51,14 +61,26 @@ class SectionBuilderBloc<T>
 
   void _multiSelectContent(
       MultiSelectContent event, Emitter<SectionBuilderState> emit) {
+    print(event.content);
+    print(state.section!.content);
     try {
+      if (state.section == null) {
+        throw Exception("Section is null");
+      }
       final section = switch (state.section) {
         CategorySection s => s.copyWith(
-            content: <cat.Category>[...state.section.content, ...event.content],
+            content: <cat.Category>[
+              ...state.section!.content,
+              ...event.content
+            ],
           ),
         ProductSpotlightSection s => s.copyWith(
             content: [...s.content, ...event.content] as List<Productt>,
           ),
+        PromotionSection s => s.copyWith(
+            content: <PromoCard>[...state.section!.content, ...event.content]),
+        // TODO: Handle this case.
+        null => throw UnimplementedError(),
       };
 
       emit(state.copyWith(section: section as Section));
@@ -69,18 +91,27 @@ class SectionBuilderBloc<T>
 
   void _removeContent(RemoveContent event, Emitter<SectionBuilderState> emit) {
     try {
-      final updatedContent = List.of(state.section.content)
-        ..removeAt(event.index);
+      if (state.section != null) {
+        if (event.index < 0 && event.index > state.section!.content.length) {
+          throw Exception("Index out of bound");
+        }
+        final updatedContent = List.of(state.section!.content)
+          ..removeAt(event.index);
 
-      final newSection = switch (state.section) {
-        CategorySection s => s.copyWith(
-            content:
-                updatedContent.cast<cat.Category>() as List<cat.Category>?),
-        ProductSpotlightSection s =>
-          s.copyWith(content: updatedContent.cast<Productt>()),
-      };
+        final newSection = switch (state.section) {
+          CategorySection s => s.copyWith(
+              content:
+                  updatedContent.cast<cat.Category>() as List<cat.Category>?),
+          ProductSpotlightSection s =>
+            s.copyWith(content: updatedContent.cast<Productt>()),
+          // TODO: Handle this case.
+          PromotionSection() => throw UnimplementedError(),
+          // TODO: Handle this case.
+          null => throw UnimplementedError(),
+        };
 
-      emit(state.copyWith(section: newSection as Section));
+        emit(state.copyWith(section: newSection as Section));
+      }
     } catch (e) {
       print("Error in _removeContent: $e");
     }

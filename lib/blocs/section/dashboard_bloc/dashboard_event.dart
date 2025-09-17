@@ -8,9 +8,21 @@ sealed class DashboardEvent extends Equatable {
 }
 
 @immutable
+class AddColor extends DashboardEvent {
+  final String color;
+  const AddColor({required this.color});
+}
+
+@immutable
 class AddSection extends DashboardEvent {
   final Section section;
   const AddSection({required this.section});
+}
+
+@immutable
+class AddPromoBanner extends DashboardEvent {
+  final Section section;
+  const AddPromoBanner({required this.section});
 }
 
 @immutable
@@ -23,7 +35,14 @@ class RemoveSection extends DashboardEvent {
 @immutable
 class SavePage extends DashboardEvent {}
 
+@immutable
 class AddSectionToSave extends DashboardEvent {
   final Section section;
-  AddSectionToSave({required this.section});
+  const AddSectionToSave({required this.section});
+}
+
+@immutable
+class AddPromoToSave extends DashboardEvent {
+  final Section section;
+  const AddPromoToSave({required this.section});
 }

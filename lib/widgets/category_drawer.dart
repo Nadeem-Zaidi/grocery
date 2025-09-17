@@ -7,7 +7,7 @@ import 'package:grocery_app/blocs/section/dashboard_bloc/dashboard_bloc.dart';
 import 'package:grocery_app/database_service.dart/db_service.dart';
 import 'package:grocery_app/pages/category_pages/categories.dart';
 import 'package:grocery_app/pages/created_products/product_list.dart';
-import 'package:grocery_app/pages/dashboard/page_builder.dart';
+import 'package:grocery_app/widgets/templates/page_builder.dart';
 import 'package:grocery_app/pages/product_pages/new_product.dart';
 import 'package:grocery_app/service_locator/service_locator.dart';
 import '../models/category.dart' as cat;

@@ -8,8 +8,8 @@ import '../../database_service.dart/db_service.dart';
 import '../../models/category.dart';
 import '../../models/product/productt.dart';
 import '../../service_locator/service_locator.dart';
-import '../../widgets/shop_by_store.dart';
-import '../../widgets/sliver_category.dart';
+import '../shop_by_store.dart';
+import '../sliver_category.dart';
 
 class CategorySection extends StatefulWidget {
   const CategorySection({super.key});
@@ -75,13 +75,13 @@ class _CategorySectionBuilderState extends State<CategorySection> {
           SizedBox(
             child: BlocConsumer<SectionBuilderBloc, SectionBuilderState>(
                 listener: (context, state) {
-              if (state.section.content.isNotEmpty) {
+              if (state.section != null && state.section!.content.isNotEmpty) {
                 context
                     .read<DashboardBloc>()
-                    .add(AddSectionToSave(section: state.section));
+                    .add(AddSectionToSave(section: state.section!));
               }
             }, builder: (context, state) {
-              if (state.section.content.isEmpty) {
+              if (state.section != null && state.section!.content.isEmpty) {
                 return Center(
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 20),
@@ -166,8 +166,8 @@ class _CategorySectionBuilderState extends State<CategorySection> {
                 );
               }
 
-              if (state.section.content.isNotEmpty) {
-                var content = state.section.content;
+              if (state.section != null && state.section!.content.isNotEmpty) {
+                var content = state.section!.content;
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
