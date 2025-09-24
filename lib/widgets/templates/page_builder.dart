@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/section/dashboard_bloc/dashboard_bloc.dart';
@@ -28,11 +30,12 @@ class _PageBuilderState extends State<PageBuilder> {
   final GlobalKey _appbarListSection = GlobalKey();
   bool _changeColorNormal = false;
   bool _isSearchBarAtTop = false;
-  static const double _headerImageheight = 500;
+  static const double _headerImageheight = 600;
   static const double _searchbarheight = 45.0;
   bool get _shouldStick => (_isSearchBarAtTop && _scrollOffset > 100);
-  final String _imageUrl =
-      'https://firebasestorage.googleapis.com/v0/b/grocerybynadeem.firebasestorage.app/o/images%2Fimp%2FRectangle%201.png?alt=media&token=886eb902-b5a5-4889-ae61-f7d54c9fb81b';
+
+  // final String _imageUrl =
+  //     'https://firebasestorage.googleapis.com/v0/b/grocerybynadeem.firebasestorage.app/o/images%2Fimp%2FRectangle%201.png?alt=media&token=886eb902-b5a5-4889-ae61-f7d54c9fb81b';
 
   Color appBarBackground = Colors.blue;
   Color? dominantColor;
@@ -41,29 +44,29 @@ class _PageBuilderState extends State<PageBuilder> {
   void initState() {
     super.initState();
     _scrollController.addListener(_handleScroll);
-    _updatePalette();
+    // _updatePalette();
   }
 
-  Future<void> _updatePalette() async {
-    final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
-      NetworkImage(_imageUrl),
-      size: const Size(200, 100),
-    );
+  // Future<void> _updatePalette() async {
+  //   final PaletteGenerator generator = await PaletteGenerator.fromImageProvider(
+  //     NetworkImage(_imageUrl),
+  //     size: const Size(200, 100),
+  //   );
 
-    final color = generator.dominantColor?.color ?? Colors.grey;
+  //   final color = generator.dominantColor?.color ?? Colors.grey;
 
-    setState(() {
-      dominantColor = color;
-    });
+  //   setState(() {
+  //     dominantColor = color;
+  //   });
 
-    // ✅ safe to use context now, because we scheduled this after the first frame
-    saveColor(color, context);
-  }
+  //   // ✅ safe to use context now, because we scheduled this after the first frame
+  //   saveColor(color, context);
+  // }
 
-  Future<void> saveColor(Color color, BuildContext context) async {
-    String hexColor = '#${color.value.toRadixString(16).padLeft(8, '0')}';
-    context.read<DashboardBloc>().add(AddColor(color: hexColor));
-  }
+  // Future<void> saveColor(Color color, BuildContext context) async {
+  //   String hexColor = '#${color.value.toRadixString(16).padLeft(8, '0')}';
+  //   context.read<DashboardBloc>().add(AddColor(color: hexColor));
+  // }
 
   /// Returns the proper text color based on appBarBackground and system theme
   Color getContrastingTextColor(BuildContext context, Color background) {
@@ -78,24 +81,18 @@ class _PageBuilderState extends State<PageBuilder> {
     }
   }
 
-  // Define a gradient instead of a solid color
-  LinearGradient appBarGradient = const LinearGradient(
-    colors: [
-      Color.fromARGB(255, 8, 82, 231), // Blue
-      Color.fromARGB(255, 165, 172, 233),
-      Colors.white,
+  Color getColorFromString(String hex) {
+    hex = hex.replaceAll('#', '');
+    if (hex.length == 6) hex = 'ff$hex'; // assume fully opaque
+    return Color(int.parse(hex, radix: 16));
+  }
 
-      // Light Blue
-    ],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  );
+  // Define a gradient instead of a solid color
 
 // Helper to get text color based on the first color of the gradient
-  Color getContrastingTextColorFromGradient(
-      BuildContext context, LinearGradient gradient) {
+  Color getContrastingTextColorFromGradient(BuildContext context, Color color) {
     final brightness = View.of(context).platformDispatcher.platformBrightness;
-    final luminance = gradient.colors.first.computeLuminance();
+    final luminance = color.computeLuminance();
 
     if (brightness == Brightness.dark) {
       return Colors.white;
@@ -157,8 +154,15 @@ class _PageBuilderState extends State<PageBuilder> {
     _checkPromoSectionPosition();
   }
 
-  Widget _buildStickyAppBar(BuildContext context) {
-    final textColor = getContrastingTextColor(context, appBarBackground);
+  Widget _buildStickyAppBar(BuildContext context, DashboardState state) {
+    bool _shouldStickColor = _shouldStick;
+    if (_changeColorNormal) {
+      _shouldStickColor = false;
+    }
+    Color? appBarColor;
+    if (state.page.dominantColorAppBar != null) {
+      appBarColor = getColorFromString(state.page.dominantColorAppBar!);
+    }
 
     return Transform.translate(
       offset: _shouldStick ? const Offset(0, 0) : Offset(0, -_scrollOffset),
@@ -172,10 +176,10 @@ class _PageBuilderState extends State<PageBuilder> {
           0,
         ),
         decoration: BoxDecoration(
-            color: _shouldStick
-                ? dominantColor
+            color: _shouldStickColor
+                ? appBarColor
                 : _changeColorNormal
-                    ? Colors.amber
+                    ? Theme.of(context).primaryColor
                     : Colors.transparent),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -193,7 +197,7 @@ class _PageBuilderState extends State<PageBuilder> {
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
                         color: getContrastingTextColorFromGradient(
-                            context, appBarGradient),
+                            context, appBarColor ?? Colors.black),
                       ),
                     ),
                     Row(
@@ -204,7 +208,7 @@ class _PageBuilderState extends State<PageBuilder> {
                               fontSize: 21,
                               fontWeight: FontWeight.bold,
                               color: getContrastingTextColorFromGradient(
-                                  context, appBarGradient)),
+                                  context, appBarColor ?? Colors.black)),
                         ),
                         Text(
                           " - Last House",
@@ -212,7 +216,7 @@ class _PageBuilderState extends State<PageBuilder> {
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: getContrastingTextColorFromGradient(
-                                  context, appBarGradient)),
+                                  context, appBarColor ?? Colors.black)),
                         ),
                       ],
                     ),
@@ -241,15 +245,18 @@ class _PageBuilderState extends State<PageBuilder> {
                 ],
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Row(
               key: _appbarListSection,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildCategoryIcon(context, Icons.widgets, "All"),
-                _buildCategoryIcon(context, Icons.umbrella, "Monsoon"),
-                _buildCategoryIcon(context, Icons.headphones, "Electronics"),
-                _buildCategoryIcon(context, Icons.auto_awesome, "Beauty"),
+                _buildCategoryIcon(context, Icons.widgets, "All", appBarColor),
+                _buildCategoryIcon(
+                    context, Icons.umbrella, "Monsoon", appBarColor),
+                _buildCategoryIcon(
+                    context, Icons.headphones, "Electronics", appBarColor),
+                _buildCategoryIcon(
+                    context, Icons.auto_awesome, "Beauty", appBarColor),
               ],
             ),
             const SizedBox(height: 10),
@@ -259,7 +266,8 @@ class _PageBuilderState extends State<PageBuilder> {
     );
   }
 
-  Widget _buildCategoryIcon(BuildContext context, IconData icon, String label) {
+  Widget _buildCategoryIcon(
+      BuildContext context, IconData icon, String label, Color? appBarColor) {
     final textColor = getContrastingTextColor(context, appBarBackground);
 
     return Column(
@@ -270,7 +278,8 @@ class _PageBuilderState extends State<PageBuilder> {
         Text(
           label,
           style: TextStyle(
-            color: getContrastingTextColorFromGradient(context, appBarGradient),
+            color: getContrastingTextColorFromGradient(
+                context, appBarColor ?? Colors.black),
             fontSize: 12,
             fontWeight: FontWeight.bold,
           ),
@@ -308,26 +317,42 @@ class _PageBuilderState extends State<PageBuilder> {
                         child: Stack(
                           fit: StackFit.expand,
                           children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: NetworkImage(_imageUrl), // local image
-                                  fit: BoxFit
-                                      .cover, // cover, contain, fill, etc.
-                                ),
-                              ),
-                            ),
+                            state.page.appBarImage != null
+                                ? Container(
+                                    height: 400,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                        image: FileImage(File(state.page
+                                            .appBarImage!.path)), // local image
+                                        fit: BoxFit
+                                            .cover, // cover, contain, fill, etc.
+                                      ),
+                                    ),
+                                  )
+                                : Container(
+                                    decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                      colors: [
+                                        Colors.blue,
+                                        Colors.white,
+                                        Colors.white
+                                      ],
+                                      begin: Alignment
+                                          .topCenter, // start at the top
+                                      end: Alignment.bottomCenter, //
+                                    )),
+                                  ),
                             Positioned(
                               bottom: 0,
                               left: 0,
                               right: 0,
-                              // ignore: unnecessary_null_comparison
                               child: promoSection.isNotEmpty
                                   ? sectionBuilder(
                                       section: state.page.promoBanner.values
                                           .toList()[0])
                                   : SizedBox.shrink(),
-                            ),
+                            )
                           ],
                         ),
                       ),
@@ -342,7 +367,7 @@ class _PageBuilderState extends State<PageBuilder> {
                     ),
                   ],
                 ),
-                _buildStickyAppBar(context)
+                _buildStickyAppBar(context, state)
               ],
             ),
           );
@@ -361,12 +386,7 @@ class _PageBuilderState extends State<PageBuilder> {
                     goTo: () {
                       parentContext.read<DashboardBloc>().add(
                             AddSection(
-                              section: db_section.CategorySection(
-                                  id: "NZ${DateTime.now().millisecondsSinceEpoch}",
-                                  name: "",
-                                  type: 'category',
-                                  sequence: 1),
-                            ),
+                                section: db_section.CategorySection.initial()),
                           );
                       Navigator.pop(parentContext);
                     },
@@ -375,18 +395,19 @@ class _PageBuilderState extends State<PageBuilder> {
                     name: "Promo Section",
                     goTo: () {
                       parentContext.read<DashboardBloc>().add(AddPromoBanner(
-                              section: db_section.PromotionSection(
-                            id: "NZ${DateTime.now().millisecondsSinceEpoch}",
-                            type: "promotion",
-                            name: "",
-                            sequence: 1,
-                            imageUrls: [],
-                            content: [],
-                            attributes: {},
-                          )));
+                          section:
+                              db_section.AppbarPromotionSection.initial()));
                       Navigator.pop(parentContext);
                     },
-                  )
+                  ),
+                  SelectImageWithBlocEvent(
+                      addEvent: () {
+                        parentContext
+                            .read<DashboardBloc>()
+                            .add(SelectAppBarImge());
+                        Navigator.pop(parentContext);
+                      },
+                      name: "Select Appbar Image")
                 ],
               );
             },
@@ -414,3 +435,71 @@ List<Widget> demoList = [
       imageUrl:
           "https://firebasestorage.googleapis.com/v0/b/grocerybynadeem.firebasestorage.app/o/images%2Fimp%2Fbest-protein-powders-available-refresh-lead-1668468392-jpg_enhanced.webp?alt=media&token=36ac5c8a-2130-4a60-bc77-56d73ba81ade")
 ];
+
+class SimpleResizableBox extends StatefulWidget {
+  const SimpleResizableBox({super.key});
+
+  @override
+  State<SimpleResizableBox> createState() => _SimpleResizableBoxState();
+}
+
+class _SimpleResizableBoxState extends State<SimpleResizableBox> {
+  double width = 200;
+  double height = 150;
+
+  void _onDrag(DragUpdateDetails details) {
+    setState(() {
+      width += details.delta.dx;
+      height += details.delta.dy;
+
+      // Clamp values so it doesn’t shrink too small
+      width = width.clamp(100, 500);
+      height = height.clamp(100, 500);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    print("width==>${width} | height==>${height}");
+    return GestureDetector(
+      onTap: () {
+        print("width==>${width} | height==>${height}");
+      },
+      child: Center(
+        child: Stack(
+          children: [
+            Container(
+              width: width,
+              height: height,
+              color: Colors.blue[200],
+              alignment: Alignment.center,
+              child: const Text("Resizable Box"),
+            ),
+
+            // Drag handle (bottom-right corner)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: GestureDetector(
+                onPanUpdate: _onDrag,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Icon(
+                    Icons.drag_handle,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

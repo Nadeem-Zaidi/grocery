@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 final ThemeData myAppTheme = ThemeData(
   // Color scheme
   colorScheme: ColorScheme.light(
-    primary: Colors.deepPurple, // Primary color
+    primary: const Color(0xFF5590D9), // Primary color
     secondary: Colors.amber, // Background color
     surface: Colors.white, // Surface color (e.g., cards, dialogs)
     error: Colors.red, // Error color
@@ -59,7 +59,7 @@ final ThemeData myAppTheme = ThemeData(
   // Button theme
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.deepPurple, // Button background color
+      backgroundColor: const Color(0xFF5590D9), // Button background color
       foregroundColor: Colors.white, // Button text color
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       shape: RoundedRectangleBorder(
@@ -86,7 +86,7 @@ final ThemeData myAppTheme = ThemeData(
 
   // AppBar theme
   appBarTheme: const AppBarTheme(
-    backgroundColor: Colors.deepPurple, // AppBar background color
+    backgroundColor: Color(0xFF5590D9), // AppBar background color
     foregroundColor: Colors.white, // AppBar text/icon color
     elevation: 4, // AppBar shadow
   ),

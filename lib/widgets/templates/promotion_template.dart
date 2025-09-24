@@ -18,6 +18,8 @@ class PromotionTemplate extends StatefulWidget {
 class _PromotionTemplateState extends State<PromotionTemplate> {
   @override
   Widget build(BuildContext context) {
+    String? hexColor =
+        context.read<DashboardBloc>().state.page.dominantColorAppBar;
     return BlocConsumer<SectionBuilderBloc, SectionBuilderState>(
       listener: (context, state) {
         context
@@ -73,14 +75,11 @@ class _PromotionTemplateState extends State<PromotionTemplate> {
                     onPressed: () {
                       context
                           .read<SectionBuilderBloc>()
-                          .add(MultiSelectContent(content: [
-                            PromoCard(
-                              hexColor: context
-                                  .read<DashboardBloc>()
-                                  .state
-                                  .page
-                                  .appBarColor,
-                            )
+                          .add(MultiSelectContent<PlainCard>(content: [
+                            PlainCard(
+                                title: '',
+                                imageUrl: '',
+                                backGroundColor: hexColor ?? ""),
                           ]));
                     },
                     icon: const Icon(Icons.add),
@@ -126,26 +125,23 @@ class _PromotionTemplateState extends State<PromotionTemplate> {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    scrollDirection: Axis.horizontal, // 👈
+                    scrollDirection: Axis.horizontal,
                     itemCount: content.length + 1,
                     itemBuilder: (context, index) {
                       if (index < content.length) {
                         return BlocProvider<CustomCardBloc>(
                             create: (context) => CustomCardBloc(),
-                            child: content[index]);
+                            child: PromoCard(hexColor: hexColor));
                       } else {
                         return GestureDetector(
                           onTap: () {
                             context
                                 .read<SectionBuilderBloc>()
-                                .add(MultiSelectContent(content: [
-                                  PromoCard(
-                                    hexColor: context
-                                        .read<DashboardBloc>()
-                                        .state
-                                        .page
-                                        .appBarColor,
-                                  )
+                                .add(MultiSelectContent<PlainCard>(content: [
+                                  PlainCard(
+                                      title: '',
+                                      imageUrl: '',
+                                      backGroundColor: hexColor ?? ""),
                                 ]));
                           },
                           child: Container(

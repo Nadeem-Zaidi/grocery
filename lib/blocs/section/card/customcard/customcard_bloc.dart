@@ -48,7 +48,10 @@ class CustomCardBloc extends Bloc<CustomCardEvent, CustomCardState> {
       };
 
       emit(state.copyWith(customCard: customCard));
-    } catch (error) {}
+    } catch (error) {
+      print("Error in adding the title==>${error.toString()}");
+      emit(state.copyWith(error: "Something went wrong in setting the title"));
+    }
   }
 
   void _setImage(SetImage event, Emitter<CustomCardState> emit) {}

@@ -4,13 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/section/card/customcard/customcard_bloc.dart';
 
-class PromoCard extends StatelessWidget {
+class PromoCard extends StatefulWidget {
   final String? title;
   final String? imageUrl;
   final String? hexColor;
 
   const PromoCard({super.key, this.title, this.imageUrl, this.hexColor});
 
+  @override
+  State<PromoCard> createState() => _PromoCardState();
+}
+
+class _PromoCardState extends State<PromoCard> {
   Color hexToColor(String hex) {
     hex = hex.replaceAll('#', '');
     if (hex.length == 6) hex = 'ff$hex'; // assume fully opaque
@@ -20,19 +25,20 @@ class PromoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasImageUrl = imageUrl != null && imageUrl!.trim().isNotEmpty;
+    final hasImageUrl =
+        widget.imageUrl != null && widget.imageUrl!.trim().isNotEmpty;
 
     return BlocBuilder<CustomCardBloc, CustomCardState>(
       builder: (context, state) {
         return Container(
-          width: 128,
-          height: 100,
+          width: 120,
+          height: 70,
           margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
               colors: [
-                hexToColor(hexColor ?? "#FF9E9E9E"),
+                hexToColor(widget.hexColor ?? "#FF9E9E9E"),
                 theme.colorScheme.surfaceVariant.withOpacity(0.6),
               ],
               begin: Alignment.topLeft,
@@ -51,25 +57,26 @@ class PromoCard extends StatelessWidget {
             child: Stack(
               children: [
                 Positioned(
-                  left: 8,
-                  right: 5,
-                  top: 5,
-                  child: BlocBuilder<CustomCardBloc, CustomCardState>(
-                    builder: (context, state) {
-                      return SizedBox(
-                        width: double.infinity,
-                        height: 20,
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: "Enter title",
-                            border: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            errorBorder: InputBorder.none,
-                          ),
-                        ),
-                      );
-                    },
+                  left: 10,
+                  right: 8,
+                  top: 10,
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 20,
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: "Enter title",
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                        errorBorder: InputBorder.none,
+                      ),
+                      onChanged: (value) {
+                        context.read<CustomCardBloc>().add(
+                              SetTitle(title: value.toString()),
+                            );
+                      },
+                    ),
                   ),
                 ),
                 Positioned(
@@ -111,7 +118,7 @@ class PromoCard extends StatelessWidget {
     } else if (hasImageUrl) {
       // Show network image
       return Image.network(
-        imageUrl!,
+        widget.imageUrl!,
         fit: BoxFit.cover,
         height: 100,
         errorBuilder: (_, __, ___) => Icon(

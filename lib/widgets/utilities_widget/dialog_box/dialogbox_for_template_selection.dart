@@ -64,10 +64,40 @@ class DialogBoxSectionType extends StatelessWidget {
                 itemBuilder: (context, index) {
                   switch (listitems[index]) {
                     case ItemWithGoto(name: String name, goTo: Function goTo):
-                      // TODO: Handle this case.
                       return InkWell(
                         onTap: () {
                           goTo();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.folder_open_outlined,
+                                  size: 20, color: Colors.blueGrey),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  name,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ),
+                              const Icon(Icons.chevron_right,
+                                  size: 20, color: Colors.grey),
+                            ],
+                          ),
+                        ),
+                      );
+                    case SelectImageWithBlocEvent(
+                        name: String name,
+                        addEvent: Function addEvent
+                      ):
+                      return InkWell(
+                        onTap: () {
+                          addEvent();
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(

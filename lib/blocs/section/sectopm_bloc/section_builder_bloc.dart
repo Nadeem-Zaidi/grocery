@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:grocery_app/database_service.dart/dashboard/section.dart';
+import 'package:grocery_app/models/custom_cards/customcard.dart';
 import 'package:grocery_app/widgets/card/custom_card.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../models/category.dart' as cat;
@@ -27,7 +28,8 @@ class SectionBuilderBloc
     on<RemoveImages>(_removePickedImages);
     on<AddContent>(_addContent);
     on<RemoveContent>(_removeContent);
-    on<MultiSelectContent>(_multiSelectContent);
+    on<MultiSelectContent<cat.Category>>(_multiSelectContent<cat.Category>);
+    on<MultiSelectContent<PlainCard>>(_multiSelectContent<PlainCard>);
     on<Save>(_save);
     on<SaveVisible>(_saveVisible);
     on<SetSection>(_setSection);
@@ -59,33 +61,19 @@ class SectionBuilderBloc
     }
   }
 
-  void _multiSelectContent(
+  void _multiSelectContent<T>(
       MultiSelectContent event, Emitter<SectionBuilderState> emit) {
-    print(event.content);
-    print(state.section!.content);
     try {
-      if (state.section == null) {
+      final section = state.section as Section<T>?;
+      if (section == null) {
         throw Exception("Section is null");
       }
-      final section = switch (state.section) {
-        CategorySection s => s.copyWith(
-            content: <cat.Category>[
-              ...state.section!.content,
-              ...event.content
-            ],
-          ),
-        ProductSpotlightSection s => s.copyWith(
-            content: [...s.content, ...event.content] as List<Productt>,
-          ),
-        PromotionSection s => s.copyWith(
-            content: <PromoCard>[...state.section!.content, ...event.content]),
-        // TODO: Handle this case.
-        null => throw UnimplementedError(),
-      };
-
-      emit(state.copyWith(section: section as Section));
+      emit(state.copyWith(
+          section: section
+              .copyWith(content: [...section.content, ...event.content])));
     } catch (error) {
       print("Error in _multiSelectContent ==>${error.toString()}");
+      emit(state.copyWith(error: "Cannot add content to the section"));
     }
   }
 
@@ -97,20 +85,6 @@ class SectionBuilderBloc
         }
         final updatedContent = List.of(state.section!.content)
           ..removeAt(event.index);
-
-        final newSection = switch (state.section) {
-          CategorySection s => s.copyWith(
-              content:
-                  updatedContent.cast<cat.Category>() as List<cat.Category>?),
-          ProductSpotlightSection s =>
-            s.copyWith(content: updatedContent.cast<Productt>()),
-          // TODO: Handle this case.
-          PromotionSection() => throw UnimplementedError(),
-          // TODO: Handle this case.
-          null => throw UnimplementedError(),
-        };
-
-        emit(state.copyWith(section: newSection as Section));
       }
     } catch (e) {
       print("Error in _removeContent: $e");

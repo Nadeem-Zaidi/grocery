@@ -46,3 +46,6 @@ class AddPromoToSave extends DashboardEvent {
   final Section section;
   const AddPromoToSave({required this.section});
 }
+
+@immutable
+class SelectAppBarImge extends DashboardEvent {}
