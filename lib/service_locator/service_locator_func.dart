@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:grocery_app/database_service.dart/db_service.dart';
 import 'package:grocery_app/models/form_config/form_config.dart';
 import 'package:grocery_app/service_locator/service_locator.dart';
@@ -16,6 +17,8 @@ void registerServices() {
   // Register FirebaseFirestore as a singleton
   serviceLocator
       .registerSingleton<FirebaseFirestore>(FirebaseFirestore.instance);
+
+  serviceLocator.registerSingleton<FirebaseStorage>(FirebaseStorage.instance);
 
   // Register factory for DBServiceFactory<Category>
   serviceLocator.registerFactory<DBService<cat.Category>>(() {

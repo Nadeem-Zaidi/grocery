@@ -26,10 +26,15 @@ class AddPromoBanner extends DashboardEvent {
 }
 
 @immutable
+class AddPromobannerGridView extends DashboardEvent {
+  final Section section;
+  const AddPromobannerGridView({required this.section});
+}
+
+@immutable
 class RemoveSection extends DashboardEvent {
-  final int index;
-  final String? id;
-  const RemoveSection({required this.index, required this.id});
+  final String id;
+  const RemoveSection({required this.id});
 }
 
 @immutable
@@ -49,3 +54,15 @@ class AddPromoToSave extends DashboardEvent {
 
 @immutable
 class SelectAppBarImge extends DashboardEvent {}
+
+@immutable
+class SelectAppbarImageUrl extends DashboardEvent {
+  final String imageUrl;
+  const SelectAppbarImageUrl({required this.imageUrl});
+}
+
+@immutable
+class SetAppbarHeight extends DashboardEvent {
+  final double value;
+  const SetAppbarHeight({required this.value});
+}

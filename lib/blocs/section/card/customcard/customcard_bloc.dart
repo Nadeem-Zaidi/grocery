@@ -17,6 +17,40 @@ class CustomCardBloc extends Bloc<CustomCardEvent, CustomCardState> {
     on<SetImage>(_setImage);
     on<SetBackgroundColor>(_setBackgroundColor);
     on<SelectImage>(_pickImage);
+    on<SelectImageUrl>(_pickImageUrl);
+    on<RemoveImage>(_removeImage);
+  }
+
+  void _removeImage(RemoveImage event, Emitter<CustomCardState> emit) {
+    try {
+      print("running state");
+      print(state.imageUrl);
+      print(state.imageFile);
+      emit(state.copyWith(imageFile: null, imageUrl: null));
+    } catch (error) {
+      print("Error in removing the image. Error=>${error.toString()}");
+      emit(state.copyWith(error: "Cannot remove the image"));
+    }
+  }
+
+  Future<void> _pickImageUrl(
+      SelectImageUrl event, Emitter<CustomCardState> emit) async {
+    try {
+      print(event.imageUrl);
+      print(state.customCard.runtimeType);
+      final card = state.customCard;
+      emit(state.copyWith(imageUrl: event.imageUrl));
+
+      if (card is PlainCard) {
+        print("hurray running here");
+        emit(state.copyWith(
+            customCard: (state.customCard as PlainCard)
+                .copyWith(imageUrl: event.imageUrl)));
+      }
+    } catch (error) {
+      print("Error in selecting an image due to error==>${error.toString()}");
+      emit(state.copyWith(error: "cannot select an image"));
+    }
   }
 
   Future<void> _pickImage(
@@ -36,16 +70,7 @@ class CustomCardBloc extends Bloc<CustomCardEvent, CustomCardState> {
 
   void _setTitle(SetTitle event, Emitter<CustomCardState> emit) {
     try {
-      final customCard = switch (state.customCard) {
-        // TODO: Handle this case.
-        null => throw UnimplementedError(),
-        // TODO: Handle this case.
-        PlainCard s => s.copyWith(title: event.title),
-        // TODO: Handle this case.
-        DiscountCard() => throw UnimplementedError(),
-        // TODO: Handle this case.
-        FeaturedCard() => throw UnimplementedError(),
-      };
+      final customCard = state.customCard?.copyWith();
 
       emit(state.copyWith(customCard: customCard));
     } catch (error) {

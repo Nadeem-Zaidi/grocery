@@ -5,27 +5,39 @@ class CustomCardState extends Equatable {
   final CustomCard? customCard;
   final String? error;
   final XFile? imageFile;
+  final String? imageUrl;
 
-  const CustomCardState(
-      {this.loading = false, this.customCard, this.error, this.imageFile});
+  const CustomCardState({
+    this.loading = false,
+    this.customCard,
+    this.error,
+    this.imageFile,
+    this.imageUrl,
+  });
 
   CustomCardState copyWith(
       {bool? loading,
       CustomCard? customCard,
       String? error,
-      XFile? imageFile}) {
+      XFile? imageFile,
+      String? imageUrl}) {
     return CustomCardState(
         loading: loading ?? this.loading,
         customCard: customCard ?? this.customCard,
         error: error ?? this.error,
-        imageFile: imageFile ?? this.imageFile);
+        imageFile: imageFile,
+        imageUrl: imageUrl);
   }
 
   factory CustomCardState.initial() {
     return CustomCardState(
-        loading: false, customCard: null, error: null, imageFile: null);
+        loading: false,
+        customCard: null,
+        error: null,
+        imageFile: null,
+        imageUrl: null);
   }
 
   @override
-  List<Object?> get props => [loading, customCard, error, imageFile];
+  List<Object?> get props => [loading, customCard, error, imageFile, imageUrl];
 }

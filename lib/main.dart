@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,27 +9,30 @@ import 'package:grocery_app/authentication/cubit/auth_cubit.dart';
 import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
 import 'package:grocery_app/blocs/change_variation/bloc/change_variation_bloc.dart';
 import 'package:grocery_app/blocs/dashboard_builder/cubit/dashboard_builder_cubit.dart';
+import 'package:grocery_app/blocs/list_files_from_storage/list_files_cloud_storage_bloc.dart';
 import 'package:grocery_app/blocs/products/cart/cart_bloc.dart';
 import 'package:grocery_app/database_service.dart/dashboard/firebase_dashboard_service.dart';
 import 'package:grocery_app/database_service.dart/register_factory.dart';
+import 'package:grocery_app/database_service.dart/storage_service/upload_provider.dart';
 
 import 'package:grocery_app/router/route_generator.dart';
+import 'package:grocery_app/service_locator/service_locator.dart';
 import 'package:grocery_app/service_locator/service_locator_func.dart';
 import 'package:grocery_app/theme/theme_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'database_service.dart/storage_service/storage_provider.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await FirebaseAppCheck.instance.activate(
-    webProvider: ReCaptchaV3Provider('site-key'),
-    androidProvider: AndroidProvider.debug,
-  );
+  // await FirebaseAppCheck.instance.activate(
+  //   webProvider: ReCaptchaV3Provider('site-key'),
+  //   androidProvider: AndroidProvider.debug,
+  // );
 
   final sharedPreferences = await SharedPreferences.getInstance();
   registerServices();
@@ -67,6 +71,15 @@ class MyApp extends StatelessWidget {
                 dbService: FirebaseDashBoard(FirebaseFirestore.instance))
               ..fetchSections(),
           ),
+          // BlocProvider(
+          //   create: (context) => CloudStorageBloc(
+          //     storageProvider: StorageProvider(
+          //       storegeProvider: FireBaseStorageProvider(
+          //         firebaseStorage: ServiceLocator().get<FirebaseStorage>(),
+          //       ),
+          //     ),
+          //   ),
+          // )
 
           // BlocProvider<LocationCubit>(
           //     create: (context) => LocationCubit()..getCurrentPosition())

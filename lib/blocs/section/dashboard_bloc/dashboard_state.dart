@@ -3,14 +3,11 @@ part of 'dashboard_bloc.dart';
 class DashboardState extends Equatable {
   final bool loading;
   final PageBuilder page;
-  final Map<String, Section> sections;
-  final Map<String, Section> promoBanner;
+
   final List<Section> sectionToSave;
   final String? error;
 
   const DashboardState({
-    this.sections = const {},
-    this.promoBanner = const {},
     this.loading = false,
     this.error,
     this.sectionToSave = const [],
@@ -19,7 +16,7 @@ class DashboardState extends Equatable {
 
   factory DashboardState.initial() {
     return DashboardState(
-      page: PageBuilder(), // provide a default Dashboard
+      page: PageBuilder(appbarHeight: 600), // provide a default Dashboard
     );
   }
 
@@ -33,14 +30,11 @@ class DashboardState extends Equatable {
   }) {
     return DashboardState(
         loading: loading ?? this.loading,
-        sections: sections ?? this.sections,
         page: page ?? this.page,
         error: error ?? this.error,
-        sectionToSave: sectionToSave ?? this.sectionToSave,
-        promoBanner: promoBanner ?? this.promoBanner);
+        sectionToSave: sectionToSave ?? this.sectionToSave);
   }
 
   @override
-  List<Object?> get props =>
-      [sections, loading, error, sectionToSave, page, promoBanner];
+  List<Object?> get props => [loading, error, sectionToSave, page];
 }

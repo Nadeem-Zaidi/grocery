@@ -200,9 +200,8 @@ class _CategorySectionBuilderState extends State<CategorySection> {
                                 top: 0,
                                 child: InkWell(
                                   onTap: () {
-                                    context
-                                        .read<SectionBuilderBloc>()
-                                        .add(RemoveContent(index: index));
+                                    context.read<SectionBuilderBloc>().add(
+                                        RemoveContent<Category>(index: index));
                                   },
                                   child: const Icon(
                                     Icons.cancel,
@@ -267,7 +266,7 @@ class _CategorySectionBuilderState extends State<CategorySection> {
 
 Widget _buildSection(String type, Category category) {
   if (type == "category") {
-    return DashboardCategory(category: category);
+    return DashboardCategory(category: category, key: ValueKey(category.id));
   }
   if (type == "store") {
     return ShopByStore(category: category);

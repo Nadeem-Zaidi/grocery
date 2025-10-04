@@ -28,7 +28,7 @@ class MultiSelectContent<T> extends SectionBuilderEvent {
 }
 
 @immutable
-class RemoveContent extends SectionBuilderEvent {
+class RemoveContent<T> extends SectionBuilderEvent {
   final int index;
   const RemoveContent({required this.index});
 }
@@ -52,4 +52,18 @@ class SaveVisible extends SectionBuilderEvent {}
 class SetSection extends SectionBuilderEvent {
   final Section section;
   const SetSection({required this.section});
+}
+
+@immutable
+class AddImageToContent<T extends CustomCard> extends SectionBuilderEvent {
+  final int index;
+  final String imageUrl;
+  const AddImageToContent({required this.index, required this.imageUrl});
+}
+
+@immutable
+class UpdateContent<T> extends SectionBuilderEvent {
+  final T content;
+  final int index;
+  UpdateContent({required this.content, required this.index});
 }

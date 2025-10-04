@@ -1,12 +1,30 @@
-sealed class CustomCard {
-  const CustomCard();
+library custom_card;
+
+part 'plain_card_with_title.dart';
+part 'discount_card.dart';
+part 'featured_card.dart';
+part 'plain_card.dart';
+part 'plain_card_gridview.dart';
+
+abstract class CustomCard {
+  final String? title;
+  final String imageUrl;
+  final String? backGroundColor;
+  final String type;
+
+  const CustomCard(
+      {required this.imageUrl,
+      required this.type,
+      this.backGroundColor,
+      this.title});
 
   Map<String, dynamic> toMap();
+  CustomCard copyWith();
 
   static CustomCard fromMap(Map<String, dynamic> map) {
     switch (map['type']) {
       case 'plain':
-        return PlainCard.fromMap(map);
+        return PlainCardWithTitle.fromMap(map);
       case 'discount':
         return DiscountCard.fromMap(map);
       case 'featured':
@@ -15,68 +33,4 @@ sealed class CustomCard {
         throw Exception("Unknown card type: ${map['type']}");
     }
   }
-}
-
-class PlainCard extends CustomCard {
-  final String title;
-  final String imageUrl;
-  final String? backGroundColor;
-
-  const PlainCard({
-    required this.title,
-    required this.imageUrl,
-    this.backGroundColor,
-  });
-
-  PlainCard copyWith({
-    String? title,
-    String? imageUrl,
-    String? backGroundColor,
-  }) {
-    return PlainCard(
-      title: title ?? this.title,
-      imageUrl: imageUrl ?? this.imageUrl,
-      backGroundColor: backGroundColor ?? this.backGroundColor,
-    );
-  }
-
-  @override
-  Map<String, dynamic> toMap() {
-    return {
-      'type': 'plain',
-      'title': title,
-      'imageUrl': imageUrl,
-      if (backGroundColor != null) 'backGroundColor': backGroundColor,
-    };
-  }
-
-  factory PlainCard.fromMap(Map<String, dynamic> map) {
-    return PlainCard(
-      title: map['title'] as String,
-      imageUrl: map['imageUrl'] as String,
-      backGroundColor: map['backGroundColor'] as String?,
-    );
-  }
-}
-
-class DiscountCard extends CustomCard {
-  const DiscountCard();
-
-  DiscountCard copyWith() => const DiscountCard();
-
-  @override
-  Map<String, dynamic> toMap() => {'type': 'discount'};
-
-  factory DiscountCard.fromMap(Map<String, dynamic> _) => const DiscountCard();
-}
-
-class FeaturedCard extends CustomCard {
-  const FeaturedCard();
-
-  FeaturedCard copyWith() => const FeaturedCard();
-
-  @override
-  Map<String, dynamic> toMap() => {'type': 'featured'};
-
-  factory FeaturedCard.fromMap(Map<String, dynamic> _) => const FeaturedCard();
 }

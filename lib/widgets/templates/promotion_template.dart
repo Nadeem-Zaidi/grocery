@@ -4,9 +4,7 @@ import 'package:grocery_app/blocs/section/card/customcard/customcard_bloc.dart';
 import 'package:grocery_app/blocs/section/dashboard_bloc/dashboard_bloc.dart';
 import 'package:grocery_app/blocs/section/sectopm_bloc/section_builder_bloc.dart';
 import 'package:grocery_app/models/custom_cards/customcard.dart';
-import 'package:grocery_app/models/page_builder/page_builder.dart';
-import 'package:grocery_app/database_service.dart/dashboard/section.dart';
-import 'package:grocery_app/widgets/card/custom_card.dart';
+import 'package:grocery_app/widgets/cards/promo_cards.dart';
 
 class PromotionTemplate extends StatefulWidget {
   const PromotionTemplate({super.key});
@@ -79,7 +77,8 @@ class _PromotionTemplateState extends State<PromotionTemplate> {
                             PlainCard(
                                 title: '',
                                 imageUrl: '',
-                                backGroundColor: hexColor ?? ""),
+                                backGroundColor: hexColor ?? "",
+                                type: 'plain'),
                           ]));
                     },
                     icon: const Icon(Icons.add),
@@ -101,7 +100,7 @@ class _PromotionTemplateState extends State<PromotionTemplate> {
           var content = state.section!.content;
 
           return Container(
-            height: 230,
+            height: 160,
             margin: EdgeInsets.all(5),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
@@ -109,20 +108,6 @@ class _PromotionTemplateState extends State<PromotionTemplate> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  padding: EdgeInsets.all(4),
-                  child: TextField(
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    decoration: InputDecoration(
-                        hintText: "Section Name",
-                        border: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none),
-                  ),
-                ),
                 Expanded(
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
@@ -131,7 +116,9 @@ class _PromotionTemplateState extends State<PromotionTemplate> {
                       if (index < content.length) {
                         return BlocProvider<CustomCardBloc>(
                             create: (context) => CustomCardBloc(),
-                            child: PromoCard(hexColor: hexColor));
+                            child: SizedBox(
+                                width: 120,
+                                child: PromoCard(hexColor: hexColor)));
                       } else {
                         return GestureDetector(
                           onTap: () {
@@ -141,7 +128,8 @@ class _PromotionTemplateState extends State<PromotionTemplate> {
                                   PlainCard(
                                       title: '',
                                       imageUrl: '',
-                                      backGroundColor: hexColor ?? ""),
+                                      backGroundColor: hexColor ?? "",
+                                      type: ''),
                                 ]));
                           },
                           child: Container(

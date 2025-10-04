@@ -24,3 +24,15 @@ class SetBackgroundColor extends CustomCardEvent {
 }
 
 class SelectImage extends CustomCardEvent {}
+
+@immutable
+class SelectImageUrl<T> extends CustomCardEvent {
+  final String imageUrl;
+  SelectImageUrl({required this.imageUrl});
+}
+
+@immutable
+class RemoveImage extends CustomCardEvent {}
+
+@immutable
+class RemoveImageUrl extends CustomCardEvent {}

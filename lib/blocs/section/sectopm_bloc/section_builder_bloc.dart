@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:grocery_app/database_service.dart/dashboard/section.dart';
 import 'package:grocery_app/models/custom_cards/customcard.dart';
-import 'package:grocery_app/widgets/card/custom_card.dart';
+import 'package:grocery_app/widgets/cards/promo_cards.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../models/category.dart' as cat;
 import '../../../models/product/productt.dart';
@@ -27,12 +27,52 @@ class SectionBuilderBloc
     on<PickImages>(_pickImages);
     on<RemoveImages>(_removePickedImages);
     on<AddContent>(_addContent);
-    on<RemoveContent>(_removeContent);
+    on<RemoveContent<PlainCard>>(_removeContent<PlainCard>);
+    on<RemoveContent<cat.Category>>(_removeContent<cat.Category>);
     on<MultiSelectContent<cat.Category>>(_multiSelectContent<cat.Category>);
     on<MultiSelectContent<PlainCard>>(_multiSelectContent<PlainCard>);
     on<Save>(_save);
     on<SaveVisible>(_saveVisible);
     on<SetSection>(_setSection);
+    on<AddImageToContent<PlainCard>>(_addImageToContent<PlainCard>);
+    on<UpdateContent<PlainCard>>(_updateContent<PlainCard>);
+  }
+
+  Future<void> _updateContent<T>(
+      UpdateContent event, Emitter<SectionBuilderState> emit) async {
+    try {
+      int index = event.index;
+      var content = event.content;
+      if (state.section != null) {
+        var section = state.section as Section<T>;
+        var updatedContent = List.from(section!.content)..removeAt(index);
+        state.copyWith(
+            section: section?.copyWith(content: [...updatedContent, content]));
+      }
+    } catch (error) {
+      print(
+          "Cannot add image to to the content in _updatedContent in Sectionbuilderbloc .Error==>${error.toString()}");
+    }
+  }
+
+  Future<void> _addImageToContent<T extends CustomCard>(
+      AddImageToContent event, Emitter<SectionBuilderState> emit) async {
+    try {
+      int index = event.index;
+      String imageUrl = event.imageUrl;
+      if (state.section != null && state.section!.content.isNotEmpty) {
+        var section = state.section as Section<PlainCard>;
+        var content = (section.content[index]).copyWith(imageUrl: imageUrl);
+        var updatedContent = List.from(state.section!.content)..removeAt(index);
+        emit(state.copyWith(
+            section: section!.copyWith(content: [...updatedContent, content])));
+
+        print(state.section?.toMap());
+      }
+    } catch (error) {
+      print("Cannot add image to to the content .Error==>${error.toString()}");
+      emit(state.copyWith(error: error.toString()));
+    }
   }
 
   void _setSection(SetSection event, Emitter<SectionBuilderState> emit) {
@@ -77,17 +117,22 @@ class SectionBuilderBloc
     }
   }
 
-  void _removeContent(RemoveContent event, Emitter<SectionBuilderState> emit) {
+  void _removeContent<T>(
+      RemoveContent event, Emitter<SectionBuilderState> emit) {
     try {
-      if (state.section != null) {
+      final section = state.section as Section<T>;
+      print(event.index);
+      if (section != null) {
         if (event.index < 0 && event.index > state.section!.content.length) {
           throw Exception("Index out of bound");
         }
-        final updatedContent = List.of(state.section!.content)
-          ..removeAt(event.index);
+        final updatedContent = List.of(section.content)..removeAt(event.index);
+        emit(state.copyWith(
+            section: state.section!.copyWith(content: updatedContent)));
       }
-    } catch (e) {
-      print("Error in _removeContent: $e");
+    } catch (error) {
+      print("Error in _removeContent: ${error.toString()}");
+      emit(state.copyWith(error: error.toString()));
     }
   }
 

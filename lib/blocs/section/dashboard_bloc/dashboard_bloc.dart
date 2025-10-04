@@ -28,6 +28,48 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<AddPromoToSave>(_addPromoToSave);
     on<AddColor>(_addColor);
     on<SelectAppBarImge>(_appBarImage);
+    on<SetAppbarHeight>(_setAppbarHeight);
+    on<AddPromobannerGridView>(_addPromoBannerGridView);
+    on<SelectAppbarImageUrl>(_selectAppBarImageUrl);
+  }
+
+  void _selectAppBarImageUrl(
+      SelectAppbarImageUrl event, Emitter<DashboardState> emit) async {
+    try {
+      final PaletteGenerator generator =
+          await PaletteGenerator.fromImageProvider(
+        NetworkImage(
+          event.imageUrl,
+        ),
+        size: const Size(200, 100),
+      );
+
+      final color = generator.dominantColor?.color ?? Colors.grey;
+      String hexColor = '#${color.value.toRadixString(16).padLeft(8, '0')}';
+
+      final darkColor = generator.darkVibrantColor?.color ?? Colors.grey;
+      String darkHexColor =
+          '#${darkColor.value.toRadixString(16).padLeft(8, '0')}';
+      emit(state.copyWith(
+          page: state.page.copyWith(
+              appBarImageUrl: event.imageUrl,
+              dominantColorAppBar: hexColor,
+              darkDominantColor: darkHexColor)));
+    } catch (error) {
+      print(
+          "Cannot add Image Url in _selectAppBarImageUrl in Dashboardbloc due to error ==>${error.toString()}");
+      emit(state.copyWith(error: error.toString()));
+    }
+  }
+
+  void _setAppbarHeight(SetAppbarHeight event, Emitter<DashboardState> emit) {
+    try {
+      emit(
+          state.copyWith(page: state.page.copyWith(appbarHeight: event.value)));
+    } catch (error) {
+      print("Error in setting appbar height==>$error");
+      emit(state.copyWith(error: "Cannot set the appbar height"));
+    }
   }
 
   Future<void> _appBarImage(
@@ -49,9 +91,16 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       final color = generator.dominantColor?.color ?? Colors.grey;
       String hexColor = '#${color.value.toRadixString(16).padLeft(8, '0')}';
 
+      final darkColor = generator.darkVibrantColor?.color ?? Colors.grey;
+      String darkHexColor =
+          '#${darkColor.value.toRadixString(16).padLeft(8, '0')}';
+
       emit(state.copyWith(
           page: state.page.copyWith(
-              appBarImage: pickedImage, dominantColorAppBar: hexColor)));
+        appBarImage: pickedImage,
+        dominantColorAppBar: hexColor,
+        darkDominantColor: darkHexColor,
+      )));
     } catch (error) {
       print("error in picking image in _appBarImage in DashBoardBloc");
       emit(state.copyWith(error: "Cannot select an image"));
@@ -96,23 +145,55 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       section[event.section.id.toString()] = event.section;
       emit(
           state.copyWith(page: state.page.copyWith(promoBanner: {...section})));
-    } catch (error) {}
+    } catch (error) {
+      print("Error in adding the Promobanner==>${error.toString()}");
+      emit(state.copyWith(error: "Cannot add the promobanner"));
+    }
+  }
+
+  void _addPromoBannerGridView(
+      AddPromobannerGridView event, Emitter<DashboardState> emit) {
+    try {} catch (error) {
+      print("Error in adding the Promobanner GridView==>${error.toString()}");
+      emit(state.copyWith(error: "Cannot add the PromoBannerGridView"));
+    }
   }
 
   void _removeSection(RemoveSection event, Emitter<DashboardState> emit) {
     try {
-      // if (event.id != null && event.id.toString().isNotEmpty) {
-      //   //remove from the data base and then from the list
-      // } else {
-      //   List<Section> sections = List<Section>.from(state.sections)
-      //     ..removeAt(event.index);
-      //   emit(state.copyWith(sections: sections));
-      // }
+      if (state.page.promoBanner.isEmpty && state.page.sections.isEmpty) {
+        throw Exception("Section is empty");
+      }
+
+      final updatedPromoBanner =
+          Map<String, Section>.from(state.page.promoBanner)..remove(event.id);
+      final updatedSections = Map<String, Section>.from(state.page.sections)
+        ..remove(event.id);
+
+      print(updatedSections.entries);
+
+      // Emit new state once
+      emit(
+        state.copyWith(
+          page: state.page.copyWith(
+            promoBanner: updatedPromoBanner,
+            sections: updatedSections,
+          ),
+        ),
+      );
+
+      print("hurray section is here");
+      print(state.page.toMap());
+      print("hurray section is here");
     } catch (error) {
       print(
-          "Error in adding the section in _removeSection due to error==>${error.toString()}");
-      emit(state.copyWith(
-          error: "Cannot remove section.See the logs for more details"));
+        "Error in removing the section in _removeSection: ${error.toString()}",
+      );
+      emit(
+        state.copyWith(
+          error: "Cannot remove section. See the logs for more details",
+        ),
+      );
     }
   }
 

@@ -260,6 +260,17 @@ class AppbarPromotionSectionGridView extends Section {
     super.attributes = const {},
   });
 
+  factory AppbarPromotionSectionGridView.initial() =>
+      AppbarPromotionSectionGridView(
+        id: "NEW-${DateTime.now().millisecondsSinceEpoch}",
+        type: "promogridview",
+        name: "",
+        sequence: 0,
+        imageUrls: [],
+        content: [],
+        attributes: {},
+      );
+
   @override
   Section copyWith({
     String? id,
