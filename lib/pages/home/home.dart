@@ -15,12 +15,12 @@ import 'package:grocery_app/widgets/category_list.dart';
 import 'package:grocery_app/widgets/shop_by_store.dart';
 import 'package:grocery_app/widgets/sliver_category.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../database_service.dart/db_service.dart';
-import '../models/product/productt.dart';
-import '../service_locator/service_locator.dart';
-import '../widgets/cart/cart_action_button.dart';
-import '../widgets/category_drawer.dart';
-import '../widgets/products/build_product_grid.dart';
+import '../../database_service.dart/db_service.dart';
+import '../../models/product/productt.dart';
+import '../../service_locator/service_locator.dart';
+import '../../widgets/cart/cart_action_button.dart';
+import '../../widgets/category_drawer.dart';
+import '../../widgets/products/build_product_grid.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});

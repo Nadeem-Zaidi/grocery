@@ -66,3 +66,9 @@ class SetAppbarHeight extends DashboardEvent {
   final double value;
   const SetAppbarHeight({required this.value});
 }
+
+@immutable
+class SetPromoSectionPosition extends DashboardEvent {
+  final double fromTop;
+  const SetPromoSectionPosition({required this.fromTop});
+}

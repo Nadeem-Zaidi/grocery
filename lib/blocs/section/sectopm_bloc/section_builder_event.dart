@@ -67,3 +67,9 @@ class UpdateContent<T> extends SectionBuilderEvent {
   final int index;
   UpdateContent({required this.content, required this.index});
 }
+
+@immutable
+class SelectContentBackground extends SectionBuilderEvent {
+  final Color color;
+  const SelectContentBackground({required this.color});
+}

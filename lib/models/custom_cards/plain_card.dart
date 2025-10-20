@@ -1,15 +1,17 @@
 part of 'customcard.dart';
 
 class PlainCard extends CustomCard {
-  const PlainCard({
-    required super.imageUrl,
-    super.backGroundColor,
-    required super.type,
-    super.title,
-  });
+  final Color? color;
+  const PlainCard(
+      {required super.imageUrl,
+      super.backGroundColor,
+      required super.type,
+      super.title,
+      super.key,
+      this.color});
 
   factory PlainCard.initial() {
-    return PlainCard(imageUrl: "", type: "plain", title: "");
+    return PlainCard(imageUrl: "", type: "plain", title: "", color: null);
   }
 
   @override
@@ -18,13 +20,14 @@ class PlainCard extends CustomCard {
     String? imageUrl,
     String? backGroundColor,
     String? type,
+    Color? color,
   }) {
     return PlainCard(
-      title: title ?? this.title,
-      imageUrl: imageUrl ?? this.imageUrl,
-      backGroundColor: backGroundColor ?? this.backGroundColor,
-      type: type ?? this.type,
-    );
+        title: title ?? this.title,
+        imageUrl: imageUrl ?? this.imageUrl,
+        backGroundColor: backGroundColor ?? this.backGroundColor,
+        type: type ?? this.type,
+        color: color ?? color);
   }
 
   @override

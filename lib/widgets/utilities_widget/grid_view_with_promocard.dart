@@ -1,0 +1,170 @@
+import 'package:flutter/material.dart';
+
+class CardBuilder<T> extends StatelessWidget {
+  final List<T> content;
+  final double cardHeight;
+  final double cardWidth;
+  final double containerHeight;
+  final Color? hexColor;
+  final void Function(int index)? onRemoveCard;
+  final VoidCallback? onAddCard;
+  final void Function(int index)? onChangeBackground;
+  final Widget Function(T itemn, int index) itemBuilder;
+  final bool wrap;
+  const CardBuilder(
+      {super.key,
+      required this.content,
+      required this.cardHeight,
+      required this.cardWidth,
+      required this.containerHeight,
+      this.hexColor,
+      required this.onRemoveCard,
+      required this.onAddCard,
+      required this.itemBuilder,
+      this.wrap = false,
+      this.onChangeBackground});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          height: 150,
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            image: DecorationImage(
+              image: NetworkImage(
+                  "https://firebasestorage.googleapis.com/v0/b/grocerybynadeem.firebasestorage.app/o/images%2Fimp%2FHappy%20Diwali%20Sub%20Image%20(3).gif?alt=media&token=84724326-2f13-486f-8fde-80a7385f967a"),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+
+        // Center(
+        //   child: SizedBox(
+        //     width:
+        //         double.infinity - 20, // or any fixed width you like
+        //     child: TextField(
+        //       textAlign: TextAlign.center,
+        //       style: GoogleFonts.poppins(
+        //         fontSize: 18,
+        //         fontWeight: FontWeight.bold,
+        //         color: const Color.fromARGB(255, 239, 122, 4),
+        //         letterSpacing: 1.2,
+        //       ),
+        //       decoration: const InputDecoration(
+        //         enabledBorder: InputBorder.none,
+        //         errorBorder: InputBorder.none,
+        //         focusedBorder: InputBorder.none,
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        Container(
+          height: containerHeight,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: wrap
+              ? Column(
+                  children: [
+                    SizedBox(height: 5),
+                    Expanded(
+                      child: Wrap(
+                        spacing: 5,
+                        children: List.generate(content.length + 1, (index) {
+                          if (index < content.length) {
+                            final item = content[index];
+
+                            return Stack(children: [
+                              SizedBox(
+                                height: cardHeight,
+                                width: cardWidth,
+                                child: itemBuilder(item, index),
+                              ),
+                              Positioned(
+                                left: 2,
+                                top: 5,
+                                child: GestureDetector(
+                                  onTap: () => onRemoveCard?.call(index),
+                                  child: Icon(Icons.cancel),
+                                ),
+                              ),
+                              Positioned(
+                                  bottom: 0,
+                                  left: 0,
+                                  child: GestureDetector(
+                                    onTap: () =>
+                                        onChangeBackground?.call(index),
+                                    child: Icon(Icons.edit),
+                                  ))
+                            ]);
+                          } else {
+                            return SizedBox(
+                              height: cardHeight,
+                              width: cardWidth,
+                              child: Center(
+                                child: GestureDetector(
+                                  onTap: onAddCard,
+                                  child: Icon(Icons.add),
+                                ),
+                              ),
+                            );
+                          }
+                        }),
+                      ),
+                    ),
+                  ],
+                )
+              : SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ...List.generate(content.length + 1, (index) {
+                        if (index < content.length) {
+                          final item = content[index];
+
+                          return Stack(children: [
+                            SizedBox(
+                              height: cardHeight,
+                              width: cardWidth,
+                              child: itemBuilder(item, index),
+                            ),
+                            Positioned(
+                              left: 2,
+                              top: 5,
+                              child: GestureDetector(
+                                onTap: () => onRemoveCard?.call(index),
+                                child: Icon(Icons.cancel),
+                              ),
+                            ),
+                            Positioned(
+                                bottom: 0,
+                                left: 0,
+                                child: GestureDetector(
+                                  onTap: () => onChangeBackground,
+                                  child: Icon(Icons.edit),
+                                ))
+                          ]);
+                        } else {
+                          return SizedBox(
+                            height: cardHeight,
+                            width: cardWidth,
+                            child: Center(
+                              child: GestureDetector(
+                                onTap: onAddCard,
+                                child: Icon(Icons.add),
+                              ),
+                            ),
+                          );
+                        }
+                      }),
+                    ],
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+}

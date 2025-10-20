@@ -141,7 +141,7 @@ class _CategoryDrawerState extends State<CategoryDrawer> {
             },
             child: const ListTile(
               leading: Icon(Icons.category),
-              title: Text("Product List"),
+              title: Text("Create Page"),
             ),
           ),
         ],

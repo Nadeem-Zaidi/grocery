@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:grocery_app/database_service.dart/dashboard/section.dart';
 import 'package:grocery_app/models/custom_cards/customcard.dart';
-import 'package:grocery_app/widgets/cards/promo_cards.dart';
+import 'package:grocery_app/widgets/cards/plain_promo_card.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../models/category.dart' as cat;
 import '../../../models/product/productt.dart';
@@ -36,6 +36,17 @@ class SectionBuilderBloc
     on<SetSection>(_setSection);
     on<AddImageToContent<PlainCard>>(_addImageToContent<PlainCard>);
     on<UpdateContent<PlainCard>>(_updateContent<PlainCard>);
+    on<SelectContentBackground>(_selectContentBackground);
+  }
+
+  Future<void> _selectContentBackground(
+      SelectContentBackground event, Emitter<SectionBuilderState> emit) async {
+    try {
+      emit(state.copyWith(contentbackGroundColor: event.color));
+    } catch (error) {
+      print("error occured in _selectContentBackground ==>${e.toString}");
+      emit(state.copyWith(error: error.toString()));
+    }
   }
 
   Future<void> _updateContent<T>(

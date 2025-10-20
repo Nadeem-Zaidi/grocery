@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:grocery_app/blocs/section/card/customcard/customcard_bloc.dart';
 import 'package:grocery_app/blocs/section/sectopm_bloc/section_builder_bloc.dart';
 import 'package:grocery_app/database_service.dart/dashboard/section.dart';
 import 'package:grocery_app/widgets/templates/category_section_template.dart'
@@ -28,12 +29,19 @@ Widget sectionBuilder({required Section section}) {
         child: PromotionTemplate(),
       );
     case "promogridview":
-      return BlocProvider(
+      return MultiBlocProvider(
         key: ValueKey(section.id),
-        create: (context) => SectionBuilderBloc()
-          ..add(
-            SetSection(section: section),
+        providers: [
+          BlocProvider(
+            create: (context) => SectionBuilderBloc()
+              ..add(
+                SetSection(section: section),
+              ),
           ),
+          BlocProvider(
+            create: (context) => CustomCardBloc(),
+          ),
+        ],
         child: AppbarPromoGridView(),
       );
     default:

@@ -4,12 +4,12 @@ import 'package:grocery_app/authentication/presentation/otp_screen.dart';
 import 'package:grocery_app/pages/category_pages/create_category_page.dart';
 import 'package:grocery_app/widgets/templates/page_builder/page_builder.dart';
 import 'package:grocery_app/widgets/templates/section_builder.dart';
-import 'package:grocery_app/pages/home2.dart';
+import 'package:grocery_app/pages/home/home2.dart';
 
 import '../authentication/presentation/app.dart';
 import '../blocs/section/dashboard_bloc/dashboard_bloc.dart';
 import '../pages/category_pages/categories.dart';
-import '../pages/home.dart';
+import '../pages/home/home.dart';
 import '../authentication/presentation/landing_page.dart';
 
 class RouteGenerator {
@@ -23,7 +23,7 @@ class RouteGenerator {
         return MaterialPageRoute(
             builder: (_) => BlocProvider<DashboardBloc>(
                   create: (context) => DashboardBloc(),
-                  child: const Home(),
+                  child: const PageBuilder(),
                 ));
       // return MaterialPageRoute(
       //     builder: (context) => MultiBlocProvider(

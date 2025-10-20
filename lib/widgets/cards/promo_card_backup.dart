@@ -18,9 +18,20 @@ class PromoCard extends StatefulWidget {
   final String? imageUrl;
   final String? hexColor;
   final int? index;
+  final double cardHeight;
+  final double cardWidth;
+  final Widget Function() itemBuilder;
 
-  const PromoCard(
-      {super.key, this.title, this.imageUrl, this.hexColor, this.index});
+  const PromoCard({
+    super.key,
+    this.title,
+    this.imageUrl,
+    this.hexColor,
+    this.index,
+    required this.cardHeight,
+    required this.cardWidth,
+    required this.itemBuilder,
+  });
 
   @override
   State<PromoCard> createState() => _PromoCardState();
@@ -139,17 +150,16 @@ class _PromoCardState extends State<PromoCard> {
     } else {
       // Show placeholder
       return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           GestureDetector(
             onTap: () {
               context.read<CustomCardBloc>().add(SelectImage());
             },
-            child: Center(
-              child: Icon(
-                Icons.image_outlined,
-                size: 60,
-                color: theme.colorScheme.onSurface.withOpacity(0.4),
-              ),
+            child: Icon(
+              Icons.image_outlined,
+              size: widget.cardHeight * 0.4,
+              color: theme.colorScheme.onSurface.withOpacity(0.4),
             ),
           ),
           GestureDetector(
@@ -177,12 +187,10 @@ class _PromoCardState extends State<PromoCard> {
                     )),
               ));
             },
-            child: Center(
-              child: Icon(
-                Icons.link_rounded,
-                size: 60,
-                color: theme.colorScheme.onSurface.withOpacity(0.4),
-              ),
+            child: Icon(
+              Icons.link_rounded,
+              size: widget.cardHeight * 0.4,
+              color: theme.colorScheme.onSurface.withOpacity(0.4),
             ),
           ),
         ],

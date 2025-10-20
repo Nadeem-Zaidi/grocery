@@ -31,6 +31,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<SetAppbarHeight>(_setAppbarHeight);
     on<AddPromobannerGridView>(_addPromoBannerGridView);
     on<SelectAppbarImageUrl>(_selectAppBarImageUrl);
+    on<SetPromoSectionPosition>(_setPromoSectionVerticalPosition);
   }
 
   void _selectAppBarImageUrl(
@@ -67,7 +68,6 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       emit(
           state.copyWith(page: state.page.copyWith(appbarHeight: event.value)));
     } catch (error) {
-      print("Error in setting appbar height==>$error");
       emit(state.copyWith(error: "Cannot set the appbar height"));
     }
   }
@@ -209,6 +209,17 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
 
   Future<void> _savePage(SavePage event, Emitter<DashboardState> emit) async {
     print(state.page.toMap());
+  }
+
+  void _setPromoSectionVerticalPosition(
+      SetPromoSectionPosition event, Emitter<DashboardState> emit) {
+    try {
+      emit(state.copyWith(
+          promoBannerVerticalPosition:
+              state.promoBannerVerticalPosition + event.fromTop));
+    } catch (e) {
+      print(e);
+    }
   }
 }
 

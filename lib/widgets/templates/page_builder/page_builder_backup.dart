@@ -11,7 +11,8 @@ import 'package:grocery_app/widgets/templates/page_builder/wrapper/dashboard_app
 import 'package:grocery_app/widgets/templates/section_builder.dart';
 
 class PageBuilder extends StatefulWidget {
-  const PageBuilder({super.key});
+  final Function appBarBuilder;
+  const PageBuilder({super.key, required this.appBarBuilder});
 
   @override
   State<PageBuilder> createState() => _PageBuilderState();

@@ -4,7 +4,9 @@ import 'package:grocery_app/blocs/section/card/customcard/customcard_bloc.dart';
 import 'package:grocery_app/blocs/section/dashboard_bloc/dashboard_bloc.dart';
 import 'package:grocery_app/blocs/section/sectopm_bloc/section_builder_bloc.dart';
 import 'package:grocery_app/models/custom_cards/customcard.dart';
-import 'package:grocery_app/widgets/cards/promo_cards.dart';
+import 'package:grocery_app/widgets/cards/plain_promo_card.dart';
+
+import '../../utils/screen_utils.dart';
 
 class PromotionTemplate extends StatefulWidget {
   const PromotionTemplate({super.key});
@@ -16,6 +18,8 @@ class PromotionTemplate extends StatefulWidget {
 class _PromotionTemplateState extends State<PromotionTemplate> {
   @override
   Widget build(BuildContext context) {
+    double screenWidth = ScreenUtils.getScreenWidth(context);
+    double screenHeight = ScreenUtils.getScreenHeight(context);
     String? hexColor =
         context.read<DashboardBloc>().state.page.dominantColorAppBar;
     return BlocConsumer<SectionBuilderBloc, SectionBuilderState>(
@@ -98,9 +102,12 @@ class _PromotionTemplateState extends State<PromotionTemplate> {
         }
         if (state.section != null && state.section!.content.isNotEmpty) {
           var content = state.section!.content;
+          double listWidth = screenWidth - 10;
+          double perCardWidth = listWidth / 3;
 
           return Container(
             height: 160,
+            width: listWidth,
             margin: EdgeInsets.all(5),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
@@ -118,7 +125,12 @@ class _PromotionTemplateState extends State<PromotionTemplate> {
                             create: (context) => CustomCardBloc(),
                             child: SizedBox(
                                 width: 120,
-                                child: PromoCard(hexColor: hexColor)));
+                                child: PromoCard(
+                                  hexColor: hexColor,
+                                  cardHeight: 100,
+                                  cardWidth: perCardWidth,
+                                  index: index,
+                                )));
                       } else {
                         return GestureDetector(
                           onTap: () {

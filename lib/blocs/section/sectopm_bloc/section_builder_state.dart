@@ -9,6 +9,7 @@ class SectionBuilderState extends Equatable {
   final String? error;
   final bool saveVisible;
   final String? type;
+  final Color? contentbackGroundColor;
   const SectionBuilderState({
     this.field = const {},
     this.images = const [],
@@ -17,6 +18,7 @@ class SectionBuilderState extends Equatable {
     this.error,
     this.saveVisible = false,
     required this.type,
+    this.contentbackGroundColor,
   });
 
   factory SectionBuilderState.initial() {
@@ -27,7 +29,8 @@ class SectionBuilderState extends Equatable {
         loading: false,
         error: null,
         saveVisible: false,
-        type: null);
+        type: null,
+        contentbackGroundColor: null);
   }
 
   SectionBuilderState copyWith(
@@ -37,7 +40,8 @@ class SectionBuilderState extends Equatable {
       bool? loading,
       String? error,
       bool? saveVisible,
-      String? type}) {
+      String? type,
+      Color? contentbackGroundColor}) {
     return SectionBuilderState(
         field: field ?? this.field,
         images: images ?? this.images,
@@ -45,10 +49,20 @@ class SectionBuilderState extends Equatable {
         loading: loading ?? this.loading,
         error: error ?? this.error,
         saveVisible: saveVisible ?? this.saveVisible,
-        type: type ?? this.type);
+        type: type ?? this.type,
+        contentbackGroundColor:
+            contentbackGroundColor ?? this.contentbackGroundColor);
   }
 
   @override
-  List<Object?> get props =>
-      [field, images, section, loading, error, saveVisible, type];
+  List<Object?> get props => [
+        field,
+        images,
+        section,
+        loading,
+        error,
+        saveVisible,
+        type,
+        contentbackGroundColor
+      ];
 }
