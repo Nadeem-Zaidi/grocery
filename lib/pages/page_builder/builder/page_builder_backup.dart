@@ -230,12 +230,13 @@ class _PageBuilderState extends State<PageBuilder> {
                                             },
                                             child: Icon(Icons.move_up)),
                                         GestureDetector(
-                                            onTap: () {
-                                              context.read<DashboardBloc>().add(
-                                                  SetPromoSectionPosition(
-                                                      fromTop: 5));
-                                            },
-                                            child: Icon(Icons.move_down))
+                                          onTap: () {
+                                            context.read<DashboardBloc>().add(
+                                                SetPromoSectionPosition(
+                                                    fromTop: 5));
+                                          },
+                                          child: Icon(Icons.move_down),
+                                        )
                                       ],
                                     ),
                                   ),
@@ -246,17 +247,6 @@ class _PageBuilderState extends State<PageBuilder> {
                         ),
                         dynamicHeight: bloc.state.page.appbarHeight / 100);
                   },
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Transform.translate(
-                  offset: const Offset(0, -200), // move 20px right and 10px up
-                  child: Container(
-                    width: 100,
-                    height: 100,
-                    color: Colors.blue,
-                    child: const Center(child: Text("Shifted")),
-                  ),
                 ),
               ),
               BlocBuilder<DashboardBloc, DashboardState>(

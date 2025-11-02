@@ -9,7 +9,6 @@ class SectionBuilderState extends Equatable {
   final String? error;
   final bool saveVisible;
   final String? type;
-  final Color? contentbackGroundColor;
   const SectionBuilderState({
     this.field = const {},
     this.images = const [],
@@ -18,19 +17,18 @@ class SectionBuilderState extends Equatable {
     this.error,
     this.saveVisible = false,
     required this.type,
-    this.contentbackGroundColor,
   });
 
   factory SectionBuilderState.initial() {
     return SectionBuilderState(
-        field: const {},
-        images: const [],
-        section: null,
-        loading: false,
-        error: null,
-        saveVisible: false,
-        type: null,
-        contentbackGroundColor: null);
+      field: const {},
+      images: const [],
+      section: null,
+      loading: false,
+      error: null,
+      saveVisible: false,
+      type: null,
+    );
   }
 
   SectionBuilderState copyWith(
@@ -43,15 +41,14 @@ class SectionBuilderState extends Equatable {
       String? type,
       Color? contentbackGroundColor}) {
     return SectionBuilderState(
-        field: field ?? this.field,
-        images: images ?? this.images,
-        section: section ?? this.section,
-        loading: loading ?? this.loading,
-        error: error ?? this.error,
-        saveVisible: saveVisible ?? this.saveVisible,
-        type: type ?? this.type,
-        contentbackGroundColor:
-            contentbackGroundColor ?? this.contentbackGroundColor);
+      field: field ?? this.field,
+      images: images ?? this.images,
+      section: section ?? this.section,
+      loading: loading ?? this.loading,
+      error: error ?? this.error,
+      saveVisible: saveVisible ?? this.saveVisible,
+      type: type ?? this.type,
+    );
   }
 
   @override
@@ -63,6 +60,5 @@ class SectionBuilderState extends Equatable {
         error,
         saveVisible,
         type,
-        contentbackGroundColor
       ];
 }

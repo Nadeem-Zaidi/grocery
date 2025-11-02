@@ -5,11 +5,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:grocery_app/blocs/section/card/customcard/customcard_bloc.dart';
 import 'package:grocery_app/blocs/section/sectopm_bloc/section_builder_bloc.dart';
 import 'package:grocery_app/models/custom_cards/customcard.dart';
-import 'package:grocery_app/widgets/cards/plain_promo_card.dart';
+import 'package:grocery_app/builder/plain_promo_builder.dart';
 import 'package:grocery_app/widgets/utilities_widget/select_item.dart';
 import '../../blocs/section/dashboard_bloc/dashboard_bloc.dart';
 import '../../utils/screen_utils.dart';
-import '../utilities_widget/grid_view_with_promocard.dart';
+import '../../builder/card_builder.dart';
 
 class AppbarPromoGridView extends StatelessWidget {
   final int numOfContentPerRow;
@@ -69,8 +69,8 @@ class AppbarPromoGridView extends StatelessWidget {
                         MultiSelectContent<PlainCard>(
                           content: [
                             PlainCard.initial().copyWith(
-                                backGroundColor: hexColor,
-                                color: state.contentbackGroundColor)
+                              backGroundColor: hexColor,
+                            )
                           ],
                         ),
                       );
@@ -84,82 +84,64 @@ class AppbarPromoGridView extends StatelessWidget {
                     10; // 3 cards + 4 spaces
                 double cardHeight = (containerHeight / numOfContentPerCol) - 20;
                 return CardBuilder(
-                    content: content,
-                    cardHeight: cardHeight,
-                    cardWidth: cardWidth,
-                    containerHeight: containerHeight,
-                    wrap: true,
-                    onRemoveCard: (index) {
-                      context
-                          .read<SectionBuilderBloc>()
-                          .add(RemoveContent<PlainCard>(index: index));
-                    },
-                    onAddCard: () {
-                      context.read<SectionBuilderBloc>().add(
-                            MultiSelectContent<PlainCard>(
-                              content: [
-                                PlainCard.initial()
-                                    .copyWith(backGroundColor: hexColor)
-                              ],
-                            ),
-                          );
-                    },
-                    onChangeBackground: (index) {
-                      showDialog(
-                        context: context,
-                        builder: (_) => AlertDialog(
-                          title: const Text('Pick a color!'),
-                          content: SingleChildScrollView(
-                            child: ColorPicker(
-                              pickerColor: pickerColor,
-                              onColorChanged: (color) {
-                                context
-                                    .read<SectionBuilderBloc>()
-                                    .add(SelectContentBackground(color: color));
-                              },
-                            ),
-                            // Use Material color picker:
-                            //
-                            // child: MaterialPicker(
-                            //   pickerColor: pickerColor,
-                            //   onColorChanged: changeColor,
-                            //   showLabel: true, // only on portrait mode
-                            // ),
-                            //
-                            // Use Block color picker:
-                            //
-                            // child: BlockPicker(
-                            //   pickerColor: currentColor,
-                            //   onColorChanged: changeColor,
-                            // ),
-                            //
-                            // child: MultipleChoiceBlockPicker(
-                            //   pickerColors: currentColors,
-                            //   onColorsChanged: changeColors,
-                            // ),
+                  content: content,
+                  cardHeight: cardHeight,
+                  cardWidth: cardWidth,
+                  containerHeight: containerHeight,
+                  wrap: true,
+                  onRemoveCard: (index) {
+                    context
+                        .read<SectionBuilderBloc>()
+                        .add(RemoveContent<PlainCard>(index: index));
+                  },
+                  onAddCard: () {
+                    context.read<SectionBuilderBloc>().add(
+                          MultiSelectContent<PlainCard>(
+                            content: [
+                              PlainCard.initial().copyWith(
+                                  backGroundColor: content[0].backGroundColor)
+                            ],
                           ),
-                          actions: <Widget>[
-                            ElevatedButton(
-                              child: const Text('Got it'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
+                        );
+                  },
+                  onChangeBackground: (index) {
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('Pick a color!'),
+                        content: SingleChildScrollView(
+                          child: ColorPicker(
+                            pickerColor: pickerColor,
+                            onColorChanged: (color) {
+                              context
+                                  .read<SectionBuilderBloc>()
+                                  .add(SelectContentBackground(color: color));
+                            },
+                          ),
                         ),
-                      );
-                    },
-                    itemBuilder: (card, index) {
-                      return PromoCard(
-                        key: ValueKey(index),
-                        hexColor: hexColor,
-                        index: index,
-                        color: state.contentbackGroundColor,
-                        imageUrl: card.imageUrl,
-                        cardHeight: cardHeight,
-                        cardWidth: cardWidth,
-                      );
-                    });
+                        actions: <Widget>[
+                          ElevatedButton(
+                            child: const Text('On'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  itemBuilder: (card, index) {
+                    return PlainCardBuilder(
+                      key: ValueKey(index),
+                      hexColor: hexColor,
+                      index: index,
+                      color: hexToColor(card.backGroundColor!),
+                      imageUrl: card.imageUrl,
+                      cardHeight: cardHeight,
+                      cardWidth: cardWidth,
+                    );
+                  },
+                );
               }
               return SizedBox.shrink();
             },

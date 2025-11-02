@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/list_files_from_storage/list_files_cloud_storage_bloc.dart';
 import 'package:grocery_app/blocs/section/dashboard_bloc/dashboard_bloc.dart';
-import 'package:grocery_app/widgets/overlay.dart';
+import 'package:grocery_app/widgets/utilities_widget/overlay.dart';
 
 import '../../blocs/list_files_from_storage/list_files_cloud_storage_state.dart';
 

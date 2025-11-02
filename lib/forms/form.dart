@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart';
+import 'package:grocery_app/blocs/form_bloc/form_bloc.dart';
 import 'package:grocery_app/widgets/multi_image_picker.dart';
-import 'package:grocery_app/widgets/overlay.dart';
+import 'package:grocery_app/widgets/utilities_widget/overlay.dart';
 import 'package:grocery_app/widgets/textfield.dart';
-import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart'
-    as formState;
+import 'package:grocery_app/blocs/form_bloc/form_bloc.dart' as formState;
 
 import '../models/form_config/form_config.dart';
 import '../pages/product_pages/product_detail.dart';

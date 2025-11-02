@@ -5,16 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/section/card/customcard/customcard_bloc.dart';
 
-import '../../blocs/list_files_from_storage/list_files_cloud_storage_bloc.dart';
-import '../../blocs/section/sectopm_bloc/section_builder_bloc.dart';
-import '../../database_service.dart/storage_service/storage_provider.dart';
-import '../../database_service.dart/storage_service/upload_provider.dart';
-import '../../models/custom_cards/customcard.dart';
-import '../../pages/cloud_files/cloud_file_list.dart';
-import '../../service_locator/service_locator.dart';
-import '../card_view/plain_card_view.dart';
+import '../blocs/list_files_from_storage/list_files_cloud_storage_bloc.dart';
+import '../blocs/section/sectopm_bloc/section_builder_bloc.dart';
+import '../database_service.dart/storage_service/storage_provider.dart';
+import '../database_service.dart/storage_service/upload_provider.dart';
+import '../models/custom_cards/customcard.dart';
+import '../pages/cloud_files/cloud_file_list.dart';
+import '../service_locator/service_locator.dart';
+import '../views/plain_card_view.dart';
 
-class PromoCard extends StatelessWidget {
+class PlainCardBuilder extends StatelessWidget {
   final String? title;
   final String? imageUrl;
   final String? hexColor;
@@ -23,15 +23,16 @@ class PromoCard extends StatelessWidget {
   final double cardHeight;
   final double cardWidth;
 
-  const PromoCard(
-      {super.key,
-      this.title,
-      this.imageUrl,
-      this.hexColor,
-      required this.index,
-      required this.cardHeight,
-      required this.cardWidth,
-      this.color});
+  const PlainCardBuilder({
+    super.key,
+    this.title,
+    this.imageUrl,
+    this.hexColor,
+    required this.index,
+    required this.cardHeight,
+    required this.cardWidth,
+    this.color,
+  });
 
   Color hexToColor(String hex) {
     hex = hex.replaceAll('#', '');
@@ -41,7 +42,7 @@ class PromoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PromoCardView(
+    return PlainCardView(
       key: ValueKey(index),
       title: title,
       imageUrl: imageUrl,
@@ -50,6 +51,7 @@ class PromoCard extends StatelessWidget {
       cardWidth: cardWidth,
       onSelectImage: () => context.read<CustomCardBloc>().add(SelectImage()),
       onRemoveImage: () => context.read<CustomCardBloc>().add(RemoveImage()),
+      onChangebackGround: () {},
       onSelectFromCloud: (url) {
         final bloc = context;
         void selectImage(String imageUrl) {

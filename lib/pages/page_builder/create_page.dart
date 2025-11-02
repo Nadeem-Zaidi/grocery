@@ -1,0 +1,212 @@
+// import 'dart:io';
+
+// import 'package:flutter/material.dart';
+// import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:grocery_app/blocs/section/dashboard_bloc/dashboard_bloc.dart';
+// import 'package:grocery_app/pages/page_builder/builder/page_builder_2.dart';
+// import 'package:grocery_app/utils/screen_utils.dart';
+// import 'package:grocery_app/widgets/templates/page_builder/wrapper/dashboard_appbar_background_builder.dart';
+
+// import '../../widgets/templates/page_builder/page_builder_topsection.dart';
+// import '../../widgets/templates/section_builder.dart';
+
+// class Createpage extends StatefulWidget {
+//   const Createpage({super.key});
+
+//   @override
+//   State<Createpage> createState() => _CreatepageState();
+// }
+
+// class _CreatepageState extends State<Createpage> {
+//   @override
+//   Widget build(BuildContext context) {
+//     var bloc = BlocProvider.of<DashboardBloc>(context);
+//     double screenHeight = ScreenUtils.getScreenHeight(context);
+//     double screenWidth = ScreenUtils.getScreenWidth(context);
+//     return PageBuilder2(
+//         appBarBackground: BlocBuilder<DashboardBloc, DashboardState>(
+//           builder: (context, state) {
+//             return AppBarBackgroundBuilder(
+//                 onHeightIncreement: () => context.read<DashboardBloc>().add(
+//                       SetAppbarHeight(
+//                         value: context
+//                                 .read<DashboardBloc>()
+//                                 .state
+//                                 .page
+//                                 .appbarHeight +
+//                             10,
+//                       ),
+//                     ),
+//                 onHeightDecreement: () => context.read<DashboardBloc>().add(
+//                       SetAppbarHeight(
+//                         value: context
+//                                 .read<DashboardBloc>()
+//                                 .state
+//                                 .page
+//                                 .appbarHeight -
+//                             10,
+//                       ),
+//                     ),
+//                 backGroundBuilder: BlocBuilder<DashboardBloc, DashboardState>(
+//                     buildWhen: (previous, current) =>
+//                         ((previous.page.appBarImage !=
+//                                 current.page.appBarImage) ||
+//                             previous.page.appBarImageUrl !=
+//                                 current.page.appBarImageUrl),
+//                     builder: (context, state) {
+//                       if (state.page.appBarImage != null) {
+//                         return Container(
+//                           width: double.infinity,
+//                           decoration: BoxDecoration(
+//                             image: DecorationImage(
+//                               image: FileImage(File(bloc.state.page.appBarImage!
+//                                   .path)), // local image
+//                               fit: BoxFit.cover, // cover, contain, fill, etc.
+//                             ),
+//                           ),
+//                         );
+//                       } else if (state.page.appBarImageUrl != null) {
+//                         return SizedBox(
+//                           width: double.infinity,
+//                           child: Image.network(
+//                             state.page.appBarImageUrl!,
+//                             fit: BoxFit.fill,
+//                             errorBuilder: (_, __, ___) => Icon(
+//                               Icons.image_not_supported_outlined,
+//                               color: Theme.of(context)
+//                                   .colorScheme
+//                                   .onSurface
+//                                   .withOpacity(0.5),
+//                             ),
+//                           ),
+//                         );
+//                       }
+//                       return Container(
+//                         decoration: BoxDecoration(
+//                           gradient: LinearGradient(
+//                             colors: [Colors.blue, Colors.white, Colors.white],
+//                             begin: Alignment.topCenter, // start at the top
+//                             end: Alignment.bottomCenter, //
+//                           ),
+//                         ),
+//                       );
+//                     }),
+//                 promoBannerBuilder: BlocBuilder<DashboardBloc, DashboardState>(
+//                   builder: (context, state) {
+//                     if (state.page.promoBanner.isEmpty) {
+//                       return SizedBox.shrink();
+//                     }
+//                     if (state.promoBannerVerticalPosition > 0) {}
+//                     return Positioned(
+//                       left: 0,
+//                       right: 0,
+//                       top: screenHeight *
+//                           (state.promoBannerVerticalPosition / 100),
+//                       child: Stack(
+//                         children: [
+//                           sectionBuilder(
+//                               section: bloc.state.page.promoBanner.values
+//                                   .toList()[0]),
+//                           Positioned(
+//                             right: 0,
+//                             top: 0,
+//                             child: GestureDetector(
+//                               onTap: () {
+//                                 context.read<DashboardBloc>().add(RemoveSection(
+//                                     id: bloc.state.page.promoBanner.keys
+//                                         .toList()[0]));
+//                               },
+//                               child: Icon(Icons.cancel),
+//                             ),
+//                           ),
+//                           Positioned(
+//                             left: 0,
+//                             top: 70,
+//                             child: Column(
+//                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                               children: [
+//                                 GestureDetector(
+//                                     onTap: () {
+//                                       context.read<DashboardBloc>().add(
+//                                           SetPromoSectionPosition(fromTop: -5));
+//                                     },
+//                                     child: Icon(Icons.move_up)),
+//                                 GestureDetector(
+//                                     onTap: () {
+//                                       context.read<DashboardBloc>().add(
+//                                           SetPromoSectionPosition(fromTop: 5));
+//                                     },
+//                                     child: Icon(Icons.move_down))
+//                               ],
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                     );
+//                   },
+//                 ),
+//                 dynamicHeight: bloc.state.page.appbarHeight / 100);
+//           },
+//         ),
+//         stickySectionAppBar: StickyAppBar<DashboardState>(
+//           searchBarKey: _searchBarKey,
+//           searchbarHeight: _searchbarheight,
+//           scrollOffset: _scrollOffset,
+//           shouldStick: _shouldStick,
+//           state: bloc.state,
+//           appbarListSectionKey: _appbarListSection,
+//           changeAppBarColor: _changeColorNormal,
+//         ),
+//         whenNoListContent: BlocBuilder<DashboardBloc, DashboardState>(
+//           builder: (context, state) {
+//             if (state.page.sections.isEmpty) {
+//               return SizedBox(
+//                 height: 400,
+//                 child: Center(
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(24.0),
+//                     child: Text(
+//                       "No sections yet",
+//                       style: TextStyle(fontSize: 18, color: Colors.grey),
+//                     ),
+//                   ),
+//                 ),
+//               );
+//             }
+//             return SizedBox.shrink();
+//           },
+//         ),
+//         listSections: BlocBuilder<DashboardBloc, DashboardState>(
+//           builder: (context, state) {
+//             return SliverList(
+//               delegate: SliverChildBuilderDelegate(
+//                 (context, index) {
+//                   return Stack(
+//                     children: [
+//                       sectionBuilder(section: sections[index]),
+//                       Positioned(
+//                         top: 10,
+//                         right: 0,
+//                         child: GestureDetector(
+//                           onTap: () {
+//                             context.read<DashboardBloc>().add(
+//                                   RemoveSection(id: sections[index].id!),
+//                                 );
+//                           },
+//                           child: Icon(
+//                             Icons.cancel,
+//                             color: Colors.red.shade400,
+//                           ),
+//                         ),
+//                       ),
+//                     ],
+//                   );
+//                 },
+//                 childCount: sections.length,
+//               ),
+//             );
+//           },
+//         ),
+//         onError: onError);
+//   }
+// }

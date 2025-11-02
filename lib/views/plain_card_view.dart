@@ -2,18 +2,19 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-class PromoCardView extends StatelessWidget {
+class PlainCardView extends StatelessWidget {
   final String? title;
   final String? imageUrl;
   final Color? backgroundColor;
   final File? imageFile;
   final VoidCallback? onSelectImage;
   final VoidCallback? onRemoveImage;
+  final VoidCallback? onChangebackGround;
   final void Function(String)? onSelectFromCloud;
   final double cardHeight;
   final double cardWidth;
 
-  const PromoCardView({
+  const PlainCardView({
     super.key,
     this.title,
     this.imageUrl,
@@ -24,6 +25,7 @@ class PromoCardView extends StatelessWidget {
     this.onSelectFromCloud,
     required this.cardHeight,
     required this.cardWidth,
+    required this.onChangebackGround,
   });
 
   @override
@@ -34,11 +36,6 @@ class PromoCardView extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: backgroundColor,
-        // gradient: LinearGradient(
-        //   colors: [backgroundColor ?? Colors.grey.shade400, Colors.white],
-        //   begin: Alignment.topLeft,
-        //   end: Alignment.bottomRight,
-        // ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -53,27 +50,9 @@ class PromoCardView extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             _buildImage(theme),
-            if (title != null && title!.isNotEmpty)
-              Positioned(
-                left: 10,
-                bottom: 10,
-                child: Text(
-                  title!,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withOpacity(0.5),
-                        blurRadius: 6,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             Positioned(
-              right: 1,
-              top: 1,
+              right: cardWidth * 0.01,
+              top: cardHeight * 0.01,
               child: GestureDetector(
                 onTap: onRemoveImage,
                 child: Icon(

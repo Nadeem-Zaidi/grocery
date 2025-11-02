@@ -10,8 +10,8 @@ import '../../database_service.dart/db_service.dart';
 import '../../models/category.dart';
 import '../../service_locator/service_locator.dart';
 import '../../widgets/category_card.dart';
-import '../../widgets/empty_state.dart';
-import '../../widgets/error_widget.dart';
+import '../../widgets/utilities_widget/empty_state.dart';
+import '../../widgets/utilities_widget/error_widget.dart';
 
 class CategoriesPage extends StatefulWidget {
   const CategoriesPage({super.key});

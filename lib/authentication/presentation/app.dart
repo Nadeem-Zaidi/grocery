@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/authentication/cubit/signin_cubit.dart';
 import 'package:grocery_app/authentication/presentation/otp_screen.dart';
 import 'package:grocery_app/authentication/presentation/phone_number_signin.dart';
-import '../../widgets/overlay.dart';
+import '../../widgets/utilities_widget/overlay.dart';
 
 import '../cubit/auth_cubit.dart';
 

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/bloc/new_product/bloc/new_product_bloc.dart';
 import 'package:grocery_app/widgets/category_card.dart';
-import 'package:grocery_app/widgets/error_widget.dart';
+import 'package:grocery_app/widgets/utilities_widget/error_widget.dart';
 
 class SelectCategoryNewProduct extends StatefulWidget {
   const SelectCategoryNewProduct({super.key});

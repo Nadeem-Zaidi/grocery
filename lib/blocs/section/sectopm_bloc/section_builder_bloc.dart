@@ -5,10 +5,11 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:grocery_app/database_service.dart/dashboard/section.dart';
 import 'package:grocery_app/models/custom_cards/customcard.dart';
-import 'package:grocery_app/widgets/cards/plain_promo_card.dart';
+import 'package:grocery_app/builder/plain_promo_builder.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../models/category.dart' as cat;
 import '../../../models/product/productt.dart';
@@ -42,7 +43,20 @@ class SectionBuilderBloc
   Future<void> _selectContentBackground(
       SelectContentBackground event, Emitter<SectionBuilderState> emit) async {
     try {
-      emit(state.copyWith(contentbackGroundColor: event.color));
+      List<PlainCard> changedContents = [];
+      var contents = state.section?.content;
+      if (contents != null && contents.isNotEmpty) {
+        for (PlainCard content in contents) {
+          changedContents.add(
+              content.copyWith(backGroundColor: event.color.toHexString()));
+        }
+      }
+      emit(state.copyWith(
+          section: state.section?.copyWith(
+              content: contents!.isNotEmpty
+                  ? changedContents
+                  : state.section?.content),
+          contentbackGroundColor: event.color));
     } catch (error) {
       print("error occured in _selectContentBackground ==>${e.toString}");
       emit(state.copyWith(error: error.toString()));
@@ -132,7 +146,6 @@ class SectionBuilderBloc
       RemoveContent event, Emitter<SectionBuilderState> emit) {
     try {
       final section = state.section as Section<T>;
-      print(event.index);
       if (section != null) {
         if (event.index < 0 && event.index > state.section!.content.length) {
           throw Exception("Index out of bound");

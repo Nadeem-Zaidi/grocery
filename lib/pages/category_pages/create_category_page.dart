@@ -5,8 +5,8 @@ import 'package:grocery_app/blocs/categories/create_category_bloc/category_creat
 import 'package:grocery_app/blocs/categories/fetch_category_bloc/fetch_category_bloc.dart';
 import 'package:grocery_app/database_service.dart/product/firestore_product_service.dart';
 import 'package:grocery_app/pages/select_category/select_category.dart';
-import 'package:grocery_app/widgets/image_picker.dart';
-import 'package:grocery_app/widgets/overlay.dart';
+import 'package:grocery_app/widgets/utilities_widget/image_picker.dart';
+import 'package:grocery_app/widgets/utilities_widget/overlay.dart';
 import '../../database_service.dart/db_service.dart';
 import '../../models/category.dart';
 import '../../models/product/productt.dart';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:grocery_app/blocs/beauty_cosmetics/bloc/form_bloc.dart';
 import 'package:grocery_app/blocs/bloc/new_product/bloc/new_product_bloc.dart';
 import 'package:grocery_app/database_service.dart/db_service.dart';
 import 'package:grocery_app/forms/form.dart';
@@ -8,6 +7,7 @@ import 'package:grocery_app/models/form_config/form_config.dart';
 import 'package:grocery_app/models/product/productt.dart';
 import 'package:grocery_app/service_locator/service_locator.dart';
 
+import '../../blocs/form_bloc/form_bloc.dart';
 import 'select_category_for_new_product.dart';
 
 class NewProduct extends StatefulWidget {

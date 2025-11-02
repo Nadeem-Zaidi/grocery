@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:grocery_app/blocs/products/product_detail/product_detail_bloc.dart';
 import 'package:grocery_app/extensions/capitalize_first.dart';
 import 'package:grocery_app/widgets/cart/cart_action_button.dart';
-import 'package:grocery_app/widgets/image_slider.dart';
+import 'package:grocery_app/widgets/utilities_widget/image_slider.dart';
 import '../../models/product/productt.dart';
 import '../../widgets/products/variation_discount_box.dart';
 

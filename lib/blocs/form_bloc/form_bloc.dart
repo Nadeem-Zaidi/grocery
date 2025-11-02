@@ -14,8 +14,8 @@ import 'package:grocery_app/models/form_config/form_config.dart';
 import 'package:grocery_app/models/product/product.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:math_expressions/math_expressions.dart';
-import '../../../models/category.dart';
-import '../../../models/product/productt.dart';
+import '../../models/category.dart';
+import '../../models/product/productt.dart';
 import 'package:uuid/uuid.dart';
 
 part 'form_event.dart';

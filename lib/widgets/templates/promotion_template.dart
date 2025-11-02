@@ -4,9 +4,9 @@ import 'package:grocery_app/blocs/section/card/customcard/customcard_bloc.dart';
 import 'package:grocery_app/blocs/section/dashboard_bloc/dashboard_bloc.dart';
 import 'package:grocery_app/blocs/section/sectopm_bloc/section_builder_bloc.dart';
 import 'package:grocery_app/models/custom_cards/customcard.dart';
-import 'package:grocery_app/widgets/cards/plain_promo_card.dart';
 
 import '../../utils/screen_utils.dart';
+import '../../builder/plain_promo_builder.dart';
 
 class PromotionTemplate extends StatefulWidget {
   const PromotionTemplate({super.key});
@@ -125,7 +125,7 @@ class _PromotionTemplateState extends State<PromotionTemplate> {
                             create: (context) => CustomCardBloc(),
                             child: SizedBox(
                                 width: 120,
-                                child: PromoCard(
+                                child: PlainCardBuilder(
                                   hexColor: hexColor,
                                   cardHeight: 100,
                                   cardWidth: perCardWidth,

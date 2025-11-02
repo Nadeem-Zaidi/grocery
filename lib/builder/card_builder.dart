@@ -29,38 +29,6 @@ class CardBuilder<T> extends StatelessWidget {
     return Column(
       children: [
         Container(
-          height: 150,
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            image: DecorationImage(
-              image: NetworkImage(
-                  "https://firebasestorage.googleapis.com/v0/b/grocerybynadeem.firebasestorage.app/o/images%2Fimp%2FHappy%20Diwali%20Sub%20Image%20(3).gif?alt=media&token=84724326-2f13-486f-8fde-80a7385f967a"),
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-
-        // Center(
-        //   child: SizedBox(
-        //     width:
-        //         double.infinity - 20, // or any fixed width you like
-        //     child: TextField(
-        //       textAlign: TextAlign.center,
-        //       style: GoogleFonts.poppins(
-        //         fontSize: 18,
-        //         fontWeight: FontWeight.bold,
-        //         color: const Color.fromARGB(255, 239, 122, 4),
-        //         letterSpacing: 1.2,
-        //       ),
-        //       decoration: const InputDecoration(
-        //         enabledBorder: InputBorder.none,
-        //         errorBorder: InputBorder.none,
-        //         focusedBorder: InputBorder.none,
-        //       ),
-        //     ),
-        //   ),
-        // ),
-        Container(
           height: containerHeight,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(9),
